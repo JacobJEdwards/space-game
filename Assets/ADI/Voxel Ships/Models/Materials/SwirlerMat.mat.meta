@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 4870f2cd933ab2c468ffb1c3ab0302ff
+timeCreated: 1516695294
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 109876
+  packageName: Voxel Space Ships
+  packageVersion: 1.0
+  assetPath: Assets/ADI/Voxel Ships/Models/Materials/SwirlerMat.mat
+  uploadId: 225487

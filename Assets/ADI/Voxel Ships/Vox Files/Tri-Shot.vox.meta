@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 54d90d9a3f081044a8d398c198348763
+timeCreated: 1516695238
+licenseType: Store
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 109876
+  packageName: Voxel Space Ships
+  packageVersion: 1.0
+  assetPath: Assets/ADI/Voxel Ships/Vox Files/Tri-Shot.vox
+  uploadId: 225487

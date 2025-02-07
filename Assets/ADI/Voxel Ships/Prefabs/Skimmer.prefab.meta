@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 16da7ff10d66fac4aa63dc9c0340af17
+timeCreated: 1516695637
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 109876
+  packageName: Voxel Space Ships
+  packageVersion: 1.0
+  assetPath: Assets/ADI/Voxel Ships/Prefabs/Skimmer.prefab
+  uploadId: 225487

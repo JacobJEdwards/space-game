@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 75f7b3eabb218ca40a3ac03459f49f52
+timeCreated: 1516695238
+licenseType: Store
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 109876
+  packageName: Voxel Space Ships
+  packageVersion: 1.0
+  assetPath: Assets/ADI/Voxel Ships/Vox Files/Skimmer.vox
+  uploadId: 225487

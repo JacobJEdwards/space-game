@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: d7d475a74f950f242be97d10ff966769
+timeCreated: 1516695211
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 109876
+  packageName: Voxel Space Ships
+  packageVersion: 1.0
+  assetPath: Assets/ADI/Voxel Ships/Materials/ModelMaterial.mat
+  uploadId: 225487

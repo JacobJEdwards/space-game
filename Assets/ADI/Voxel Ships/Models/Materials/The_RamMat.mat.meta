@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 5f33cc19a4f49394ebf5a532d14eb900
+timeCreated: 1516695299
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 109876
+  packageName: Voxel Space Ships
+  packageVersion: 1.0
+  assetPath: Assets/ADI/Voxel Ships/Models/Materials/The_RamMat.mat
+  uploadId: 225487
