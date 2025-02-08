@@ -6,6 +6,7 @@ public class AsteroidSpawner : MonoBehaviour
 {
     public GameObject player;
     public GameObject asteroidPrefab;
+
     public float spawnRadius = 100f;
     public float despawnRadius = 200f;
     public int maxAsteroids = 100;

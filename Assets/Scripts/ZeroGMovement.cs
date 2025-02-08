@@ -4,21 +4,20 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
-public class ShipController : MonoBehaviour
+public class ZeroGMovement : MonoBehaviour
 {
-    [SerializeField] private ShipMovementConfig shipConfig;
-    [SerializeField] private MovementStateManager movementStateManager;
-
     [SerializeField]
-    private CinemachineCamera cineMachineCamera;
+    private ZeroGMovementConfig zeroGConfig;
+    [SerializeField]
+    private CinemachineCamera playerCamera;
+    [SerializeField]
+    private MovementStateManager movementStateManager;
 
     private void Start()
     {
-        movementStateManager.InitialiseShipState(GetComponent<Rigidbody>(), shipConfig);
-        cineMachineCamera.enabled = false;
-        cineMachineCamera.Priority = 0;
+        movementStateManager.InitialiseZeroGState(GetComponent<Rigidbody>(), zeroGConfig, playerCamera);
+        playerCamera.enabled = true;
     }
-
 
     #region Input Methods
     public void OnThrust(InputAction.CallbackContext context)
@@ -41,23 +40,14 @@ public class ShipController : MonoBehaviour
         movementStateManager.HandleInput(new MovementInputData { Roll = context.ReadValue<float>() });
     }
 
-    public void OnPitchYaw(InputAction.CallbackContext context)
-    {
-        movementStateManager.HandleInput(new MovementInputData { PitchYaw = context.ReadValue<Vector2>() });
-    }
-
     public void OnBoost(InputAction.CallbackContext context)
     {
         movementStateManager.HandleInput(new MovementInputData { IsBoosting = context.ReadValueAsButton() });
     }
+
     public void OnInteract(InputAction.CallbackContext context)
     {
-
+        throw new NotImplementedException("OnInteract");
     }
-    public void OnSwitchCamera(InputAction.CallbackContext context)
-    {
-        throw new NotImplementedException();
-    }
-
     #endregion
 }

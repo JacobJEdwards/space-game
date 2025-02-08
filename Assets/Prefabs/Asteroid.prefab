@@ -13,8 +13,9 @@ GameObject:
   - component: {fileID: 6570098647274459731}
   - component: {fileID: 6316611228235962270}
   - component: {fileID: 5605618125202433820}
+  - component: {fileID: -767632609632239910}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Asteroid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -136,3 +137,16 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &-767632609632239910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8011009541588906089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 538f52ffb7f2b42138bf6171ec6212c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  explosionPrefab: {fileID: 6717211538479828133, guid: e45081c9b417d4dd8b38e89480b33fe8, type: 3}
