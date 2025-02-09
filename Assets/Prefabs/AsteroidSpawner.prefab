@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
-  asteroidPrefab: {fileID: 8011009541588906089, guid: 3bb68f263a7cc4deb94fa05e3fca7a05, type: 3}
+  asteroidPrefab: {fileID: -767632609632239910, guid: 3bb68f263a7cc4deb94fa05e3fca7a05, type: 3}
   spawnRadius: 100
   despawnRadius: 200
   maxAsteroids: 100

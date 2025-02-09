@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9f28b6f449fa84abb8e5b2af5fce9203
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 167825
+  packageName: Breakable Asteroids
+  packageVersion: 1.0
+  assetPath: Assets/BreakableAsteroids/Scenes/AsteroidScene.unity
+  uploadId: 365415

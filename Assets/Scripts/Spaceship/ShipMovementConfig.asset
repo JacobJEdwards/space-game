@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc87c03bbcd8473cab7cc8a96d7767bf, type: 3}
+  m_Name: ShipMovementConfig
+  m_EditorClassIdentifier: 
+  speed: 10
+  rollTorque: 500
+  pitchTorque: 1000
+  yawTorque: 1000
+  thrust: 100
+  upThrust: 50
+  strafeThrust: 50
+  thrustGlideReduction: 0.99
+  upDownGlideReduction: 0.99
+  leftRightGlideReduction: 0.99
+  maxBoostAmount: 2
+  boostDepreciationRate: 0.25
+  boostRechargeRate: 0.1
+  boostMultiplier: 5
+  useCameraDirection: 0

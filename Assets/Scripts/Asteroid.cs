@@ -1,34 +1,42 @@
-using System;
-using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class Asteroid : MonoBehaviour
 {
-    public GameObject explosionPrefab;
-    public float forceThreshold = 10f;
+    public Health health;
+    private ObjectPool<Asteroid> _asteroidPool;
+    private Fracture _fracture;
+
+    [SerializeField]
+    private GameObject rock;
+
+    public void SetPool(ObjectPool<Asteroid> pool)
+    {
+        _asteroidPool = pool;
+    }
+
+    private void Start()
+    {
+        health = GetComponentInChildren<Health>();
+        health.onDeath.AddListener(OnDie);
+        _fracture = GetComponentInChildren<Fracture>();
+    }
+
+    private void OnDie()
+    {
+        Explode();
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void OnCollisionEnter(Collision other)
     {
-        if (other.relativeVelocity.magnitude > forceThreshold)
-            Explode();
+        health.TakeDamage(other.relativeVelocity.magnitude);
     }
 
     private void Explode()
     {
-        if (explosionPrefab)
-            Instantiate(explosionPrefab, transform.position, Quaternion.identity);
-
-        gameObject.SetActive(false);
-    }
-
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
+        _fracture?.FractureObject();
+        _asteroidPool.Release(this);
+        health.Reset();
     }
 }
