@@ -16,14 +16,16 @@ MonoBehaviour:
   rollTorque: 500
   pitchTorque: 100
   yawTorque: 100
-  thrust: 100
-  upThrust: 50
-  strafeThrust: 50
-  thrustGlideReduction: 0.99
-  upDownGlideReduction: 0.99
-  leftRightGlideReduction: 0.99
-  maxBoostAmount: 2
+  thrust: 250
+  upThrust: 150
+  strafeThrust: 150
+  thrustGlideReduction: 0.43
+  upDownGlideReduction: 0.528
+  leftRightGlideReduction: 0.226
+  maxBoostAmount: 5
   boostDepreciationRate: 0.25
-  boostRechargeRate: 0.1
+  boostRechargeRate: 0.5
   boostMultiplier: 5
   useCameraDirection: 1
+  rotationSpeed: 10
+  maxSpeed: 100

@@ -1,4 +1,4 @@
-using System;
+using Interfaces;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -50,7 +50,7 @@ public class Health : MonoBehaviour, IDamageable
         onHealthChanged.Invoke(_currentHealth);
     }
 
-    public void Die()
+    private void Die()
     {
         onDeath.Invoke();
     }

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class Asteroid : MonoBehaviour
+public class Asteroid : MonoBehaviour, Interfaces.IPoolable<Asteroid>
 {
     public Health health;
     private ObjectPool<Asteroid> _asteroidPool;

@@ -1,0 +1,60 @@
+using Interfaces;
+using UnityEngine;
+
+namespace Managers
+{
+    public class InteractionManager : MonoBehaviour
+    {
+        [SerializeField] private LayerMask interactionLayer;
+        [SerializeField] private float interactionRange = 5f;
+        [SerializeField] private string interactionPrompt = "Press E to interact";
+
+        private Camera _mainCamera;
+
+        private IInteractable _currentTarget;
+
+        private void Awake()
+        {
+            _mainCamera = Camera.main;
+        }
+
+        private void Update()
+        {
+            HandleInteractionRaycast();
+        }
+
+        private void HandleInteractionRaycast()
+        {
+            var ray = _mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+            if (Physics.Raycast(ray, out var hit, interactionRange, interactionLayer))
+            {
+                var interactable = hit.collider.GetComponent<IInteractable>();
+
+                if (interactable != null)
+                {
+                    Debug.Log(interactable.GetInteractionPrompt(gameObject));
+                    if (interactable.CanInteract(gameObject))
+                    {
+                        _currentTarget = interactable;
+                    }
+                }
+                else
+                {
+                    _currentTarget = null;
+                }
+            }
+            else
+            {
+                _currentTarget = null;
+            }
+        }
+
+        public void OnInteractInput()
+        {
+            if (_currentTarget != null && _currentTarget.CanInteract(gameObject))
+            {
+                _currentTarget.OnInteract(gameObject);
+            }
+        }
+    }
+}

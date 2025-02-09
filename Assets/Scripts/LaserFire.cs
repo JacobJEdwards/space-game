@@ -1,3 +1,4 @@
+using Interfaces;
 using UnityEngine;
 
 public class LaserFire : MonoBehaviour, IFireable
@@ -52,9 +53,14 @@ public class LaserFire : MonoBehaviour, IFireable
 
     private void MaybeDamageTarget(RaycastHit hit)
     {
-        if (hit.collider.transform.parent.GetComponentInChildren<IDamageable>() is { } damageable)
+        print(hit.collider.name);
+        if (hit.collider.transform.GetComponentInChildren<IDamageable>() is { } damageable)
         {
             damageable.TakeDamage(damage * Time.deltaTime);
+        }
+        else
+        {
+            print("No damageable target found");
         }
     }
 

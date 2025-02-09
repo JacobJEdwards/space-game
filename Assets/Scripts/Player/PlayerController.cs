@@ -1,10 +1,13 @@
-using System;
 using JetBrains.Annotations;
+using Managers;
 using Unity.Assertions;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
+
+namespace Player
+{
 
 public enum PlayerState
 {
@@ -15,23 +18,25 @@ public enum PlayerState
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
-    [Header("Camera Settings")] [SerializeField]
+    [Header("Camera Settings")]
+    [SerializeField]
     private CinemachineCamera playerCamera;
-
     [SerializeField] private CameraController cameraController;
+    [SerializeField]
+    private InteractionManager interactionManager;
 
     [CanBeNull] public ShipController shipToEnter;
 
-    public UnityEvent onRequestEnterShip;
+    public UnityEvent onEnterShip;
+    public UnityEvent onExitShip;
 
-    public PlayerState PlayerState { get; private set; }
+    private PlayerState PlayerState { get; set; }
 
     private Health _playerHealth;
     private Oxygen _playerOxygen;
 
     private void Start()
     {
-        shipToEnter = null;
         var spaceInput = GetComponentInChildren<SpaceInput>();
         spaceInput.OnInteractPressed += OnInteract;
 
@@ -40,8 +45,14 @@ public class PlayerController : MonoBehaviour
 
         UnityEngine.Assertions.Assert.IsNotNull(_playerHealth);
         UnityEngine.Assertions.Assert.IsNotNull(_playerOxygen);
+        UnityEngine.Assertions.Assert.IsNotNull(interactionManager);
 
         PlayerState = PlayerState.InZeroG;
+    }
+
+    private void OnInteractionInput()
+    {
+        interactionManager.OnInteractInput();
     }
 
     private void FixedUpdate()
@@ -60,13 +71,34 @@ public class PlayerController : MonoBehaviour
     private void OnEnable()
     {
         if (playerCamera) CameraController.Register(playerCamera);
-
         CameraController.SetActiveCamera(playerCamera);
     }
 
     private void OnDisable()
     {
         if (playerCamera) CameraController.Unregister(playerCamera);
+    }
+
+    public void EnterShip(ShipController ship)
+    {
+        shipToEnter = ship;
+        transform.parent = ship.transform;
+        gameObject.SetActive(false);
+
+        onEnterShip?.Invoke();
+        PlayerState = PlayerState.OnShip;
+        _playerOxygen.Reset();
+    }
+
+    public void ExitShip()
+    {
+        transform.parent = null;
+        gameObject.SetActive(true);
+        CameraController.SetActiveCamera(playerCamera);
+
+        onExitShip?.Invoke();
+        PlayerState = PlayerState.InZeroG;
+        shipToEnter = null;
     }
 
     private void OnEnterShip()
@@ -76,7 +108,7 @@ public class PlayerController : MonoBehaviour
         transform.parent = shipToEnter!.transform;
         gameObject.SetActive(false);
 
-        onRequestEnterShip?.Invoke();
+        onEnterShip?.Invoke();
 
         PlayerState = PlayerState.OnShip;
         _playerOxygen.Reset();
@@ -116,4 +148,5 @@ public class PlayerController : MonoBehaviour
     }
 
     #endregion
+}
 }

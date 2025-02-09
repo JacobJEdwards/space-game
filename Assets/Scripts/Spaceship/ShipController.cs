@@ -2,24 +2,25 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using Player;
 
 [RequireComponent(typeof(Rigidbody))]
 public class ShipController : MonoBehaviour
 {
     [Header("Camera Settings")] [SerializeField]
     private CameraController cameraController;
-
     [SerializeField] private CinemachineCamera shipThirdPersonCamera;
-
     [SerializeField] private CinemachineCamera shipFirstPersonCamera;
 
     [SerializeField] private PlayerController player;
+
+    private Health _health;
+    private Rigidbody _rb;
 
     private ShipInteractionZone _shipInteractionZone;
 
     public UnityEvent onRequestExitShip;
 
-    private Rigidbody _rb;
 
     public bool IsOccupied { get; private set; }
 
@@ -36,7 +37,10 @@ public class ShipController : MonoBehaviour
         _shipInteractionZone.onPlayerEnterZone.AddListener(AssignPlayer);
         _shipInteractionZone.onPlayerExitZone.AddListener(RemovePlayer);
 
-        player.onRequestEnterShip.AddListener(PlayerEnteredShip);
+        player.onEnterShip.AddListener(PlayerEnteredShip);
+
+        _health = GetComponentInChildren<Health>();
+        _health.onDeath.AddListener(PlayerExitedShip); //todo
     }
 
     private void FixedUpdate()

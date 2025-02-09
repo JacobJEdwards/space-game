@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Serialization;
+using Player;
 
 public class UiManager : MonoBehaviour
 {
@@ -35,7 +36,7 @@ public class UiManager : MonoBehaviour
         shipInteractionZone.onPlayerExitZone.AddListener(OnPlayerExitZone);
 
         shipController.onRequestExitShip.AddListener(OnRequestExitShip);
-        playerController.onRequestEnterShip.AddListener(OnRequestEnterShip);
+        playerController.onEnterShip.AddListener(OnRequestEnterShip);
     }
 
     private void OnPlayerEnterZone(PlayerController player)
