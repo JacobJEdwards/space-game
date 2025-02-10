@@ -53,14 +53,9 @@ public class LaserFire : MonoBehaviour, IFireable
 
     private void MaybeDamageTarget(RaycastHit hit)
     {
-        print(hit.collider.name);
-        if (hit.collider.transform.GetComponentInChildren<IDamageable>() is { } damageable)
+        if (hit.collider.transform.GetComponent<IDamageable>() is { } damageable)
         {
             damageable.TakeDamage(damage * Time.deltaTime);
-        }
-        else
-        {
-            print("No damageable target found");
         }
     }
 

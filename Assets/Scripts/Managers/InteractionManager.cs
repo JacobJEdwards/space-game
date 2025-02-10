@@ -7,7 +7,7 @@ namespace Managers
     {
         [SerializeField] private LayerMask interactionLayer;
         [SerializeField] private float interactionRange = 5f;
-        [SerializeField] private string interactionPrompt = "Press E to interact";
+        [SerializeField] private UiManager uiManager;
 
         private Camera _mainCamera;
 
@@ -26,26 +26,30 @@ namespace Managers
         private void HandleInteractionRaycast()
         {
             var ray = _mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+
             if (Physics.Raycast(ray, out var hit, interactionRange, interactionLayer))
             {
+                print(hit.collider.name);
                 var interactable = hit.collider.GetComponent<IInteractable>();
 
                 if (interactable != null)
                 {
-                    Debug.Log(interactable.GetInteractionPrompt(gameObject));
-                    if (interactable.CanInteract(gameObject))
-                    {
-                        _currentTarget = interactable;
-                    }
+                    if (!interactable.CanInteract(gameObject)) return;
+
+                    _currentTarget = interactable;
+
+                    uiManager.SetHint(interactable.GetInteractionPrompt(gameObject));
                 }
                 else
                 {
                     _currentTarget = null;
+                    uiManager.SetHint("");
                 }
             }
             else
             {
                 _currentTarget = null;
+                uiManager.SetHint("");
             }
         }
 

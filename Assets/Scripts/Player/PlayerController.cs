@@ -1,5 +1,6 @@
 using JetBrains.Annotations;
 using Managers;
+using Spaceship;
 using Unity.Assertions;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -24,6 +25,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private CameraController cameraController;
     [SerializeField]
     private InteractionManager interactionManager;
+    [SerializeField] private UiManager uiManager;
 
     [CanBeNull] public ShipController shipToEnter;
 
@@ -38,7 +40,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         var spaceInput = GetComponentInChildren<SpaceInput>();
-        spaceInput.OnInteractPressed += OnInteract;
+        spaceInput.OnInteractPressed += OnInteractionInput;
 
         _playerHealth = GetComponentInChildren<Health>();
         _playerOxygen = GetComponent<Oxygen>();
@@ -88,6 +90,8 @@ public class PlayerController : MonoBehaviour
         onEnterShip?.Invoke();
         PlayerState = PlayerState.OnShip;
         _playerOxygen.Reset();
+        uiManager.SetHint("");
+        uiManager.TransitionToState(UIState.Ship);
     }
 
     public void ExitShip()
@@ -99,54 +103,8 @@ public class PlayerController : MonoBehaviour
         onExitShip?.Invoke();
         PlayerState = PlayerState.InZeroG;
         shipToEnter = null;
+        uiManager.SetHint("");
+        uiManager.TransitionToState(UIState.ZeroG);
     }
-
-    private void OnEnterShip()
-    {
-        Assert.IsNotNull(shipToEnter);
-
-        transform.parent = shipToEnter!.transform;
-        gameObject.SetActive(false);
-
-        onEnterShip?.Invoke();
-
-        PlayerState = PlayerState.OnShip;
-        _playerOxygen.Reset();
-    }
-
-    private void OnExitShip()
-    {
-        transform.parent = null;
-
-        gameObject.SetActive(true);
-
-        CameraController.SetActiveCamera(playerCamera);
-
-        PlayerState = PlayerState.InZeroG;
-    }
-
-    public void AssignShipToEnter(ShipController ship)
-    {
-        shipToEnter = ship;
-        shipToEnter?.onRequestExitShip.AddListener(OnExitShip);
-    }
-
-    public void RemoveShipToEnter()
-    {
-        if (!shipToEnter) return;
-
-        shipToEnter.onRequestExitShip.RemoveListener(OnExitShip);
-        shipToEnter = null;
-    }
-
-
-    #region Input Methods
-
-    public void OnInteract()
-    {
-        if (shipToEnter) OnEnterShip();
-    }
-
-    #endregion
 }
 }

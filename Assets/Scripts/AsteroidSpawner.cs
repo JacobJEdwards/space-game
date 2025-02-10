@@ -7,7 +7,8 @@ using Random = UnityEngine.Random;
 public class AsteroidSpawner : MonoBehaviour
 {
     public GameObject player;
-    public Asteroid asteroidPrefab;
+
+    public List<Asteroid> asteroidPrefabs;
 
     public float spawnRadius = 500f;
     public float fromPlayerRadius = 200f;
@@ -31,7 +32,7 @@ public class AsteroidSpawner : MonoBehaviour
 
     private Asteroid CreateAsteroid()
     {
-        var asteroid = Instantiate(asteroidPrefab);
+        var asteroid = Instantiate(asteroidPrefabs[Random.Range(0, asteroidPrefabs.Count)]);
         asteroid.SetPool(_asteroidPool);
         return asteroid;
     }

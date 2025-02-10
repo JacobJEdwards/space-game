@@ -1,9 +1,12 @@
+using Managers;
 using Microlight.MicroBar;
-using Unity.Assertions;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Interfaces;
 
-public class ZeroGUI : MonoBehaviour
+namespace Player
+{
+public class ZeroGUI : MonoBehaviour, IUIPanel
 {
     [FormerlySerializedAs("playerOxygen")]
     [Header("ZeroG Settings")]
@@ -14,29 +17,34 @@ public class ZeroGUI : MonoBehaviour
     [Header("UI Settings")]
     [SerializeField]
     private MicroBar oxygenUI;
+    [SerializeField]
+    private UiManager uiManager;
 
     private bool _zeroGUIActive;
+
+    public UIState AssociatedState => UIState.ZeroG;
 
     private void Start()
     {
         oxygenUI.Initialize(playerOxygenConfig.MaxOxygen);
+        uiManager.RegisterPanel(this);
+        uiManager.TransitionToState(UIState.ZeroG);
     }
 
     private void Update()
     {
-        if (!_zeroGUIActive) return;
-
         oxygenUI.UpdateBar(oxygen.CurrentOxygen);
     }
 
 
     public void Hide()
     {
-        _zeroGUIActive = false;
+        gameObject.SetActive(false);
     }
 
     public void Show()
     {
-        _zeroGUIActive = true;
+        gameObject.SetActive(true);
     }
+}
 }

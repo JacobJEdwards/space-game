@@ -62,7 +62,6 @@ public class EnemyShipAI : MonoBehaviour
 
     private void OnHealthChanged(float health) // add to controller script
     {
-        print("Health changed to " + health); // add to controller script
     }
 
     private void OnDeath() // add to controller script

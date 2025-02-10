@@ -1,8 +1,10 @@
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.InputSystem;
 using Player;
+using Managers;
+
+namespace Spaceship
+{
 
 [RequireComponent(typeof(Rigidbody))]
 public class ShipController : MonoBehaviour
@@ -11,36 +13,25 @@ public class ShipController : MonoBehaviour
     private CameraController cameraController;
     [SerializeField] private CinemachineCamera shipThirdPersonCamera;
     [SerializeField] private CinemachineCamera shipFirstPersonCamera;
+    [SerializeField] private UiManager uiManager;
 
-    [SerializeField] private PlayerController player;
 
     private Health _health;
     private Rigidbody _rb;
+    private PlayerController _currentPlayer;
 
-    private ShipInteractionZone _shipInteractionZone;
-
-    public UnityEvent onRequestExitShip;
-
-
-    public bool IsOccupied { get; private set; }
+    public bool IsOccupied => _currentPlayer;
 
     private void Start()
     {
         _rb = GetComponent<Rigidbody>();
 
         var spaceInput = GetComponentInChildren<SpaceInput>();
-
         spaceInput.OnInteractPressed += OnInteract;
 
-        _shipInteractionZone = GetComponentInChildren<ShipInteractionZone>();
-
-        _shipInteractionZone.onPlayerEnterZone.AddListener(AssignPlayer);
-        _shipInteractionZone.onPlayerExitZone.AddListener(RemovePlayer);
-
-        player.onEnterShip.AddListener(PlayerEnteredShip);
-
         _health = GetComponentInChildren<Health>();
-        _health.onDeath.AddListener(PlayerExitedShip); //todo
+        // _health.onDeath.AddListener(ForcePlayerExit); //todo
+
     }
 
     private void FixedUpdate()
@@ -60,33 +51,33 @@ public class ShipController : MonoBehaviour
         if (shipFirstPersonCamera) CameraController.Unregister(shipFirstPersonCamera);
     }
 
-    private void AssignPlayer(PlayerController zeroGController)
-    {
-        player = zeroGController;
-        player.AssignShipToEnter(this);
-    }
 
-    private void RemovePlayer(PlayerController zeroGController)
+    public void PlayerEnteredShip(PlayerController player)
     {
-        player.RemoveShipToEnter();
-        player = null;
-    }
-
-    private void PlayerEnteredShip()
-    {
-        IsOccupied = true;
+        _currentPlayer = player;
         CameraController.SetActiveCamera(shipThirdPersonCamera);
     }
 
-    private void PlayerExitedShip()
+    public void PlayerExitShip()
     {
-        IsOccupied = false;
-        onRequestExitShip?.Invoke();
+        if (!_currentPlayer) return;
+
+        _currentPlayer.ExitShip();
+        _currentPlayer = null;
+        uiManager.SetHint("");
+        uiManager.TransitionToState(UIState.ZeroG);
+    }
+
+    public void ForcePlayerExit()
+    {
+        if (!_currentPlayer) return;
+        _currentPlayer.ExitShip();
+        _currentPlayer = null;
     }
 
     public void OnInteract()
     {
-        if (IsOccupied) PlayerExitedShip();
+        if (IsOccupied) PlayerExitShip();
     }
 
     public void OnSwitchCamera()
@@ -97,4 +88,5 @@ public class ShipController : MonoBehaviour
             ? shipFirstPersonCamera
             : shipThirdPersonCamera);
     }
+}
 }

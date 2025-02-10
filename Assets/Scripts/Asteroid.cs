@@ -1,14 +1,15 @@
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Pool;
 
 public class Asteroid : MonoBehaviour, Interfaces.IPoolable<Asteroid>
 {
-    public Health health;
-    private ObjectPool<Asteroid> _asteroidPool;
+    [CanBeNull] private ObjectPool<Asteroid> _asteroidPool;
     private Fracture _fracture;
 
-    [SerializeField]
-    private GameObject rock;
+    [SerializeField] private GameObject rock;
+    public Health health;
+
 
     public void SetPool(ObjectPool<Asteroid> pool)
     {
@@ -17,7 +18,7 @@ public class Asteroid : MonoBehaviour, Interfaces.IPoolable<Asteroid>
 
     private void Start()
     {
-        health = GetComponentInChildren<Health>();
+        health = GetComponent<Health>();
         health.onDeath.AddListener(OnDie);
         _fracture = GetComponentInChildren<Fracture>();
     }
@@ -36,7 +37,10 @@ public class Asteroid : MonoBehaviour, Interfaces.IPoolable<Asteroid>
     private void Explode()
     {
         _fracture?.FractureObject();
-        _asteroidPool.Release(this);
+
+        if (_asteroidPool != null) _asteroidPool.Release(this);
+        else Destroy(gameObject);
+
         health.Reset();
     }
 }

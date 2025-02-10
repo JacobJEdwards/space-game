@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+namespace Spaceship
+{
+
 public class ShipShooting : MonoBehaviour
 {
     private ShipController _shipController;
@@ -92,4 +95,5 @@ public class ShipShooting : MonoBehaviour
         else if (context.canceled) _firing = false;
     }
     #endregion
+}
 }

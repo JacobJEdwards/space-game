@@ -45,7 +45,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
-  asteroidPrefab: {fileID: -767632609632239910, guid: 3bb68f263a7cc4deb94fa05e3fca7a05, type: 3}
+  asteroidPrefabs:
+  - {fileID: -767632609632239910, guid: 3bb68f263a7cc4deb94fa05e3fca7a05, type: 3}
+  - {fileID: -767632609632239910, guid: 09f1a22d0d355439f8ca132687fc45c9, type: 3}
+  - {fileID: -767632609632239910, guid: 64e80a34d41b547b79845b9593c6f09f, type: 3}
+  - {fileID: -767632609632239910, guid: 48303f56c91974f2288bb7fed096da33, type: 3}
+  - {fileID: -767632609632239910, guid: f8b5ef99ce53b4ea6a98842adf5413e1, type: 3}
+  - {fileID: -767632609632239910, guid: 572e0a72c5c5d4110a00a1700bb7a394, type: 3}
+  - {fileID: -767632609632239910, guid: 96331752b11164139bf16be49eb8f0c3, type: 3}
+  - {fileID: -767632609632239910, guid: c7ecc00a1020541b9a6cf2ffc6610aa6, type: 3}
+  - {fileID: -767632609632239910, guid: b2eb28d57fc5142e8aaa4c6115062ec1, type: 3}
+  - {fileID: -767632609632239910, guid: afbd161a56b4942bd951823909b672fc, type: 3}
+  - {fileID: -767632609632239910, guid: 5faa892d0227946cbbf8454526b789f1, type: 3}
+  - {fileID: -767632609632239910, guid: 11df5caf520f44077b6b4f7065118f6c, type: 3}
+  - {fileID: -767632609632239910, guid: 7585f910ce68c4ea58939bd3ddfc8cb3, type: 3}
+  - {fileID: -767632609632239910, guid: 0911f7c6657ac4207a0c268ba08832b2, type: 3}
+  - {fileID: -767632609632239910, guid: 54eead6d209264318b91099b08a3683e, type: 3}
   spawnRadius: 100
+  fromPlayerRadius: 200
   despawnRadius: 200
   maxAsteroids: 100

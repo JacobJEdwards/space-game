@@ -1,46 +1,49 @@
+using System.Runtime.InteropServices;
 using Interfaces;
+using JetBrains.Annotations;
 using UnityEngine;
 using Player;
 
 namespace Spaceship
 {
-    [RequireComponent(typeof(Collider)), RequireComponent(typeof(ShipController))]
+    [RequireComponent(typeof(Collider))]
     public class InteractableShip : MonoBehaviour, IInteractable
     {
         private ShipController _shipController;
+        [CanBeNull] private PlayerController _player;
 
         private void Start()
         {
-            _shipController = GetComponent<ShipController>();
+            _shipController = GetComponentInParent<ShipController>();
         }
 
         public bool CanInteract(GameObject interactor)
         {
-            var player = interactor.GetComponent<PlayerController>();
-            if (!player) return false;
+            _player = _player ? _player : interactor.GetComponent<PlayerController>();
 
-            return !_shipController.IsOccupied;
+            return _player;
         }
 
         public void OnInteract(GameObject interactor)
         {
-            var player = interactor.GetComponent<PlayerController>();
-            if (!player) return;
+            _player = _player ? _player : interactor.GetComponent<PlayerController>();
+
+            if (!_player) return;
 
             if (_shipController.IsOccupied)
             {
-                _shipController.OnInteract();
+                _shipController.PlayerExitShip();
             }
             else
             {
-                player.AssignShipToEnter(_shipController);
-                player.OnInteract();
+                _player?.EnterShip(_shipController);
+                _shipController.PlayerEnteredShip(_player);
             }
         }
 
         public string GetInteractionPrompt(GameObject interactor)
         {
-            return _shipController.IsOccupied ? "Press E to exit" : "Press E to enter";
+            return _shipController.IsOccupied ? "Press F to exit" : "Press F to enter";
         }
 
     }

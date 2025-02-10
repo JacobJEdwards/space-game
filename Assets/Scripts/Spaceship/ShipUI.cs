@@ -1,7 +1,11 @@
+using Managers;
+using Interfaces;
 using Microlight.MicroBar;
 using UnityEngine;
 
-public class ShipUI : MonoBehaviour
+namespace Spaceship
+{
+public class ShipUI : MonoBehaviour, IUIPanel
 {
     [Header("Spaceship Settings")] [SerializeField]
     private SpaceMovement shipMovement;
@@ -11,32 +15,33 @@ public class ShipUI : MonoBehaviour
 
     [Header("UI Settings")] [SerializeField]
     private MicroBar overheatedUI;
-
     [SerializeField] private MicroBar boostUI;
+    [SerializeField] private UiManager uiManager;
 
-    private bool _shipUIActive;
+    public UIState AssociatedState => UIState.Ship;
 
     private void Start()
     {
         overheatedUI.Initialize(shipShooting.LaserMaxCharge);
         boostUI.Initialize(shipMovementConfig.MaxBoostAmount);
+
+        uiManager.RegisterPanel(this);
     }
 
     private void Update()
     {
-        if (!_shipUIActive) return;
-
         overheatedUI.UpdateBar(shipShooting.LaserCharge);
         boostUI.UpdateBar(shipMovement.CurrentBoostAmount);
     }
 
     public void Hide()
     {
-        _shipUIActive = false;
+        gameObject.SetActive(false);
     }
 
     public void Show()
     {
-        _shipUIActive = true;
+        gameObject.SetActive(true);
     }
+}
 }
