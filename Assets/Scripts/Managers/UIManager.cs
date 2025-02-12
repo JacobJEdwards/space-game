@@ -74,7 +74,7 @@ public class UiManager : MonoBehaviour
     {
         // use the hint object to display the text, find component in children
         info.text = text;
-        Invoke(nameof(ClearHint), duration);
+        Invoke(nameof(ClearInfo), duration);
     }
 
     public void SetHint(string text, float duration)

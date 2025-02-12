@@ -203,14 +203,13 @@ namespace Spaceship
 
             if (size == 0)
             {
-                print("No landing zones found");
                 _nearestLandingZone = null;
+                UpdateLandingUI();
                 return;
             }
 
             _nearestLandingZone = GetNearestLandingZone(landingZones);
 
-            print(_nearestLandingZone);
             UpdateLandingUI();
         }
 
@@ -235,7 +234,11 @@ namespace Spaceship
 
         private void UpdateLandingUI()
         {
-            if (!_nearestLandingZone) return;
+            if (!_nearestLandingZone)
+            {
+                uiManager.ClearHint();
+                return;
+            }
 
             var closestPoint = _nearestLandingZone.ClosestPoint(transform.position);
             var distance = Vector3.Distance(transform.position, closestPoint);
@@ -391,6 +394,19 @@ namespace Spaceship
 
             _hasValidLandingPoint = false;
             CurrentState = ShipState.Landing;
+
+            // run coroutine, lasts 5 seconds if landing not completed
+            Invoke(nameof(MaybeFailLanding), 5);
+        }
+
+        private void MaybeFailLanding()
+        {
+            if (CurrentState != ShipState.Landing) return;
+
+            _hasValidLandingPoint = false;
+            uiManager.SetInfo("Landing Failed", 5);
+
+            CurrentState = ShipState.Flying;
         }
 
         private void CompleteLanding()

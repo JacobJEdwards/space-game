@@ -1,6 +1,8 @@
 using Interfaces;
 using UnityEngine;
 
+namespace Weapons
+{
 public class LaserFire : MonoBehaviour, IFireable
 {
     private LineRenderer _laser;
@@ -63,4 +65,5 @@ public class LaserFire : MonoBehaviour, IFireable
     {
         _laser.SetPosition(1, hitPos);
     }
+}
 }

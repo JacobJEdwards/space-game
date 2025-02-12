@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.Pool;
 using Random = UnityEngine.Random;
 
+namespace Objects
+{
 public class AsteroidSpawner : MonoBehaviour
 {
     public GameObject player;
@@ -93,4 +95,5 @@ public class AsteroidSpawner : MonoBehaviour
         rb.linearVelocity = Random.insideUnitSphere * Random.Range(1f, 5f);
         rb.angularVelocity = Random.insideUnitSphere * Random.Range(1f, 5f);
     }
+}
 }

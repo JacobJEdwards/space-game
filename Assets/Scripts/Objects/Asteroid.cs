@@ -2,6 +2,9 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Pool;
 
+namespace Objects
+{
+
 public class Asteroid : MonoBehaviour, Interfaces.IPoolable<Asteroid>
 {
     [CanBeNull] private ObjectPool<Asteroid> _asteroidPool;
@@ -43,4 +46,5 @@ public class Asteroid : MonoBehaviour, Interfaces.IPoolable<Asteroid>
 
         health.Reset();
     }
+}
 }
