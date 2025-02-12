@@ -223,6 +223,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 4b82a80b-20c2-43f2-9823-a5474dcaef4f
     m_ActionName: 'SpaceControls/WeaponFire[/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3998444511981156753}
+        m_TargetAssemblyTypeName: SpaceInput, Assembly-CSharp
+        m_MethodName: OnLanding
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 3f930e7f-566f-40f5-8494-ed824e41bc7a
+    m_ActionName: 'SpaceControls/Land[/Keyboard/l]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: SpaceControls

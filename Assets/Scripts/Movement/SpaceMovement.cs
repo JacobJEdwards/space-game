@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 
+namespace Movement
+{
 [RequireComponent(typeof(SpaceInput))]
 public class SpaceMovement : MonoBehaviour
 {
@@ -26,6 +28,11 @@ public class SpaceMovement : MonoBehaviour
         SpaceInput = GetComponent<SpaceInput>();
 
         CurrentBoostAmount = config.MaxBoostAmount;
+
+        if (config.UseCameraDirection && _camera)
+        {
+            _rb.rotation = _camera.transform.rotation;
+        }
     }
 
     private void FixedUpdate()
@@ -79,37 +86,70 @@ public class SpaceMovement : MonoBehaviour
             var currentThrust = config.Thrust;
             if (SpaceInput.boost) currentThrust *= config.BoostMultiplier;
 
-            _rb.AddRelativeForce(forward * (SpaceInput.forward * currentThrust * Time.fixedDeltaTime));
+            if (config.UseCameraDirection)
+            {
+                _rb.AddForce(forward * (SpaceInput.forward * currentThrust * Time.fixedDeltaTime));
+            }
+            else
+            {
+                _rb.AddRelativeForce(forward * (SpaceInput.forward * currentThrust * Time.fixedDeltaTime));
+            }
             _glide = currentThrust;
         }
         else
         {
-            _rb.AddRelativeForce(forward * (_glide * Time.fixedDeltaTime));
+            if (config.UseCameraDirection)
+            {
+                _rb.AddForce(forward * (_glide * Time.fixedDeltaTime));
+            } else {
+                _rb.AddRelativeForce(forward * (_glide * Time.fixedDeltaTime));
+            }
             _glide *= config.ThrustGlideReduction;
         }
 
         // Up/Down
         if (Mathf.Abs(SpaceInput.upDown) > 0.1f)
         {
-            _rb.AddRelativeForce(up * (SpaceInput.upDown * config.UpThrust * Time.fixedDeltaTime));
+            if (config.UseCameraDirection)
+            {
+                _rb.AddForce(up * (SpaceInput.upDown * config.UpThrust * Time.fixedDeltaTime));
+            } else {
+                _rb.AddRelativeForce(up * (SpaceInput.upDown * config.UpThrust * Time.fixedDeltaTime));
+            }
             _verticalGlide = SpaceInput.upDown * config.UpThrust;
         }
         else
         {
-            _rb.AddRelativeForce(up * (_verticalGlide * Time.fixedDeltaTime));
+            if (config.UseCameraDirection)
+            {
+                _rb.AddForce(up * (_verticalGlide * Time.fixedDeltaTime));
+            } else {
+                _rb.AddRelativeForce(up * (_verticalGlide * Time.fixedDeltaTime));
+            }
             _verticalGlide *= config.UpDownGlideReduction;
         }
 
         // Strafe
         if (Mathf.Abs(SpaceInput.strafe) > 0.1f)
         {
-            _rb.AddRelativeForce(right * (SpaceInput.strafe * config.StrafeThrust * Time.fixedDeltaTime));
+            if (config.UseCameraDirection)
+            {
+                _rb.AddForce(right * (SpaceInput.strafe * config.StrafeThrust * Time.fixedDeltaTime));
+            } else {
+                _rb.AddRelativeForce(right * (SpaceInput.strafe * config.StrafeThrust * Time.fixedDeltaTime));
+            }
             _horizontalGlide = SpaceInput.strafe * config.StrafeThrust;
         }
         else
         {
-            _rb.AddRelativeForce(right * (_horizontalGlide * Time.fixedDeltaTime));
+            if (config.UseCameraDirection)
+            {
+                _rb.AddForce(right * (_horizontalGlide * Time.fixedDeltaTime));
+            } else {
+                _rb.AddRelativeForce(right * (_horizontalGlide * Time.fixedDeltaTime));
+            }
             _horizontalGlide *= config.LeftRightGlideReduction;
         }
     }
+}
 }

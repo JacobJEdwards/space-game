@@ -29,7 +29,6 @@ namespace Managers
 
             if (Physics.Raycast(ray, out var hit, interactionRange, interactionLayer))
             {
-                print(hit.collider.name);
                 var interactable = hit.collider.GetComponent<IInteractable>();
 
                 if (interactable != null)

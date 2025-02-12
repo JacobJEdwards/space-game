@@ -18,6 +18,7 @@ public class SpaceInput : MonoBehaviour
 
     public event UnityAction OnInteractPressed;
     public event UnityAction OnShootPressed;
+    public event UnityAction OnLandingPressed;
 
     #region Inputs
 
@@ -61,6 +62,11 @@ public class SpaceInput : MonoBehaviour
     public void OnShoot(InputAction.CallbackContext context)
     {
         if (context.performed) OnShootPressed?.Invoke();
+    }
+
+    public void OnLanding(InputAction.CallbackContext context)
+    {
+        if (context.performed) OnLandingPressed?.Invoke();
     }
 
     #endregion

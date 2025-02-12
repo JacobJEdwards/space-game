@@ -152,9 +152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6ba36241324e45e487b9567e773d6b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  laserHitEffect: {fileID: 7873874706454067332, guid: 0c0854c37af8e4759834b537ae3018c6, type: 3}
+  laserHitEffect: {fileID: 5444105318733727396, guid: cf82839c411151342a7b2337bda9fb34, type: 3}
   laserRange: 100
-  aim: {fileID: 0}
   mask:
     serializedVersion: 2
     m_Bits: 64

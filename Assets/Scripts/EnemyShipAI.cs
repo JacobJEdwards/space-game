@@ -326,15 +326,14 @@ public class EnemyShipAI : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, optimalCombatRange);
 
-        if (_isAiming)
-        {
-            Gizmos.color = Color.yellow;
-            Vector3 aimDirection = transform.forward * firingRange;
-            Vector3 rightAimBound = Quaternion.Euler(0, aimingThreshold, 0) * aimDirection;
-            Vector3 leftAimBound = Quaternion.Euler(0, -aimingThreshold, 0) * aimDirection;
+        if (!_isAiming) return;
 
-            Gizmos.DrawRay(transform.position, rightAimBound);
-            Gizmos.DrawRay(transform.position, leftAimBound);
-        }
+        Gizmos.color = Color.yellow;
+        var aimDirection = transform.forward * firingRange;
+        var rightAimBound = Quaternion.Euler(0, aimingThreshold, 0) * aimDirection;
+        var leftAimBound = Quaternion.Euler(0, -aimingThreshold, 0) * aimDirection;
+
+        Gizmos.DrawRay(transform.position, rightAimBound);
+        Gizmos.DrawRay(transform.position, leftAimBound);
     }
 }

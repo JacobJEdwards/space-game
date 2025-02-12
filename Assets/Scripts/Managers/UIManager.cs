@@ -31,6 +31,11 @@ public class UiManager : MonoBehaviour
     [Header("Hint Settings")] [SerializeField]
     private TextMeshProUGUI hint;
 
+    [Header("Info Settings")] [SerializeField]
+    private TextMeshProUGUI info;
+
+
+
     private readonly Dictionary<UIState, IUIPanel> _uiPanels = new ();
     private UIState _currentState = UIState.None;
 
@@ -57,6 +62,37 @@ public class UiManager : MonoBehaviour
     {
         // use the hint object to display the text, find component in children
         hint.text = text;
+    }
+
+    public void SetInfo(string text)
+    {
+        // use the hint object to display the text, find component in children
+        info.text = text;
+    }
+
+    public void SetInfo(string text, float duration)
+    {
+        // use the hint object to display the text, find component in children
+        info.text = text;
+        Invoke(nameof(ClearHint), duration);
+    }
+
+    public void SetHint(string text, float duration)
+    {
+        // use the hint object to display the text, find component in children
+        hint.text = text;
+        Invoke(nameof(ClearHint), duration);
+    }
+
+
+    public void ClearHint()
+    {
+        hint.text = "";
+    }
+
+    public void ClearInfo()
+    {
+        info.text = "";
     }
 }
 }
