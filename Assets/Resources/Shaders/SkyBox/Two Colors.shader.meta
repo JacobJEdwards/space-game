@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 15932eb2aca0e9b489535851a29aa8eb
+timeCreated: 1512881976
+licenseType: Store
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149923
+  packageName: Infinity Square Space
+  packageVersion: 1.0
+  assetPath: Assets/NVJOB/Resources/Shaders/SkyBox/Two Colors.shader
+  uploadId: 323099

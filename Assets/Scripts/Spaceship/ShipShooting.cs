@@ -1,4 +1,5 @@
 using System;
+using Movement;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Weapons;
@@ -9,6 +10,7 @@ namespace Spaceship
 public class ShipShooting : MonoBehaviour
 {
     private ShipController _shipController;
+    private InputManager _inputManager;
 
     [SerializeField] private float laserMaxCharge = 10f;
     [SerializeField] private float laserHeatRate = 1f;
@@ -30,6 +32,10 @@ public class ShipShooting : MonoBehaviour
         _shipController = GetComponent<ShipController>();
         LaserCharge = laserMaxCharge;
         _lasers = GetComponentsInChildren<LaserFire>(true);
+        _inputManager = FindFirstObjectByType<InputManager>();
+
+        _inputManager.SetOnShootPressed(OnFire);
+        _inputManager.SetOnShootRelease(OnFireRelease);
     }
 
     private void Update()
@@ -89,13 +95,14 @@ public class ShipShooting : MonoBehaviour
         _firing = false;
     }
 
-    #region Input Actions
-    public void OnFire(InputAction.CallbackContext context)
+    public void OnFire()
     {
-        if (context.performed)
-            _firing = true;
-        else if (context.canceled) _firing = false;
+        _firing = true;
     }
-    #endregion
+
+    public void OnFireRelease()
+    {
+        _firing = false;
+    }
 }
 }

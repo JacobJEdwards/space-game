@@ -75,8 +75,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 538f52ffb7f2b42138bf6171ec6212c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: {fileID: 91755126711555074, guid: c695486c63d1747ff9ce65633afd8834, type: 3}
   rock: {fileID: 6966477669226158199}
+  health: {fileID: 91755126711555074, guid: c695486c63d1747ff9ce65633afd8834, type: 3}
+  possibleDrops:
+  - {fileID: 0}
 --- !u!114 &6966160611160819426
 MonoBehaviour:
   m_ObjectHideFlags: 0

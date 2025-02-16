@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 2812d6762e4202c41b2712ba2eb6821e
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149923
+  packageName: Infinity Square Space
+  packageVersion: 1.0
+  assetPath: Assets/NVJOB/Resources/Shaders/Unlit/Common (Cull Off, No Fog).shader
+  uploadId: 323099

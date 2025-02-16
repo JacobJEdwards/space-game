@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 957d0b6e5455f3d4b90709c49cddea61
+timeCreated: 1513313586
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149923
+  packageName: Infinity Square Space
+  packageVersion: 1.0
+  assetPath: Assets/NVJOB/Main/Materials/Sun/Sun.mat
+  uploadId: 323099

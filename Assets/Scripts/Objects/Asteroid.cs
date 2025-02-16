@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Pool;
+using Resource = CollectableResources.Resource;
 
 namespace Objects
 {
@@ -13,6 +15,12 @@ public class Asteroid : MonoBehaviour, Interfaces.IPoolable<Asteroid>
     [SerializeField] private GameObject rock;
     public Health health;
 
+    private List<GameObject> _possibleDrops;
+
+    public void SetPossibleDrops(List<GameObject> drops)
+    {
+        _possibleDrops = drops;
+    }
 
     public void SetPool(ObjectPool<Asteroid> pool)
     {
@@ -45,6 +53,9 @@ public class Asteroid : MonoBehaviour, Interfaces.IPoolable<Asteroid>
         else Destroy(gameObject);
 
         health.Reset();
+
+        var resourceIndex = Random.Range(0, _possibleDrops.Count);
+        Instantiate(_possibleDrops[resourceIndex], transform.position, Quaternion.identity);
     }
 }
 }

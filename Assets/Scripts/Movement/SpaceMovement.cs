@@ -3,153 +3,112 @@ using UnityEngine;
 
 namespace Movement
 {
-[RequireComponent(typeof(SpaceInput))]
-public class SpaceMovement : MonoBehaviour
-{
-    [SerializeField] private SpaceMovementConfig config;
-
-    private Camera _camera;
-
-    private float _glide;
-    private float _horizontalGlide;
-
-    private Rigidbody _rb;
-
-    public SpaceInput SpaceInput { get; private set; }
-
-    private float _verticalGlide;
-
-    public float CurrentBoostAmount { get; private set; }
-
-    private void Start()
+    public class SpaceMovement : MonoBehaviour
     {
-        _rb = GetComponentInParent<Rigidbody>();
-        _camera = Camera.main;
-        SpaceInput = GetComponent<SpaceInput>();
+        [SerializeField] private SpaceMovementConfig config;
+        [SerializeField] private InputManager inputManager;
 
-        CurrentBoostAmount = config.MaxBoostAmount;
+        private Camera _camera;
 
-        if (config.UseCameraDirection && _camera)
+        private float _glide;
+        private float _horizontalGlide;
+
+        private Rigidbody _rb;
+
+        private float _rotationX;
+
+        private float _verticalGlide;
+
+        public float CurrentBoostAmount { get; private set; }
+
+        private void Start()
         {
-            _rb.rotation = _camera.transform.rotation;
-        }
-    }
+            _rb = GetComponentInParent<Rigidbody>();
+            _camera = Camera.main;
 
-    private void FixedUpdate()
-    {
-        HandleBoosting();
-        HandleMovement();
-    }
+            CurrentBoostAmount = config.MaxBoostAmount;
 
-    private void HandleBoosting()
-    {
-        if (SpaceInput.boost && CurrentBoostAmount > 0f)
-        {
-            CurrentBoostAmount -= config.BoostDepreciationRate;
-            SpaceInput.boost = CurrentBoostAmount > 0f;
-        }
-        else
-        {
-            if (CurrentBoostAmount < config.MaxBoostAmount) CurrentBoostAmount += config.BoostRechargeRate;
-        }
-    }
-
-    private void HandleMovement()
-    {
-        var back = Vector3.back;
-        var forward = Vector3.forward;
-        var right = Vector3.right;
-        var up = Vector3.up;
-
-        if (config.UseCameraDirection)
-        {
-            back = -_camera.transform.forward;
-            forward = _camera.transform.forward;
-            right = _camera.transform.right;
-            up = _camera.transform.up;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         }
 
-        // Roll
-        _rb.AddRelativeTorque(back * (SpaceInput.roll * config.RollTorque * Time.fixedDeltaTime));
-
-        // Pitch
-        _rb.AddRelativeTorque(right *
-                              (Math.Clamp(-SpaceInput.vertical, -1f, 1f) * config.PitchTorque * Time.fixedDeltaTime));
-
-        // Yaw
-        _rb.AddRelativeTorque(up *
-                              (Math.Clamp(SpaceInput.horizontal, -1f, 1f) * config.YawTorque * Time.fixedDeltaTime));
-
-        // Thrust
-        if (Mathf.Abs(SpaceInput.forward) > 0.1f)
+        private void FixedUpdate()
         {
-            var currentThrust = config.Thrust;
-            if (SpaceInput.boost) currentThrust *= config.BoostMultiplier;
+            HandleBoosting();
+            HandleMovement();
+        }
 
-            if (config.UseCameraDirection)
+        private void HandleBoosting()
+        {
+            if (inputManager.GetBoost() && CurrentBoostAmount > 0f)
             {
-                _rb.AddForce(forward * (SpaceInput.forward * currentThrust * Time.fixedDeltaTime));
+                CurrentBoostAmount -= config.BoostDepreciationRate;
             }
             else
             {
-                _rb.AddRelativeForce(forward * (SpaceInput.forward * currentThrust * Time.fixedDeltaTime));
+                if (CurrentBoostAmount < config.MaxBoostAmount) CurrentBoostAmount += config.BoostRechargeRate;
             }
-            _glide = currentThrust;
         }
-        else
+
+        private void HandleMovement()
         {
-            if (config.UseCameraDirection)
+            var forward = Vector3.forward;
+            var right = Vector3.right;
+            var up = Vector3.up;
+
+            // Roll
+            _rb.AddRelativeTorque(Vector3.back * (inputManager.GetRoll() * config.RollTorque * Time.fixedDeltaTime));
+
+            // Pitch/Yaw
+            _rb.AddRelativeTorque(Vector3.right * (Math.Clamp(-inputManager.GetPitchYaw().y, -1f, 1f) * config.PitchTorque * Time
+                .fixedDeltaTime));
+
+            // Yaw
+            _rb.AddRelativeTorque(Vector3.up * (Math.Clamp(inputManager.GetPitchYaw().x, -1f, 1f) * config.YawTorque * Time
+                .fixedDeltaTime));
+
+
+            // Thrust
+            if (Mathf.Abs(inputManager.GetForward()) > 0.1f)
             {
-                _rb.AddForce(forward * (_glide * Time.fixedDeltaTime));
-            } else {
+                var currentThrust = config.Thrust;
+                if (inputManager.GetBoost()) currentThrust *= config.BoostMultiplier;
+
+                _rb.AddRelativeForce(forward * (inputManager.GetForward() * currentThrust * Time.fixedDeltaTime));
+
+                _glide = currentThrust;
+            }
+            else
+            {
                 _rb.AddRelativeForce(forward * (_glide * Time.fixedDeltaTime));
+                _glide *= config.ThrustGlideReduction;
             }
-            _glide *= config.ThrustGlideReduction;
-        }
 
-        // Up/Down
-        if (Mathf.Abs(SpaceInput.upDown) > 0.1f)
-        {
-            if (config.UseCameraDirection)
+            // Up/Down
+            if (Mathf.Abs(inputManager.GetUpDown()) > 0.1f)
             {
-                _rb.AddForce(up * (SpaceInput.upDown * config.UpThrust * Time.fixedDeltaTime));
-            } else {
-                _rb.AddRelativeForce(up * (SpaceInput.upDown * config.UpThrust * Time.fixedDeltaTime));
+                _rb.AddRelativeForce(up * (inputManager.GetUpDown() * config.UpThrust * Time.fixedDeltaTime));
+                _verticalGlide = inputManager.GetUpDown() * config.UpThrust;
             }
-            _verticalGlide = SpaceInput.upDown * config.UpThrust;
-        }
-        else
-        {
-            if (config.UseCameraDirection)
+            else
             {
-                _rb.AddForce(up * (_verticalGlide * Time.fixedDeltaTime));
-            } else {
                 _rb.AddRelativeForce(up * (_verticalGlide * Time.fixedDeltaTime));
+                _verticalGlide *= config.UpDownGlideReduction;
             }
-            _verticalGlide *= config.UpDownGlideReduction;
-        }
 
-        // Strafe
-        if (Mathf.Abs(SpaceInput.strafe) > 0.1f)
-        {
-            if (config.UseCameraDirection)
+            // Strafe
+            if (Mathf.Abs(inputManager.GetStrafe()) > 0.1f)
             {
-                _rb.AddForce(right * (SpaceInput.strafe * config.StrafeThrust * Time.fixedDeltaTime));
-            } else {
-                _rb.AddRelativeForce(right * (SpaceInput.strafe * config.StrafeThrust * Time.fixedDeltaTime));
+                    _rb.AddRelativeForce(right *
+                                         (inputManager.GetStrafe() * config.StrafeThrust * Time.fixedDeltaTime));
+
+                _horizontalGlide = inputManager.GetStrafe() * config.StrafeThrust;
             }
-            _horizontalGlide = SpaceInput.strafe * config.StrafeThrust;
-        }
-        else
-        {
-            if (config.UseCameraDirection)
+            else
             {
-                _rb.AddForce(right * (_horizontalGlide * Time.fixedDeltaTime));
-            } else {
                 _rb.AddRelativeForce(right * (_horizontalGlide * Time.fixedDeltaTime));
+                _horizontalGlide *= config.LeftRightGlideReduction;
             }
-            _horizontalGlide *= config.LeftRightGlideReduction;
         }
     }
-}
 }

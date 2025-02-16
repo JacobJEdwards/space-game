@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 3070428134fa5904da891aa2ae30b786
+timeCreated: 1512881976
+licenseType: Store
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149923
+  packageName: Infinity Square Space
+  packageVersion: 1.0
+  assetPath: Assets/NVJOB/Resources/Shaders/Unlit/Only Color (Cull Off, No Fog).shader
+  uploadId: 323099

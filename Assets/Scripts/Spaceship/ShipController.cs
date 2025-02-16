@@ -51,7 +51,6 @@ namespace Spaceship
         private bool _hasValidLandingPoint;
         [CanBeNull] private Collider _nearestLandingZone;
         private SpaceMovement _spaceMovement;
-        private SpaceInput _spaceInput;
         private Rigidbody _rb;
         private PlayerController _currentPlayer;
 
@@ -66,18 +65,11 @@ namespace Spaceship
         private void InitializeComponents()
         {
             _rb = GetComponent<Rigidbody>();
-            _spaceInput = GetComponentInChildren<SpaceInput>();
             _spaceMovement = GetComponentInChildren<SpaceMovement>();
 
-            if (_spaceInput)
-            {
-                _spaceInput.OnInteractPressed += OnInteract;
-                _spaceInput.OnLandingPressed += HandleLandingOrTakeoff;
-            }
-            else
-            {
-                Debug.LogError("SpaceInput component not found!");
-            }
+            var inputManager = FindFirstObjectByType<InputManager>();
+
+            inputManager.SetOnLandingPressed(HandleLandingOrTakeoff);
         }
 
         private void FixedUpdate()
@@ -347,7 +339,10 @@ namespace Spaceship
 
         public void OnInteract()
         {
-            if (IsOccupied) PlayerExitShip();
+            if (IsOccupied)
+            {
+                PlayerExitShip();
+            }
         }
 
         public void OnSwitchCamera()

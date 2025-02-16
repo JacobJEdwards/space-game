@@ -4,6 +4,7 @@ using Spaceship;
 using Player;
 using TMPro;
 using Interfaces;
+using UnityEngine.UI;
 
 namespace Managers
 {
@@ -29,15 +30,16 @@ public class UiManager : MonoBehaviour
     private PlayerController playerController;
 
     [Header("Hint Settings")] [SerializeField]
-    private TextMeshProUGUI hint;
+    private Text hint;
 
     [Header("Info Settings")] [SerializeField]
-    private TextMeshProUGUI info;
-
-
+    private Text info;
 
     private readonly Dictionary<UIState, IUIPanel> _uiPanels = new ();
     private UIState _currentState = UIState.None;
+
+    private UIState _previousState = UIState.None;
+
 
     public void RegisterPanel(IUIPanel panel)
     {
@@ -55,31 +57,28 @@ public class UiManager : MonoBehaviour
         if (_uiPanels.TryGetValue(state, out var uiPanel))
             uiPanel.Show();
 
+        _previousState = _currentState;
         _currentState = state;
     }
 
     public void SetHint(string text)
     {
-        // use the hint object to display the text, find component in children
         hint.text = text;
     }
 
     public void SetInfo(string text)
     {
-        // use the hint object to display the text, find component in children
         info.text = text;
     }
 
     public void SetInfo(string text, float duration)
     {
-        // use the hint object to display the text, find component in children
         info.text = text;
         Invoke(nameof(ClearInfo), duration);
     }
 
     public void SetHint(string text, float duration)
     {
-        // use the hint object to display the text, find component in children
         hint.text = text;
         Invoke(nameof(ClearHint), duration);
     }
@@ -87,12 +86,17 @@ public class UiManager : MonoBehaviour
 
     public void ClearHint()
     {
-        hint.text = "";
+        hint.text = string.Empty;
     }
 
     public void ClearInfo()
     {
-        info.text = "";
+        info.text = string.Empty;
+    }
+
+    public void ToggleInventory()
+    {
+        TransitionToState(_currentState == UIState.Inventory ? _previousState : UIState.Inventory);
     }
 }
 }

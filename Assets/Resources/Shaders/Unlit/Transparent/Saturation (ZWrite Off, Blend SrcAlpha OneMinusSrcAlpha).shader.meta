@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: ca587adb24cf87945806feff627e1ed9
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149923
+  packageName: Infinity Square Space
+  packageVersion: 1.0
+  assetPath: Assets/NVJOB/Resources/Shaders/Unlit/Transparent/Saturation (ZWrite
+    Off, Blend SrcAlpha OneMinusSrcAlpha).shader
+  uploadId: 323099

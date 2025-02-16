@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: ZeroGMovementConfig
   m_EditorClassIdentifier: 
   speed: 10
-  rollTorque: 500
-  pitchTorque: 100
-  yawTorque: 100
+  rollTorque: 1000
+  pitchTorque: 500
+  yawTorque: 800
   thrust: 250
   upThrust: 150
   strafeThrust: 150

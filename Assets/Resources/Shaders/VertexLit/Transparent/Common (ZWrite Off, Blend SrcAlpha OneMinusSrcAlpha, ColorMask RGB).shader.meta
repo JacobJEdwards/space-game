@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: a0355de0708ad81438f31fb6dff17362
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149923
+  packageName: Infinity Square Space
+  packageVersion: 1.0
+  assetPath: Assets/NVJOB/Resources/Shaders/VertexLit/Transparent/Common (ZWrite
+    Off, Blend SrcAlpha OneMinusSrcAlpha, ColorMask RGB).shader
+  uploadId: 323099

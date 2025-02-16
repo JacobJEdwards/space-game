@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: c38bfb8772f339b46b5c924dde3049a3
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149923
+  packageName: Infinity Square Space
+  packageVersion: 1.0
+  assetPath: Assets/NVJOB/Resources/Shaders/Specular/Transparent/Saturation (Cull
+    Off, ZWrite Off, Optimized).shader
+  uploadId: 323099

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 7c0e2218bab6422489534d05ba90b38f
+timeCreated: 1513539244
+licenseType: Store
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149923
+  packageName: Infinity Square Space
+  packageVersion: 1.0
+  assetPath: Assets/NVJOB/Resources/Shaders/Rim Light/Blackhole (Cull Off, Blend
+    SrcAlpha OneMinusSrcAlpha).shader
+  uploadId: 323099

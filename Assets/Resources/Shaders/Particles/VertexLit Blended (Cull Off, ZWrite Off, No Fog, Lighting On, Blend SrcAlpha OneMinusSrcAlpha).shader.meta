@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: a992d150c63fb6b44884e8babf40f1c4
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149923
+  packageName: Infinity Square Space
+  packageVersion: 1.0
+  assetPath: Assets/NVJOB/Resources/Shaders/Particles/VertexLit Blended (Cull Off,
+    ZWrite Off, No Fog, Lighting On, Blend SrcAlpha OneMinusSrcAlpha).shader
+  uploadId: 323099

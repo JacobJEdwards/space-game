@@ -5,7 +5,7 @@ namespace Movement
 {
     public class PlanetaryMovement : MonoBehaviour
     {
-        [System.Serializable]
+        [Serializable]
         public class MovementSettings
         {
             public float walkSpeed = 2.0f;
@@ -15,22 +15,38 @@ namespace Movement
             public float gravityMultiplier = 2.0f;
             public LayerMask groundLayer;
             public float maxSlopeAngle = 45.0f;
+            public float jetpackFuel = 100.0f;
+            public float jetpackFuelConsumptionRate = 10.0f;
         }
 
         [SerializeField] private MovementSettings movementSettings;
-        [SerializeField] private SpaceInput spaceInput;
+        [SerializeField] private InputManager inputManager;
 
         private Rigidbody _rb;
         private bool _isGrounded;
+        private bool _isSprinting;
+
+        private bool _isJetpacking;
+        private float _jetpackFuel;
+
         private Vector3 _surfaceNormal;
         private Transform _planetTransform;
         private Camera _camera;
+
+        public Vector3 PlanetPosition => _planetTransform.position;
+
+        private void Awake()
+        {
+            _jetpackFuel = movementSettings.jetpackFuel;
+        }
 
         private void Start()
         {
             _rb = GetComponent<Rigidbody>();
             _camera = Camera.main;
-            spaceInput = GetComponent<SpaceInput>();
+
+            inputManager.SetOnJumpPressed(OnJumpPressed);
+            inputManager.SetOnBoostPressed(OnBoostPressed);
         }
 
         public void SetPlanet(Transform planet)
@@ -58,9 +74,33 @@ namespace Movement
             }
             else
             {
-                print("Not grounded");
                 _isGrounded = false;
             }
+        }
+
+        private void OnJumpPressed()
+        {
+            if (_isGrounded)
+            {
+                _rb.AddForce(_surfaceNormal * movementSettings.jumpForce, ForceMode.Impulse);
+            }
+            else
+            {
+                UseJetpack();
+            }
+        }
+
+        private void UseJetpack()
+        {
+            if (_jetpackFuel <= 0)
+            {
+                _isJetpacking = false;
+                return;
+            }
+
+            _isJetpacking = true;
+            _jetpackFuel -= movementSettings.jetpackFuelConsumptionRate * Time.fixedDeltaTime;
+            _rb.AddForce(_surfaceNormal * movementSettings.jumpForce, ForceMode.Impulse);
         }
 
         private void HandleMovement()
@@ -71,13 +111,15 @@ namespace Movement
             var forward = Vector3.ProjectOnPlane(cameraTransform.forward, _surfaceNormal).normalized;
             var right = Vector3.ProjectOnPlane(cameraTransform.right, _surfaceNormal).normalized;
 
-            var moveDir = (forward * spaceInput.forward + right * spaceInput.strafe).normalized;
+            var moveDir = (forward * inputManager.GetForward() + right * inputManager.GetStrafe()).normalized;
 
             var angle = Vector3.Angle(transform.up, _surfaceNormal);
             if (angle > movementSettings.maxSlopeAngle) return;
 
             var speed = movementSettings.walkSpeed; // add more to space input or use different input
             _rb.AddForce(moveDir * speed, ForceMode.Acceleration);
+
+            _jetpackFuel += movementSettings.jetpackFuelConsumptionRate * Time.fixedDeltaTime;
 
             // if (spaceInput.jump && _isGrounded)
             // {
@@ -109,6 +151,11 @@ namespace Movement
 
             Gizmos.color = Color.blue;
             Gizmos.DrawRay(transform.position, _surfaceNormal * 2f);
+        }
+
+        private void OnBoostPressed()
+        {
+            _isSprinting = !_isSprinting; // fix later
         }
     }
 }

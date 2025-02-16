@@ -11,6 +11,7 @@ public class AsteroidSpawner : MonoBehaviour
     public GameObject player;
 
     public List<Asteroid> asteroidPrefabs;
+    public List<GameObject> possibleDrops;
 
     public float spawnRadius = 500f;
     public float fromPlayerRadius = 200f;
@@ -35,6 +36,7 @@ public class AsteroidSpawner : MonoBehaviour
     private Asteroid CreateAsteroid()
     {
         var asteroid = Instantiate(asteroidPrefabs[Random.Range(0, asteroidPrefabs.Count)]);
+        asteroid.SetPossibleDrops(possibleDrops);
         asteroid.SetPool(_asteroidPool);
         return asteroid;
     }

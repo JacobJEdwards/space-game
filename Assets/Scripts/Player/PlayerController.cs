@@ -8,6 +8,7 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+using Object = UnityEngine.Object;
 
 namespace Player
 {
@@ -19,7 +20,7 @@ public enum PlayerState
     InGravity
 }
 
-[RequireComponent(typeof(Rigidbody), typeof(SpaceInput))]
+[RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Health), typeof(Oxygen))]
 [RequireComponent(typeof(SpaceMovement), typeof(PlanetaryMovement))]
 public class PlayerController : MonoBehaviour
@@ -27,9 +28,6 @@ public class PlayerController : MonoBehaviour
     [Serializable]
     private class MovementSettings
     {
-        public float runSpeed = 6.0f;
-        public float jumpForce = 8.0f;
-        public float groundCheckDistance = 0.1f;
         public LayerMask groundLayer;
     }
 
@@ -51,7 +49,6 @@ public class PlayerController : MonoBehaviour
     private Health _playerHealth;
     private Oxygen _playerOxygen;
     private Rigidbody _rb;
-    private SpaceInput _spaceInput;
     private Vector3 _surfaceNormal;
     private bool _isGrounded;
     private SpaceMovement _spaceMovement;
@@ -61,12 +58,30 @@ public class PlayerController : MonoBehaviour
     {
         InitialiseComponents();
         ValidateComponents();
+        UpdateMovementComponents();
+
+        HideLockMouse(true);
     }
+
+    private static void HideLockMouse(bool on)
+    {
+        if (on)
+        {
+            if (Cursor.visible) Cursor.visible = false;
+            if (Cursor.lockState != CursorLockMode.Locked) Cursor.lockState = CursorLockMode.Locked;
+        }
+        else
+        {
+            if (Cursor.visible == false) Cursor.visible = true;
+            if (Cursor.lockState != CursorLockMode.None) Cursor.lockState = CursorLockMode.None;
+        }
+    }
+
 
     private void InitialiseComponents()
     {
-        _spaceInput = GetComponentInChildren<SpaceInput>();
-        _spaceInput.OnInteractPressed += OnInteractionInput;
+        var inputManager = FindFirstObjectByType<InputManager>();
+        inputManager.SetOnInteractPressed(OnInteractionInput);
 
         _playerHealth = GetComponent<Health>();
         _playerOxygen = GetComponent<Oxygen>();
@@ -80,7 +95,6 @@ public class PlayerController : MonoBehaviour
 
     private void ValidateComponents()
     {
-        UnityEngine.Assertions.Assert.IsNotNull(_spaceInput);
         UnityEngine.Assertions.Assert.IsNotNull(_playerHealth);
         UnityEngine.Assertions.Assert.IsNotNull(_playerOxygen);
         UnityEngine.Assertions.Assert.IsNotNull(_rb);
@@ -113,24 +127,44 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateMovementState()
     {
-        if (_playerState == PlayerState.OnShip) return;
-
-        if (_playerState == PlayerState.InZeroG)
+        switch (_playerState)
         {
-            UpdateZeroGMovement();
+            case PlayerState.OnShip:
+                return;
+            case PlayerState.InZeroG:
+                UpdateZeroGMovement();
+                break;
+            case PlayerState.InGravity:
+                UpdatePlanetaryMovement();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
-        else if (_playerState == PlayerState.InGravity)
+    }
+
+    private void UpdatePlanetaryMovement()
+    {
+        var isGrounded = false;
+
+        for (var i = 0; i < 16; i++)
         {
-            UpdatePlanetaryMovement();
+            var direction = Quaternion.Euler(0, i * 22.5f, 0) * transform.forward;
+
+            if (!Physics.Raycast(transform.position, direction, out _, 20f, movementSettings.groundLayer)) continue;
+
+            isGrounded = true;
+            break;
+
         }
 
+        if (isGrounded) return;
+
+        _playerState = PlayerState.InZeroG;
+        UpdateMovementComponents();
     }
 
     private void UpdateZeroGMovement()
     {
-        // check if near a planet in any direction
-        // if near a planet, switch to planetary movement
-
         for (var i = 0; i < 16; i++)
         {
             var direction = Quaternion.Euler(0, i * 22.5f, 0) * transform.forward;
@@ -143,34 +177,6 @@ public class PlayerController : MonoBehaviour
             UpdateMovementComponents();
             return;
         }
-    }
-
-    private void UpdatePlanetaryMovement()
-    {
-        UpdateGroundedState();
-        AlignWithSurface();
-    }
-
-    private void UpdateGroundedState()
-    {
-        if (Physics.Raycast(transform.position, -transform.up, out var hit,
-                movementSettings.groundCheckDistance, movementSettings.groundLayer))
-        {
-            _isGrounded = true;
-            _surfaceNormal = hit.normal;
-        }
-        else
-        {
-            _isGrounded = false;
-        }
-    }
-
-    private void AlignWithSurface()
-    {
-        if (!_isGrounded) return;
-
-        var targetRotation = Quaternion.FromToRotation(transform.up, _surfaceNormal) * transform.rotation;
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * 10f);
     }
 
     private void OnEnable()
@@ -203,6 +209,7 @@ public class PlayerController : MonoBehaviour
     {
         transform.parent = null;
         gameObject.SetActive(true);
+
         CameraController.SetActiveCamera(playerCamera);
 
         if (shipToEnter && shipToEnter.CurrentState == ShipState.Landed)
@@ -219,6 +226,7 @@ public class PlayerController : MonoBehaviour
         uiManager.ClearHint();
         uiManager.TransitionToState(UIState.ZeroG); // FIX
         UpdateMovementComponents();
+
     }
 
     private void UpdateMovementComponents()
@@ -247,7 +255,6 @@ public class PlayerController : MonoBehaviour
 
     private void EnablePlanetaryMovement()
     {
-        print("Enabling planetary movement");
         _spaceMovement.enabled = false;
         _planetaryMovement.enabled = true;
     }

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 1a7754c32d63150459f5516176d6155b
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149923
+  packageName: Infinity Square Space
+  packageVersion: 1.0
+  assetPath: Assets/NVJOB/Resources/Shaders/Rim Light/Rim Light (ZWrite Off, Blend
+    SrcAlpha OneMinusSrcAlpha, Optimized).shader
+  uploadId: 323099

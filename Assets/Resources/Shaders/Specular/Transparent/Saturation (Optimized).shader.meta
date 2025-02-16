@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 6ebe6c58b1f1e834f9f888912d26cc16
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149923
+  packageName: Infinity Square Space
+  packageVersion: 1.0
+  assetPath: Assets/NVJOB/Resources/Shaders/Specular/Transparent/Saturation (Optimized).shader
+  uploadId: 323099

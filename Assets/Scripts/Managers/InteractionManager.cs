@@ -58,6 +58,11 @@ namespace Managers
             {
                 _currentTarget.OnInteract(gameObject);
             }
+
+            else
+            {
+                uiManager.ToggleInventory();
+            }
         }
     }
 }

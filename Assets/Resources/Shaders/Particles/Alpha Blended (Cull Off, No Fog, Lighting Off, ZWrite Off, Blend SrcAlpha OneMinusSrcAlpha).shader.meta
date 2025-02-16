@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 4390b9e0b3a1ff54e8b679d2f2abded6
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 149923
+  packageName: Infinity Square Space
+  packageVersion: 1.0
+  assetPath: Assets/NVJOB/Resources/Shaders/Particles/Alpha Blended (Cull Off, No
+    Fog, Lighting Off, ZWrite Off, Blend SrcAlpha OneMinusSrcAlpha).shader
+  uploadId: 323099
