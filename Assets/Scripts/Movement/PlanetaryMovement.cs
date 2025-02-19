@@ -1,8 +1,11 @@
 using System;
+using Unity.Assertions;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace Movement
 {
+    [RequireComponent(typeof(Rigidbody))]
     public class PlanetaryMovement : MonoBehaviour
     {
         [Serializable]
@@ -17,60 +20,104 @@ namespace Movement
             public float maxSlopeAngle = 45.0f;
             public float jetpackFuel = 100.0f;
             public float jetpackFuelConsumptionRate = 10.0f;
+            public float mouseSensitivity = 2.0f;
+            public float maxVerticalAngle = 89.0f;
         }
 
         [SerializeField] private MovementSettings movementSettings;
         [SerializeField] private InputManager inputManager;
+        [SerializeField] private CinemachineCamera playerCamera;
 
         private Rigidbody _rb;
         private bool _isGrounded;
         private bool _isSprinting;
-
         private bool _isJetpacking;
         private float _jetpackFuel;
 
         private Vector3 _surfaceNormal;
         private Transform _planetTransform;
-        private Camera _camera;
-
-        public Vector3 PlanetPosition => _planetTransform.position;
-
-        private void Awake()
-        {
-            _jetpackFuel = movementSettings.jetpackFuel;
-        }
+        private float _currentRotationX;
 
         private void Start()
         {
             _rb = GetComponent<Rigidbody>();
-            _camera = Camera.main;
+            _rb.constraints = RigidbodyConstraints.FreezeRotation;
+            _jetpackFuel = movementSettings.jetpackFuel;
+
+            CheckComponents();
+
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
 
             inputManager.SetOnJumpPressed(OnJumpPressed);
             inputManager.SetOnBoostPressed(OnBoostPressed);
         }
 
-        public void SetPlanet(Transform planet)
+        private void CheckComponents()
         {
-            _planetTransform = planet;
+            Assert.IsNotNull(inputManager, "InputManager is missing");
+            Assert.IsNotNull(playerCamera, "PlayerCamera is missing");
+        }
+
+        private void Update()
+        {
+            HandleCameraRotation();
+        }
+
+        private void HandleCameraRotation()
+        {
+            var pitchYaw = inputManager.GetPitchYaw();
+
+            // Handle vertical rotation (pitch) of the camera
+            _currentRotationX -= pitchYaw.y * movementSettings.mouseSensitivity;
+            _currentRotationX = Mathf.Clamp(_currentRotationX, -movementSettings.maxVerticalAngle, movementSettings.maxVerticalAngle);
+
+            // Get the right vector for the camera based on our current orientation
+            var right = Vector3.Cross(_surfaceNormal, transform.forward).normalized;
+
+            // Calculate the pitch rotation around the right vector
+            var pitchRotation = Quaternion.AngleAxis(_currentRotationX, right);
+
+            // Apply the pitch to the camera while maintaining its position
+            playerCamera.transform.rotation = transform.rotation * pitchRotation;
+
+            // Handle horizontal rotation (yaw) of the player
+            transform.Rotate(Vector3.up * (pitchYaw.x * movementSettings.mouseSensitivity));
         }
 
         private void FixedUpdate()
         {
+            if (!_planetTransform)
+            {
+                FindPlanet();
+            }
+
             UpdateGroundedState();
+            print("Is Grounded: " + _isGrounded);
             HandleMovement();
             ApplyGravity();
         }
 
+        private void FindPlanet()
+        {
+            var results = new Collider[1];
+            var size = Physics.OverlapSphereNonAlloc(transform.position, 50, results, movementSettings.groundLayer);
+
+            if (size > 0)
+            {
+                _planetTransform = results[0].transform;
+            }
+        }
+
         private void UpdateGroundedState()
         {
-            if (Physics.Raycast(transform.position, -_camera.transform.up, out var hit,
+            var direction = (_planetTransform.position - transform.position).normalized;
+
+            if (Physics.Raycast(transform.position, direction, out var hit,
                     20, movementSettings.groundLayer))
             {
-                var distanceToGround = hit.distance;
+                _isGrounded = hit.distance <= movementSettings.groundCheckDistance + 0.1f;
                 _surfaceNormal = hit.normal;
-                _planetTransform = hit.transform;
-
-                _isGrounded = distanceToGround <= movementSettings.groundCheckDistance;
             }
             else
             {
@@ -78,17 +125,6 @@ namespace Movement
             }
         }
 
-        private void OnJumpPressed()
-        {
-            if (_isGrounded)
-            {
-                _rb.AddForce(_surfaceNormal * movementSettings.jumpForce, ForceMode.Impulse);
-            }
-            else
-            {
-                UseJetpack();
-            }
-        }
 
         private void UseJetpack()
         {
@@ -105,40 +141,38 @@ namespace Movement
 
         private void HandleMovement()
         {
-            if (!_isGrounded) return;
+            if (!_isGrounded && !_isJetpacking) return;
 
-            var cameraTransform = _camera.transform;
-            var forward = Vector3.ProjectOnPlane(cameraTransform.forward, _surfaceNormal).normalized;
-            var right = Vector3.ProjectOnPlane(cameraTransform.right, _surfaceNormal).normalized;
+            var forward = inputManager.GetForward();
+            var strafe = inputManager.GetStrafe();
 
-            var moveDir = (forward * inputManager.GetForward() + right * inputManager.GetStrafe()).normalized;
+            var moveDirection = transform.forward * forward + transform.right * strafe;
+            moveDirection = Vector3.ProjectOnPlane(moveDirection, _surfaceNormal).normalized;
 
-            var angle = Vector3.Angle(transform.up, _surfaceNormal);
-            if (angle > movementSettings.maxSlopeAngle) return;
+            var slopeAngle = Vector3.Angle(_surfaceNormal, transform.up);
+            if (slopeAngle <= movementSettings.maxSlopeAngle)
+            {
+                var currentSpeed = _isSprinting ? movementSettings.runSpeed : movementSettings.walkSpeed;
+                _rb.AddForce(moveDirection * currentSpeed, ForceMode.Acceleration);
+            }
 
-            var speed = movementSettings.walkSpeed; // add more to space input or use different input
-            _rb.AddForce(moveDir * speed, ForceMode.Acceleration);
-
-            _jetpackFuel += movementSettings.jetpackFuelConsumptionRate * Time.fixedDeltaTime;
-
-            // if (spaceInput.jump && _isGrounded)
-            // {
-            //     _rb.AddForce(_surfaceNormal * movementSettings.jumpForce, ForceMode.Impulse);
-            // }
+            if (_isGrounded)
+            {
+                _jetpackFuel = Mathf.Min(_jetpackFuel + movementSettings.jetpackFuelConsumptionRate * Time.deltaTime,
+                    movementSettings.jetpackFuel);
+            }
         }
-
         private void ApplyGravity()
         {
-            if (!_planetTransform) return;
-
-            var gravityDir = _isGrounded ? -_surfaceNormal : (_planetTransform.position - transform.position).normalized;
-
+            var gravityDir = -(transform.position - _planetTransform.position).normalized;
             _rb.AddForce(gravityDir * (Physics.gravity.magnitude * movementSettings.gravityMultiplier), ForceMode.Acceleration);
 
             if (!_isGrounded) return;
 
+            // rotate player to match the surface normal
+            // TODO: fix !!
             var targetRotation = Quaternion.FromToRotation(transform.up, _surfaceNormal) * transform.rotation;
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.fixedDeltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10 * Time.fixedDeltaTime);
         }
 
         private void OnDrawGizmos()
@@ -156,6 +190,18 @@ namespace Movement
         private void OnBoostPressed()
         {
             _isSprinting = !_isSprinting; // fix later
+        }
+
+        private void OnJumpPressed()
+        {
+            if (_isGrounded)
+            {
+                _rb.AddForce(_surfaceNormal * movementSettings.jumpForce, ForceMode.Impulse);
+            }
+            else
+            {
+                UseJetpack();
+            }
         }
     }
 }

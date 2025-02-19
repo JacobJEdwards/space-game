@@ -1,0 +1,82 @@
+\documentclass[final]{cmpreport}
+
+\usepackage[newfloat]{minted}
+\usepackage{rotating}
+\usepackage{subfloat}
+\usepackage{color}
+\usepackage{pdfpages}
+\usepackage{enumitem}
+\usepackage[utf8]{inputenc}
+\usepackage{textgreek}
+
+\newenvironment{code}{\captionsetup{type=listing}}{}
+\SetupFloatingEnvironment{listing}{name=Source Code}
+
+\title{Lost in Space}
+
+\author{Jacob Edwards}
+\registration{100389703}
+\supervisor{Yingliang Ma}
+\ccode{CMP-6056B}
+\summary{This report details the current development of a 3D space shooter game, Lost in Space, using the Unity game engine.}
+
+\onePageLists
+
+\begin{document}
+    \section{Introduction}\label{sec:introduction}
+
+    \section{Background / Similar games}\label{sec:background}
+
+    \section{Design}\label{sec:design}
+
+    \section{Game Features}\label{sec:features}
+
+    The following key game mechanics are implemented in the game:
+
+    \subsection{Space Movement and Combat}\label{subsec:movement}
+
+    The gameplay features 3 major states - Zero G player movement, Spaceship entry, flying and shooting, and terrestrial
+    movement.
+    This subsection will cover the first two states, with the third being covered in the next subsection.
+
+    The player, when not in their ship is able to move in 3D world space, with the ability to move in any direction and
+    rotate in any direction.
+    This is done using Unity's InputSystem\citep{unity:inputsystem} to get the player's input and apply it to the player's
+    Rigidbody component\citep{unity:rigidbody} using thrust and torque force, as well as gliding to simulate the lack of
+    friction in space.
+
+    From this state, the player can enter their ship by looking at it and pressing \textit{F}, which is the interact
+    key in the game.
+    A ray is shot from the player's camera to forwards, and if its hits an interactable object (such as the player's ship),
+    the player is able to interact, where the interaction function for the ship causes the player to enter the ship and
+    switch to the spaceship state, where the player is now controlling the ship.
+
+    The ship movement is very similar to the player movement, with the player able to move in 3D space, rotate in any
+    direction, but with a few key differences:
+    The thrust is much greater in the forwards direction, simulating the fact that the boosters are at the back, and
+    the pitch and yaw movement is much slower, simulating the fact that the ship is much larger and heavier than the
+    player, as well as requiring more force to rotate.
+
+    From the ship, the player is able to shoot lasers, which are raycast from the ship's front, and if they hit a
+    damageable object (such as an asteroid), they will deal damage to it.
+    If enough damage is dealt, the object will be destroyed.
+
+    \subsection{Planetary Exploration}\label{subsec:planetary}
+
+    From the ship, the player is able to land on planets or large asteroids, where they can exit the ship and explore
+    the surface with gravity, requiring a change to the player's movement to simulate the gravity, with the addition of
+    a jump mechanic and more fluid pitch and yaw movement.
+    A jetpack is also available allowing the player to fly within this gravity affected environment.
+
+    As well as being able to land the ship on the planet, if the player is in Zero G movement and gets close enough
+    to a planet, they will be affected by the gravity.
+
+    As the gravity is custom, a custom movement system was implemented to allow for more control over the player's
+    movement.
+
+    \appendix
+
+    \section{Screen Captures}\label{sec:screen-captures}
+
+    \section{Code}\label{sec:code}
+\end{document}

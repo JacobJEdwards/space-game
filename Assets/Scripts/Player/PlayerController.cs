@@ -3,12 +3,9 @@ using JetBrains.Annotations;
 using Managers;
 using Movement;
 using Spaceship;
-using Unity.Assertions;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
-using Object = UnityEngine.Object;
 
 namespace Player
 {
@@ -49,8 +46,7 @@ public class PlayerController : MonoBehaviour
     private Health _playerHealth;
     private Oxygen _playerOxygen;
     private Rigidbody _rb;
-    private Vector3 _surfaceNormal;
-    private bool _isGrounded;
+
     private SpaceMovement _spaceMovement;
     private PlanetaryMovement _planetaryMovement;
 
@@ -144,20 +140,9 @@ public class PlayerController : MonoBehaviour
 
     private void UpdatePlanetaryMovement()
     {
-        var isGrounded = false;
+        var colliders = new Collider[1];
 
-        for (var i = 0; i < 16; i++)
-        {
-            var direction = Quaternion.Euler(0, i * 22.5f, 0) * transform.forward;
-
-            if (!Physics.Raycast(transform.position, direction, out _, 20f, movementSettings.groundLayer)) continue;
-
-            isGrounded = true;
-            break;
-
-        }
-
-        if (isGrounded) return;
+        if (Physics.OverlapSphereNonAlloc(transform.position, 50, colliders, movementSettings.groundLayer) != 0) return;
 
         _playerState = PlayerState.InZeroG;
         UpdateMovementComponents();
@@ -169,11 +154,10 @@ public class PlayerController : MonoBehaviour
         {
             var direction = Quaternion.Euler(0, i * 22.5f, 0) * transform.forward;
 
-            if (!Physics.Raycast(transform.position, direction, out var hit, 20f, movementSettings.groundLayer))
+            if (!Physics.Raycast(transform.position, direction, out _, 20f, movementSettings.groundLayer))
                 continue;
 
             _playerState = PlayerState.InGravity;
-            _planetaryMovement.SetPlanet(hit.transform);
             UpdateMovementComponents();
             return;
         }

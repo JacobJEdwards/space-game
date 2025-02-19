@@ -42,13 +42,13 @@ namespace Managers
                 else
                 {
                     _currentTarget = null;
-                    uiManager.SetHint("");
+                    uiManager.ClearHint();
                 }
             }
             else
             {
                 _currentTarget = null;
-                uiManager.SetHint("");
+                uiManager.ClearHint();
             }
         }
 
@@ -61,6 +61,7 @@ namespace Managers
 
             else
             {
+                // TODO: move elsewhere
                 uiManager.ToggleInventory();
             }
         }
