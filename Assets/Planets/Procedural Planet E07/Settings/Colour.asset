@@ -4,7 +4,8 @@
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -41,6 +42,7 @@ MonoBehaviour:
         atime6: 0
         atime7: 0
         m_Mode: 0
+        m_ColorSpace: -1
         m_NumColorKeys: 7
         m_NumAlphaKeys: 2
       tint: {r: 0, g: 0, b: 0, a: 0}
@@ -73,6 +75,7 @@ MonoBehaviour:
         atime6: 0
         atime7: 0
         m_Mode: 0
+        m_ColorSpace: -1
         m_NumColorKeys: 5
         m_NumAlphaKeys: 2
       tint: {r: 0, g: 0, b: 0, a: 0}
@@ -105,6 +108,7 @@ MonoBehaviour:
         atime6: 0
         atime7: 0
         m_Mode: 0
+        m_ColorSpace: -1
         m_NumColorKeys: 5
         m_NumAlphaKeys: 2
       tint: {r: 1, g: 0.7533275, b: 0, a: 0}
@@ -131,7 +135,7 @@ MonoBehaviour:
         weightMultiplier: 0.8
     noiseOffset: 1.08
     noiseStrength: 0.15
-    blendAmount: 0.242
+    blendAmount: 0.207
   oceanColour:
     serializedVersion: 2
     key0: {r: 0.001290498, g: 0.095383465, b: 0.2735849, a: 1}
@@ -159,5 +163,6 @@ MonoBehaviour:
     atime6: 0
     atime7: 0
     m_Mode: 0
+    m_ColorSpace: -1
     m_NumColorKeys: 5
     m_NumAlphaKeys: 2

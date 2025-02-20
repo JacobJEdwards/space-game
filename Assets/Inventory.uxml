@@ -3,6 +3,21 @@
     <ui:VisualElement name="Container" class="container">
         <ui:VisualElement name="Inventory" class="inventory">
             <ui:Label text="Inventory" display-tooltip-when-elided="true" name="Header" class="header" />
+
+            <ui:VisualElement name="PlayerEquipment" class="equipmentContainer">
+                <ui:VisualElement name="ShipContainer" class="equipmentSlot">
+                    <ui:Label text="Ship" class="equipmentLabel" />
+                    <ui:VisualElement name="ShipImage" class="equipmentImage" />
+                    <ui:Label name="ShipName" class="equipmentName" />
+                </ui:VisualElement>
+
+                <ui:VisualElement name="WeaponContainer" class="equipmentSlot">
+                    <ui:Label text="Weapon" class="equipmentLabel" />
+                    <ui:VisualElement name="WeaponImage" class="equipmentImage" />
+                    <ui:Label name="WeaponName" class="equipmentName" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
             <ui:VisualElement name="SlotContainer" class="slotsContainer" style="align-items: center; justify-content: center; flex-direction: row; margin-top: 0; margin-left: 0; margin-right: 0; margin-bottom: 0; flex-shrink: 1;" />
         </ui:VisualElement>
         <ui:VisualElement name="GhostIcon" style="visibility: hidden; position: absolute; width: 128px; height: 128px; background-image: none;" />

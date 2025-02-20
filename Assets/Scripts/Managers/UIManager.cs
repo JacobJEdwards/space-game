@@ -4,6 +4,7 @@ using Spaceship;
 using Player;
 using TMPro;
 using Interfaces;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Managers
@@ -97,6 +98,19 @@ public class UiManager : MonoBehaviour
     public void ToggleInventory()
     {
         TransitionToState(_currentState == UIState.Inventory ? _previousState : UIState.Inventory);
+        if (_currentState == UIState.Inventory)
+        {
+            Time.timeScale = 0;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
+        {
+            Time.timeScale = 1;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
     }
 }
 }

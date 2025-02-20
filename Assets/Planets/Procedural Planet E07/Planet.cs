@@ -1,6 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Planet : MonoBehaviour
 {
@@ -10,6 +10,13 @@ public class Planet : MonoBehaviour
     public bool autoUpdate = true;
     public enum FaceRenderMask { All, Top, Bottom, Left, Right, Front, Back };
     public FaceRenderMask faceRenderMask;
+    public PlanetWater waterSystem;
+
+    public LayerMask surfaceMask;
+    public LayerMask waterMask;
+    public LayerMask atmosphereMask;
+
+    public Material waterMaterial;
 
     public ShapeSettings shapeSettings;
     public ColourSettings colourSettings;
@@ -19,18 +26,27 @@ public class Planet : MonoBehaviour
     [HideInInspector]
     public bool colourSettingsFoldout;
 
-    ShapeGenerator shapeGenerator = new ShapeGenerator();
-    ColourGenerator colourGenerator = new ColourGenerator();
+    private readonly ShapeGenerator _shapeGenerator = new ();
+    private readonly ColourGenerator _colourGenerator = new ();
 
     [SerializeField, HideInInspector]
-    MeshFilter[] meshFilters;
-    TerrainFace[] terrainFaces;
+    private MeshFilter[] meshFilters;
 
+    [SerializeField, HideInInspector]
+    private TerrainFace[] terrainFaces;
 
-    void Initialize()
+    [SerializeField, HideInInspector]
+    private GameObject atmosphere;
+
+    private void Start()
     {
-        shapeGenerator.UpdateSettings(shapeSettings);
-        colourGenerator.UpdateSettings(colourSettings);
+        GeneratePlanet();
+    }
+
+    private void Initialize()
+    {
+        _shapeGenerator.UpdateSettings(shapeSettings);
+        _colourGenerator.UpdateSettings(colourSettings);
 
         if (meshFilters == null || meshFilters.Length == 0)
         {
@@ -40,23 +56,40 @@ public class Planet : MonoBehaviour
 
         Vector3[] directions = { Vector3.up, Vector3.down, Vector3.left, Vector3.right, Vector3.forward, Vector3.back };
 
-        for (int i = 0; i < 6; i++)
+        for (var i = 0; i < 6; i++)
         {
-            if (meshFilters[i] == null)
+            if (!meshFilters[i])
             {
-                GameObject meshObj = new GameObject("mesh");
-                meshObj.transform.parent = transform;
+                var meshObj = new GameObject("mesh");
 
+                meshObj.transform.parent = transform;
                 meshObj.AddComponent<MeshRenderer>();
+
                 meshFilters[i] = meshObj.AddComponent<MeshFilter>();
                 meshFilters[i].sharedMesh = new Mesh();
+
+                var col = meshFilters[i].AddComponent<MeshCollider>();
+                col.sharedMesh = meshFilters[i].sharedMesh;
+                col.gameObject.layer = 9;
             }
             meshFilters[i].GetComponent<MeshRenderer>().sharedMaterial = colourSettings.planetMaterial;
 
-            terrainFaces[i] = new TerrainFace(shapeGenerator, meshFilters[i].sharedMesh, resolution, directions[i]);
-            bool renderFace = faceRenderMask == FaceRenderMask.All || (int)faceRenderMask - 1 == i;
+            terrainFaces[i] = new TerrainFace(_shapeGenerator, meshFilters[i].sharedMesh, resolution, directions[i]);
+
+            var renderFace = faceRenderMask == FaceRenderMask.All || (int)faceRenderMask - 1 == i;
+
             meshFilters[i].gameObject.SetActive(renderFace);
+
         }
+
+        if (!waterSystem)
+        {
+            var water = new GameObject("PlanetWater");
+            water.transform.parent = transform;
+            waterSystem = water.AddComponent<PlanetWater>();
+        }
+
+        waterSystem.GenerateWater(shapeSettings, waterMaterial);
     }
 
     public void GeneratePlanet()
@@ -64,29 +97,45 @@ public class Planet : MonoBehaviour
         Initialize();
         GenerateMesh();
         GenerateColours();
+        gameObject.layer = 9;
+        GenerateAtmosphere();
+    }
+
+    private void GenerateAtmosphere()
+    {
+        if (atmosphere) return;
+
+        var atmos = new GameObject("Atmosphere");
+        atmos.transform.parent = transform;
+
+        var sphere = atmos.AddComponent<SphereCollider>();
+        sphere.radius = shapeSettings.planetRadius * 1.3f;
+        sphere.isTrigger = true;
+
+        atmos.layer = 8;
+
+        atmosphere = atmos;
     }
 
     public void OnShapeSettingsUpdated()
     {
-        if (autoUpdate)
-        {
-            Initialize();
-            GenerateMesh();
-        }
+        if (!autoUpdate) return;
+
+        Initialize();
+        GenerateMesh();
     }
 
     public void OnColourSettingsUpdated()
     {
-        if (autoUpdate)
-        {
-            Initialize();
-            GenerateColours();
-        }
+        if (!autoUpdate) return;
+
+        Initialize();
+        GenerateColours();
     }
 
-    void GenerateMesh()
+    private void GenerateMesh()
     {
-        for (int i = 0; i < 6; i++)
+        for (var i = 0; i < 6; i++)
         {
             if (meshFilters[i].gameObject.activeSelf)
             {
@@ -94,17 +143,17 @@ public class Planet : MonoBehaviour
             }
         }
 
-        colourGenerator.UpdateElevation(shapeGenerator.elevationMinMax);
+        _colourGenerator.UpdateElevation(_shapeGenerator.ElevationMinMax);
     }
 
-    void GenerateColours()
+    private void GenerateColours()
     {
-        colourGenerator.UpdateColours();
-        for (int i = 0; i < 6; i++)
+        _colourGenerator.UpdateColours();
+        for (var i = 0; i < 6; i++)
         {
             if (meshFilters[i].gameObject.activeSelf)
             {
-                terrainFaces[i].UpdateUVs(colourGenerator);
+                terrainFaces[i].UpdateUVs(_colourGenerator);
             }
         }
     }

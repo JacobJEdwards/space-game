@@ -182,6 +182,33 @@ namespace Movement
                     ""processors"": """",
                     ""interactions"": ""Press"",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Sprint"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""7a4bace9-f19f-4aa7-9c84-cb9a8ebe6b06"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press"",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Jetpack"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""8eb028ce-e1b1-43fa-a548-24c1da5775a0"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Hold(duration=0.2)"",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Jump"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""6dae158c-2baf-406d-bb20-2e1b5ad9e231"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Tap"",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -393,6 +420,39 @@ namespace Movement
                     ""action"": ""Land"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""69c429be-2611-403e-b3d6-669b76c840d6"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""685cb9fd-9fa5-4906-b5e9-89d0f3a541da"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jetpack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""44a48470-80b6-4283-8333-602eaa1fdb5a"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -411,6 +471,9 @@ namespace Movement
             m_SpaceControls_SwapCamera = m_SpaceControls.FindAction("SwapCamera", throwIfNotFound: true);
             m_SpaceControls_WeaponFire = m_SpaceControls.FindAction("WeaponFire", throwIfNotFound: true);
             m_SpaceControls_Land = m_SpaceControls.FindAction("Land", throwIfNotFound: true);
+            m_SpaceControls_Sprint = m_SpaceControls.FindAction("Sprint", throwIfNotFound: true);
+            m_SpaceControls_Jetpack = m_SpaceControls.FindAction("Jetpack", throwIfNotFound: true);
+            m_SpaceControls_Jump = m_SpaceControls.FindAction("Jump", throwIfNotFound: true);
         }
 
         ~@PlayerControls()
@@ -501,6 +564,9 @@ namespace Movement
         private readonly InputAction m_SpaceControls_SwapCamera;
         private readonly InputAction m_SpaceControls_WeaponFire;
         private readonly InputAction m_SpaceControls_Land;
+        private readonly InputAction m_SpaceControls_Sprint;
+        private readonly InputAction m_SpaceControls_Jetpack;
+        private readonly InputAction m_SpaceControls_Jump;
         /// <summary>
         /// Provides access to input actions defined in input action map "SpaceControls".
         /// </summary>
@@ -552,6 +618,18 @@ namespace Movement
             /// Provides access to the underlying input action "SpaceControls/Land".
             /// </summary>
             public InputAction @Land => m_Wrapper.m_SpaceControls_Land;
+            /// <summary>
+            /// Provides access to the underlying input action "SpaceControls/Sprint".
+            /// </summary>
+            public InputAction @Sprint => m_Wrapper.m_SpaceControls_Sprint;
+            /// <summary>
+            /// Provides access to the underlying input action "SpaceControls/Jetpack".
+            /// </summary>
+            public InputAction @Jetpack => m_Wrapper.m_SpaceControls_Jetpack;
+            /// <summary>
+            /// Provides access to the underlying input action "SpaceControls/Jump".
+            /// </summary>
+            public InputAction @Jump => m_Wrapper.m_SpaceControls_Jump;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -608,6 +686,15 @@ namespace Movement
                 @Land.started += instance.OnLand;
                 @Land.performed += instance.OnLand;
                 @Land.canceled += instance.OnLand;
+                @Sprint.started += instance.OnSprint;
+                @Sprint.performed += instance.OnSprint;
+                @Sprint.canceled += instance.OnSprint;
+                @Jetpack.started += instance.OnJetpack;
+                @Jetpack.performed += instance.OnJetpack;
+                @Jetpack.canceled += instance.OnJetpack;
+                @Jump.started += instance.OnJump;
+                @Jump.performed += instance.OnJump;
+                @Jump.canceled += instance.OnJump;
             }
 
             /// <summary>
@@ -649,6 +736,15 @@ namespace Movement
                 @Land.started -= instance.OnLand;
                 @Land.performed -= instance.OnLand;
                 @Land.canceled -= instance.OnLand;
+                @Sprint.started -= instance.OnSprint;
+                @Sprint.performed -= instance.OnSprint;
+                @Sprint.canceled -= instance.OnSprint;
+                @Jetpack.started -= instance.OnJetpack;
+                @Jetpack.performed -= instance.OnJetpack;
+                @Jetpack.canceled -= instance.OnJetpack;
+                @Jump.started -= instance.OnJump;
+                @Jump.performed -= instance.OnJump;
+                @Jump.canceled -= instance.OnJump;
             }
 
             /// <summary>
@@ -759,6 +855,27 @@ namespace Movement
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnLand(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Sprint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnSprint(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Jetpack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnJetpack(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Jump" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnJump(InputAction.CallbackContext context);
         }
     }
 }

@@ -6,13 +6,11 @@ public static class NoiseFilterFactory {
 
     public static INoiseFilter CreateNoiseFilter(NoiseSettings settings)
     {
-        switch (settings.filterType)
+        return settings.filterType switch
         {
-            case NoiseSettings.FilterType.Simple:
-                return new SimpleNoiseFilter(settings.simpleNoiseSettings);
-            case NoiseSettings.FilterType.Ridgid:
-                return new RidgidNoiseFilter(settings.ridgidNoiseSettings);
-        }
-        return null;
+            NoiseSettings.FilterType.Simple => new SimpleNoiseFilter(settings.simpleNoiseSettings),
+            NoiseSettings.FilterType.Ridgid => new RidgidNoiseFilter(settings.ridgidNoiseSettings),
+            _ => null
+        };
     }
 }

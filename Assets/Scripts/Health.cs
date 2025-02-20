@@ -4,9 +4,23 @@ using UnityEngine.Events;
 
 public class Health : MonoBehaviour, IDamageable
 {
-    [Header("Config")]
-    [SerializeField]
-    public HealthConfig config;
+    [System.Serializable]
+    public class HealthConfigg
+    {
+        [Header("Health Settings")] [SerializeField]
+        private float maxHealth = 100f;
+
+        [SerializeField] private float healRate = 1f;
+
+        [SerializeField] private float timeToHeal = 10f;
+
+
+        public float MaxHealth => maxHealth;
+        public float HealRate => healRate;
+        public float TimeToHeal => timeToHeal;
+    }
+
+    [Header("Config")] [SerializeField] public HealthConfig config;
 
     private float _currentHealth;
     private float _timeSinceLastDamage;

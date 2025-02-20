@@ -1,5 +1,6 @@
 using System;
 using CollectableResources;
+using Player;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -13,9 +14,11 @@ namespace UI
         private readonly Image _icon;
         private readonly Label _amountLabel;
         private readonly Label _nameLabel;
+        private readonly InventoryUI _inventoryUI;
 
-        public InventorySlot()
+        public InventorySlot(InventoryUI inventoryUI)
         {
+            _inventoryUI = inventoryUI;
             _icon = new Image();
             _amountLabel = new Label();
             _nameLabel = new Label();
@@ -32,11 +35,18 @@ namespace UI
             _nameLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             _amountLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
 
+            RegisterCallback<PointerDownEvent>(OnPointerDown);
         }
 
         public void SetResource(ResourceObject resource)
         {
             _resource = resource;
+            if (!resource)
+            {
+                ClearSlot();
+                return;
+            }
+
             _icon.style.backgroundImage = new StyleBackground(resource.resourceSprite);
             _amountLabel.text = resource.resourceAmount.ToString();
             _nameLabel.text = resource.resourceName;
@@ -45,7 +55,7 @@ namespace UI
         public void ClearSlot()
         {
             _resource = null;
-            _icon.image = null;
+            _icon.style.backgroundImage = new StyleBackground();
             _amountLabel.text = string.Empty;
             _nameLabel.text = string.Empty;
         }
@@ -53,6 +63,12 @@ namespace UI
         public ResourceObject GetResource()
         {
             return _resource;
+        }
+
+        private void OnPointerDown(PointerDownEvent evt)
+        {
+            if (evt.button != 0 || !_resource) return;
+            _inventoryUI.StartDrag(evt.position, this);
         }
     }
 }

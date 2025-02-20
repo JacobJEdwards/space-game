@@ -5,7 +5,12 @@ using UnityEngine.Serialization;
 
 public class Oxygen : MonoBehaviour
 {
-    [FormerlySerializedAs("oxygenConfig")]
+    public class OxygenConfigg
+    {
+        public float MaxOxygen = 100;
+        public float OxygenRegenRate = 1;
+    }
+
     [Header("Config")]
     [SerializeField]
     public OxygenConfig config;

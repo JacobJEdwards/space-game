@@ -1,37 +1,34 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class RidgidNoiseFilter : INoiseFilter {
-
-    NoiseSettings.RidgidNoiseSettings settings;
-    Noise noise = new Noise();
+    private readonly NoiseSettings.RidgidNoiseSettings _settings;
+    private readonly Noise _noise = new ();
 
     public RidgidNoiseFilter(NoiseSettings.RidgidNoiseSettings settings)
     {
-        this.settings = settings;
+        _settings = settings;
     }
 
     public float Evaluate(Vector3 point)
     {
         float noiseValue = 0;
-        float frequency = settings.baseRoughness;
+        var frequency = _settings.baseRoughness;
         float amplitude = 1;
         float weight = 1;
 
-        for (int i = 0; i < settings.numLayers; i++)
+        for (var i = 0; i < _settings.numLayers; i++)
         {
-            float v = 1-Mathf.Abs(noise.Evaluate(point * frequency + settings.centre));
+            var v = 1-Mathf.Abs(_noise.Evaluate(point * frequency + _settings.centre));
             v *= v;
             v *= weight;
-            weight = Mathf.Clamp01(v * settings.weightMultiplier);
+            weight = Mathf.Clamp01(v * _settings.weightMultiplier);
 
             noiseValue += v * amplitude;
-            frequency *= settings.roughness;
-            amplitude *= settings.persistence;
+            frequency *= _settings.roughness;
+            amplitude *= _settings.persistence;
         }
 
-        noiseValue = noiseValue - settings.minValue; 
-        return noiseValue * settings.strength;
+        noiseValue = noiseValue - _settings.minValue;
+        return noiseValue * _settings.strength;
     }
 }

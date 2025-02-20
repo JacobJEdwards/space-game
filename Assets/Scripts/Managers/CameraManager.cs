@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
 
+namespace Managers
+{
 public class CameraController : MonoBehaviour
 {
     private static readonly List<CinemachineCamera> Cameras = new();
@@ -34,4 +36,5 @@ public class CameraController : MonoBehaviour
         ActiveCamera = cam;
         foreach (var c in Cameras) c.Priority = c == cam ? 10 : 0;
     }
+}
 }

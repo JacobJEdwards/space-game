@@ -42,20 +42,20 @@ public class ConditionalHidePropertyDrawer : PropertyDrawer
         if (!property.isArray)
         {
             string propertyPath = property.propertyPath; //returns the property path of the property we want to apply the attribute to
-            string conditionPath = propertyPath.Replace(property.name, condHAtt.conditionalSourceField); //changes the path to the conditionalsource property path
+            string conditionPath = propertyPath.Replace(property.name, condHAtt.ConditionalSourceField); //changes the path to the conditionalsource property path
             sourcePropertyValue = property.serializedObject.FindProperty(conditionPath);
 
             //if the find failed->fall back to the old system
             if (sourcePropertyValue == null)
             {
                 //original implementation (doens't work with nested serializedObjects)
-                sourcePropertyValue = property.serializedObject.FindProperty(condHAtt.conditionalSourceField);
+                sourcePropertyValue = property.serializedObject.FindProperty(condHAtt.ConditionalSourceField);
             }
         }
         else
         {
             //original implementation (doens't work with nested serializedObjects)
-            sourcePropertyValue = property.serializedObject.FindProperty(condHAtt.conditionalSourceField);
+            sourcePropertyValue = property.serializedObject.FindProperty(condHAtt.ConditionalSourceField);
         }
 
 
@@ -75,7 +75,7 @@ public class ConditionalHidePropertyDrawer : PropertyDrawer
             case SerializedPropertyType.Boolean:
                 return sourcePropertyValue.boolValue;                
             case SerializedPropertyType.Enum:
-                return sourcePropertyValue.enumValueIndex == condHAtt.enumIndex;
+                return sourcePropertyValue.enumValueIndex == condHAtt.EnumIndex;
             default:
                 Debug.LogError("Data type of the property used for conditional hiding [" + sourcePropertyValue.propertyType + "] is currently not supported");
                 return true;

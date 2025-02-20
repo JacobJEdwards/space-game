@@ -74,12 +74,27 @@ public class InputManager : MonoBehaviour
 
     public void SetOnJumpPressed(UnityAction action)
     {
-        _playerControls.SpaceControls.UpDown.performed += _ => action.Invoke();
+        _playerControls.SpaceControls.Jump.performed += _ => action.Invoke();
     }
 
-    public void SetOnBoostPressed(UnityAction action)
+    public void SetOnSprintPress(UnityAction action)
     {
-        _playerControls.SpaceControls.Boost.performed += _ => action.Invoke();
+        _playerControls.SpaceControls.Sprint.performed += _ => action.Invoke();
+    }
+
+    public void SetOnSprintRelease(UnityAction action)
+    {
+        _playerControls.SpaceControls.Sprint.canceled += _ => action.Invoke();
+    }
+
+    public void SetOnJetpackPress(UnityAction action)
+    {
+        _playerControls.SpaceControls.Jetpack.performed += _ => action.Invoke();
+    }
+
+    public void SetOnJetpackRelease(UnityAction action)
+    {
+        _playerControls.SpaceControls.Jetpack.canceled += _ => action.Invoke();
     }
 }
 }

@@ -235,12 +235,14 @@ public class PlayerController : MonoBehaviour
     {
         _spaceMovement.enabled = true;
         _planetaryMovement.enabled = false;
+        _rb.constraints = RigidbodyConstraints.None;
     }
 
     private void EnablePlanetaryMovement()
     {
         _spaceMovement.enabled = false;
         _planetaryMovement.enabled = true;
+        _rb.constraints = RigidbodyConstraints.FreezeRotation;
     }
 
     private void DisableAllMovement()

@@ -1,84 +1,81 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+[System.Serializable]
 public class TerrainFace
 {
-
-    ShapeGenerator shapeGenerator;
-    Mesh mesh;
-    int resolution;
-    Vector3 localUp;
-    Vector3 axisA;
-    Vector3 axisB;
+    private readonly ShapeGenerator _shapeGenerator;
+    private readonly Mesh _mesh;
+    private readonly int _resolution;
+    private readonly Vector3 _localUp;
+    private readonly Vector3 _axisA;
+    private readonly Vector3 _axisB;
 
     public TerrainFace(ShapeGenerator shapeGenerator, Mesh mesh, int resolution, Vector3 localUp)
     {
-        this.shapeGenerator = shapeGenerator;
-        this.mesh = mesh;
-        this.resolution = resolution;
-        this.localUp = localUp;
+        _shapeGenerator = shapeGenerator;
+        _mesh = mesh;
+        _resolution = resolution;
+        _localUp = localUp;
 
-        axisA = new Vector3(localUp.y, localUp.z, localUp.x);
-        axisB = Vector3.Cross(localUp, axisA);
+        _axisA = new Vector3(localUp.y, localUp.z, localUp.x);
+        _axisB = Vector3.Cross(localUp, _axisA);
     }
 
     public void ConstructMesh()
     {
-        Vector3[] vertices = new Vector3[resolution * resolution];
-        int[] triangles = new int[(resolution - 1) * (resolution - 1) * 6];
-        int triIndex = 0;
-        Vector2[] uv = (mesh.uv.Length == vertices.Length)?mesh.uv:new Vector2[vertices.Length];
+        var vertices = new Vector3[_resolution * _resolution];
+        var triangles = new int[(_resolution - 1) * (_resolution - 1) * 6];
+        var triIndex = 0;
+        var uv = _mesh.uv.Length == vertices.Length ? _mesh.uv : new Vector2[vertices.Length];
 
-        for (int y = 0; y < resolution; y++)
+        for (var y = 0; y < _resolution; y++)
         {
-            for (int x = 0; x < resolution; x++)
+            for (var x = 0; x < _resolution; x++)
             {
-                int i = x + y * resolution;
-                Vector2 percent = new Vector2(x, y) / (resolution - 1);
-                Vector3 pointOnUnitCube = localUp + (percent.x - .5f) * 2 * axisA + (percent.y - .5f) * 2 * axisB;
-                Vector3 pointOnUnitSphere = pointOnUnitCube.normalized;
-                float unscaledElevation = shapeGenerator.CalculateUnscaledElevation(pointOnUnitSphere);
-                vertices[i] = pointOnUnitSphere * shapeGenerator.GetScaledElevation(unscaledElevation);
+                var i = x + y * _resolution;
+                var percent = new Vector2(x, y) / (_resolution - 1);
+                var pointOnUnitCube = _localUp + (percent.x - .5f) * 2 * _axisA + (percent.y - .5f) * 2 * _axisB;
+                var pointOnUnitSphere = pointOnUnitCube.normalized;
+                var unscaledElevation = _shapeGenerator.CalculateUnscaledElevation(pointOnUnitSphere);
+                vertices[i] = pointOnUnitSphere * _shapeGenerator.GetScaledElevation(unscaledElevation);
                 uv[i].y = unscaledElevation;
 
-                if (x != resolution - 1 && y != resolution - 1)
-                {
-                    triangles[triIndex] = i;
-                    triangles[triIndex + 1] = i + resolution + 1;
-                    triangles[triIndex + 2] = i + resolution;
+                if (x == _resolution - 1 || y == _resolution - 1) continue;
 
-                    triangles[triIndex + 3] = i;
-                    triangles[triIndex + 4] = i + 1;
-                    triangles[triIndex + 5] = i + resolution + 1;
-                    triIndex += 6;
-                }
+                triangles[triIndex] = i;
+                triangles[triIndex + 1] = i + _resolution + 1;
+                triangles[triIndex + 2] = i + _resolution;
+
+                triangles[triIndex + 3] = i;
+                triangles[triIndex + 4] = i + 1;
+                triangles[triIndex + 5] = i + _resolution + 1;
+                triIndex += 6;
             }
         }
-        mesh.Clear();
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.RecalculateNormals();
-        mesh.uv = uv;
+        _mesh.Clear();
+        _mesh.vertices = vertices;
+        _mesh.triangles = triangles;
+        _mesh.RecalculateNormals();
+        _mesh.uv = uv;
     }
 
     public void UpdateUVs(ColourGenerator colourGenerator)
     {
-        Vector2[] uv = mesh.uv;
+        var uv = _mesh.uv;
 
-        for (int y = 0; y < resolution; y++)
+        for (var y = 0; y < _resolution; y++)
         {
-            for (int x = 0; x < resolution; x++)
+            for (var x = 0; x < _resolution; x++)
             {
-                int i = x + y * resolution;
-                Vector2 percent = new Vector2(x, y) / (resolution - 1);
-                Vector3 pointOnUnitCube = localUp + (percent.x - .5f) * 2 * axisA + (percent.y - .5f) * 2 * axisB;
-                Vector3 pointOnUnitSphere = pointOnUnitCube.normalized;
+                var i = x + y * _resolution;
+                var percent = new Vector2(x, y) / (_resolution - 1);
+                var pointOnUnitCube = _localUp + (percent.x - .5f) * 2 * _axisA + (percent.y - .5f) * 2 * _axisB;
+                var pointOnUnitSphere = pointOnUnitCube.normalized;
 
                 uv[i].x = colourGenerator.BiomePercentFromPoint(pointOnUnitSphere);
             }
         }
-        mesh.uv = uv;
+        _mesh.uv = uv;
     }
 
 }

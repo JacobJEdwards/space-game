@@ -179,7 +179,7 @@ namespace Spaceship
 
         private bool IsLandingComplete(float distanceToLanding, Quaternion desiredRotation)
         {
-            return distanceToLanding < 0.5f &&
+            return distanceToLanding < landingSettings.hoverDistance &&
                    Quaternion.Angle(transform.rotation, desiredRotation) < 5f;
         }
 
@@ -400,6 +400,7 @@ namespace Spaceship
 
             _hasValidLandingPoint = false;
             uiManager.SetInfo("Landing Failed", 5);
+            _spaceMovement.enabled = true;
 
             CurrentState = ShipState.Flying;
         }

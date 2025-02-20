@@ -16,6 +16,7 @@ namespace Player
             foreach (var t in resources.Where(t => t.resourceName == resource.resourceName))
             {
                 t.resourceAmount += resource.resourceAmount;
+                OnInventoryChanged?.Invoke(this);
                 return;
             }
 

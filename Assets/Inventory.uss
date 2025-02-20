@@ -11,37 +11,78 @@
 
 .inventory {
     flex-grow: 1;
-    max-width: 50%;
-    max-height: 75%;
-    width: 50%;
-    height: 75%;
+    max-width: 80%;
+    max-height: 90%;
+    width: 80%;
+    height: 90%;
     background-color: rgb(28, 32, 36);
     border-top-color: rgb(255, 197, 0);
     border-top-width: 5px;
-    padding: 10px;
+    padding: 20px;
 }
 
 .header {
     flex-grow: 0;
-    font-size: 24px;
+    font-size: 32px;
     color: rgb(255, 197, 0);
     border-bottom-color: rgb(64, 74, 82);
-    border-bottom-width: 1px;
+    border-bottom-width: 2px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+.equipmentContainer {
+    flex-direction: row;
+    justify-content: space-around;
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: rgba(9, 19, 21, 0.5);
+    border-radius: 8px;
+}
+
+.equipmentSlot {
+    width: 225px;
+    height: 225px;
+    background-color: rgb(9, 19, 21);
+    border-radius: 8px;
+    padding: 15px;
+    align-items: center;
+    margin: 0 20px;
+}
+
+.equipmentLabel {
+    color: rgb(255, 197, 0);
+    font-size: 24px;
     margin-bottom: 10px;
+}
+
+.equipmentImage {
+    width: 50%;
+    height: 60%;
+    background-color: rgba(48, 48, 48, 0.5);
+    border-radius: 5px;
+    margin: 10px;
+}
+
+.equipmentName {
+    color: white;
+    font-size: 20px;
+    margin-top: 10px;
 }
 
 .slotsContainer {
     -unity-background-image-tint-color: rgba(255, 255, 255, 0);
     flex-grow: 1;
-    margin-top: 0;
-    padding-top: 10px;
+    margin-top: 20px;
+    padding: 15px;
     flex-wrap: wrap;
     flex-direction: row;
+    justify-content: center;
 }
 
 .slotContainer {
-    width: 128px;
-    height: 128px;
+    width: 80px;
+    height: 80px;
     margin: 5px;
     border-left-color: rgb(48, 48, 48);
     border-right-color: rgb(48, 48, 48);
@@ -50,17 +91,6 @@
     background-color: rgb(9, 19, 21);
     background-image: url('/Assets/WUG/Sprites/ItemSlotBackground.png');
     border-radius: 3px;
-}
-
-.slotIcon {
-    flex-shrink: 0;
-    flex-grow: 1;
-    padding: 15px;
-    width: 80%;
-    height: 80%;
-}
-
-.slotContainer {
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -68,20 +98,24 @@
 }
 
 .slotIcon {
-    width: 80px; /* Adjust size as needed */
-    height: 80px;
-    margin-bottom: 5px;
+    width: 50px;
+    height: 50px;
+    margin-bottom: 3px;
+    flex-shrink: 0;
+    flex-grow: 1;
+    padding: 5px;
 }
 
 .slotName {
-    font-size: 14px;
+    font-size: 12px;
     color: white;
     font-weight: bold;
+    -unity-text-align: middle-center;
 }
 
 .slotAmount {
-    font-size: 12px;
+    font-size: 10px;
     color: yellow;
     font-weight: normal;
+    -unity-text-align: middle-center;
 }
-

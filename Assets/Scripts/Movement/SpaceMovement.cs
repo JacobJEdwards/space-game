@@ -8,8 +8,6 @@ namespace Movement
         [SerializeField] private SpaceMovementConfig config;
         [SerializeField] private InputManager inputManager;
 
-        private Camera _camera;
-
         private float _glide;
         private float _horizontalGlide;
 
@@ -23,8 +21,7 @@ namespace Movement
 
         private void Start()
         {
-            _rb = GetComponentInParent<Rigidbody>();
-            _camera = Camera.main;
+            _rb = GetComponent<Rigidbody>();
 
             CurrentBoostAmount = config.MaxBoostAmount;
 
