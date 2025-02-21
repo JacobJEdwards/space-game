@@ -24,6 +24,7 @@ public class LaserFire : MonoBehaviour, IFireable
         _laser = GetComponent<LineRenderer>();
         _laser.gameObject.SetActive(false);
         _aim = transform.parent;
+        mask = LayerMask.GetMask("Shootable", "PlanetSurface", "Interaction");
     }
 
     public void StopFire()

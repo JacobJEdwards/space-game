@@ -50,7 +50,7 @@ MonoBehaviour:
       ridgidNoiseSettings:
         strength: 1
         numLayers: 4
-        baseRoughness: 1
+        baseRoughness: 10
         roughness: 2
         persistence: 1
         centre: {x: 0, y: 0, z: 0}

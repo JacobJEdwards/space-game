@@ -52,6 +52,7 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
+        movementSettings.groundLayer = LayerMask.GetMask("PlanetSurface");
         InitialiseComponents();
         ValidateComponents();
         UpdateMovementComponents();

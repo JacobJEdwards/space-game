@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
+// TODO : SEED - RANDOM GEN
 public class Planet : MonoBehaviour
 {
 
@@ -40,6 +41,10 @@ public class Planet : MonoBehaviour
 
     private void Start()
     {
+        surfaceMask = LayerMask.GetMask("PlanetSurface");
+        waterMask = LayerMask.GetMask("Water");
+        atmosphereMask = LayerMask.GetMask("Atmosphere");
+
         GeneratePlanet();
     }
 

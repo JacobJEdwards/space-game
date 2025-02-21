@@ -1,3 +1,4 @@
+using System;
 using Interfaces;
 using UnityEngine;
 
@@ -12,6 +13,11 @@ namespace Managers
         private Camera _mainCamera;
 
         private IInteractable _currentTarget;
+
+        private void Start()
+        {
+            interactionLayer = LayerMask.GetMask("Interaction");
+        }
 
         private void Awake()
         {

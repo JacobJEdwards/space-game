@@ -36,7 +36,7 @@ namespace Spaceship
             public float hoverDistance = 2f;
             public float rotationSpeed = 2f;
             public float approachSpeed = 5f;
-            public LayerMask surfaceLayer;
+            public LayerMask landingLayers;
             public int landingRayCount = 16;
             public float landingRayRadius = 50f;
         }
@@ -54,7 +54,7 @@ namespace Spaceship
         private Rigidbody _rb;
         private PlayerController _currentPlayer;
 
-        public bool IsOccupied => _currentPlayer != null;
+        public bool IsOccupied => _currentPlayer;
         public ShipState CurrentState { get; private set; } = ShipState.SpaceIdle;
 
         private void Awake()
@@ -70,6 +70,11 @@ namespace Spaceship
             var inputManager = FindFirstObjectByType<InputManager>();
 
             inputManager.SetOnLandingPressed(HandleLandingOrTakeoff);
+        }
+
+        private void Start()
+        {
+            landingSettings.landingLayers = LayerMask.GetMask("PlanetSurface", "Water");
         }
 
         private void FixedUpdate()
@@ -271,10 +276,12 @@ namespace Spaceship
             ) * _nearestLandingZone.transform.forward;
 
             if (!Physics.Raycast(center, direction, out var hit, landingSettings.landingRayRadius,
-                    landingSettings.surfaceLayer))
+                    landingSettings.landingLayers))
             {
                 return false;
             }
+
+            if (hit.transform.gameObject.layer != LayerMask.NameToLayer("PlanetSurface")) return false;
 
             var distance = Vector3.Distance(transform.position, hit.point);
             if (distance >= closestDistance) return false;
@@ -424,11 +431,10 @@ namespace Spaceship
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, landingSettings.detectionRadius);
 
-            if (_nearestLandingZone)
-            {
-                Gizmos.color = Color.green;
-                Gizmos.DrawWireSphere(_nearestLandingZone.transform.position, 5f);
-            }
+            if (!_nearestLandingZone) return;
+
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(_nearestLandingZone.transform.position, 5f);
         }
 
         private void DrawShipStateGizmos()
