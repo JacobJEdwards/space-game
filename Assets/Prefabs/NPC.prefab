@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: 847266856017484266}
   - component: {fileID: 8980207639587933587}
   - component: {fileID: 4919417476869430511}
+  - component: {fileID: 2835397966967939697}
   m_Layer: 6
   m_Name: NPC
   m_TagString: Untagged
@@ -182,9 +183,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 2
-  m_Height: 7
+  m_Height: 5
   m_Direction: 1
-  m_Center: {x: 0, y: 2, z: 0}
+  m_Center: {x: 0, y: 2.5, z: 0}
 --- !u!114 &4919417476869430511
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,6 +215,25 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 16
   avoidanceWeight: 2
+--- !u!114 &2835397966967939697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7670075372788274160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89a89510858c45e48808db8ae1019db7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: eb777dc87e3f3484fb4ba16d6f10f527, type: 2}
+  onHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onDeath:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &1219694820205860700
 PrefabInstance:
   m_ObjectHideFlags: 0

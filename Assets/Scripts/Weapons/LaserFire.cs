@@ -30,7 +30,7 @@ namespace Weapons
             _mainCam = Camera.main;
             _laser = GetComponent<LineRenderer>();
             _laser.gameObject.SetActive(false);
-            settings.mask = LayerMask.GetMask("Shootable", "PlanetSurface", "Water");
+            settings.mask = LayerMask.GetMask("Shootable", "PlanetSurface", "Water", "Rock");
             ValidateComponents();
         }
 
@@ -53,7 +53,8 @@ namespace Weapons
 
                 var localHitPosition = _laser.transform.InverseTransformPoint(hit.point);
                 SetPosition(localHitPosition);
-                Instantiate(settings.laserHitEffect, hit.point, Quaternion.identity);
+                var effect = Instantiate(settings.laserHitEffect, hit.point, Quaternion.identity);
+                Destroy(effect.gameObject, effect.main.duration);
                 MaybeDamageTarget(hit);
             }
             else

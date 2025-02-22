@@ -11,5 +11,5 @@ public enum Layers
     PlanetSurface = 9,
     Sun = 10,
     NPC = 11,
-    Center = 12,
+    Rock = 12,
 }

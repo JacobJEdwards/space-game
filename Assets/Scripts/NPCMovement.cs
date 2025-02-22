@@ -54,7 +54,7 @@ public class NpcMovement : MonoBehaviour
     [SerializeField] private float groundCheckDistance = 20f;
     [SerializeField] private float uprightSpeed = 5f;
 
-    [Header("Water Settings")]
+    [Header("Avoidance Settings")]
     [SerializeField] private float waterCheckDistance = 2f;
     [SerializeField] private LayerMask waterLayer;
     [SerializeField] private float waterAvoidanceAngle = 45f;
@@ -66,6 +66,7 @@ public class NpcMovement : MonoBehaviour
     private bool _isWandering;
     private bool _isInteracting;
     private bool _isObservingPlayer;
+    private NpcState _currentState;
     private Quaternion _originalHeadRotation;
 
     private static readonly int IsMoving = Animator.StringToHash("Walking");
@@ -92,9 +93,25 @@ public class NpcMovement : MonoBehaviour
     private void Start()
     {
         ValidateComponents();
-        waterLayer = LayerMask.GetMask("Water");
+        waterLayer = LayerMask.GetMask("Water", "Rock");
         npcLayer = LayerMask.GetMask("NPC");
+        var health = GetComponent<Health>();
+        health.onHealthChanged.AddListener(OnHealthChanged);
+        health.onDeath.AddListener(OnDeath);
+
         StartCoroutine(IdleBehavior());
+    }
+
+    private void OnHealthChanged(float dt)
+    {
+        // make flee probably if health is low
+        // TDOD
+    }
+
+    private void OnDeath()
+    {
+        // probably play death animation and enemy pool and stuff
+        Destroy(gameObject);
     }
 
     private bool ShouldObservePlayer()
@@ -122,13 +139,11 @@ public class NpcMovement : MonoBehaviour
             StartObservingPlayer();
         }
 
-        // Update head tracking if we have a head bone
-        if (headBone)
-        {
-            var directionToPlayer = target.position - headBone.position;
-            var targetRotation = Quaternion.LookRotation(directionToPlayer, transform.up);
-            headBone.rotation = Quaternion.Slerp(headBone.rotation, targetRotation, Time.deltaTime * headTrackingSpeed);
-        }
+        if (!headBone) return;
+
+        var directionToPlayer = target.position - headBone.position;
+        var targetRotation = Quaternion.LookRotation(directionToPlayer, transform.up);
+        headBone.rotation = Quaternion.Slerp(headBone.rotation, targetRotation, Time.deltaTime * headTrackingSpeed);
     }
 
     private void StartObservingPlayer()
@@ -137,7 +152,6 @@ public class NpcMovement : MonoBehaviour
         _isWandering = false;
         _isInteracting = false;
 
-        // Face the player
         var directionToPlayer = target.position - transform.position;
         transform.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(directionToPlayer, _surfaceNormal), _surfaceNormal);
 
@@ -249,13 +263,14 @@ public class NpcMovement : MonoBehaviour
 
     private void ValidateComponents()
     {
-        Assert.IsNotNull(planet, "Planet transform is missing");
         Assert.IsNotNull(animator, "Animator is missing");
     }
 
     // Update is called once per frame
     private void FixedUpdate()
     {
+        if (!planet) return;
+
         UpdateGroundedState();
         UpdatePlayerObservation();
 

@@ -14,9 +14,8 @@ namespace PlanetarySystem.Planet
         public void UpdateSettings(ColourSettings settings)
         {
             _settings = settings;
-            if (!_texture || _texture.height != settings.biomeColourSettings.biomes.Length)
-                _texture = new Texture2D(TextureResolution * 2, settings.biomeColourSettings.biomes.Length,
-                    TextureFormat.RGBA32, false);
+            _texture = new Texture2D(TextureResolution * 2, settings.biomeColourSettings.biomes.Length,
+                TextureFormat.RGBA32, false);
 
             _biomeNoiseFilter = NoiseFilterFactory.CreateNoiseFilter(settings.biomeColourSettings.noise);
         }

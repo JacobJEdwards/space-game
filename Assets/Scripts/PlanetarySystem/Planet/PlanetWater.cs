@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace PlanetarySystem.Planet
@@ -90,7 +91,7 @@ namespace PlanetarySystem.Planet
 
     public class PlanetWater : MonoBehaviour
     {
-        [Range(2, 256)] public int resolution = 10;
+        [Range(2, 256)] public int resolution = 30;
         public float waterLevel = 1.02f;
         private Transform _planetTransform;
         private WaterFace[] _waterFaces;
@@ -112,20 +113,26 @@ namespace PlanetarySystem.Planet
             {
                 if (!_waterMeshFilters[i])
                 {
-                    var meshObj = new GameObject($"waterMesh_{i}");
-                    meshObj.transform.parent = transform;
-                    meshObj.AddComponent<MeshRenderer>();
+                    var meshObj = new GameObject($"waterMesh_{i}")
+                    {
+                        transform =
+                        {
+                            parent = transform,
+                            position = transform.position
+                        }
+                    };
 
+                    meshObj.AddComponent<MeshRenderer>();
                     _waterMeshFilters[i] = meshObj.AddComponent<MeshFilter>();
                     _waterMeshFilters[i].sharedMesh = new Mesh();
 
-                    var col = meshObj.AddComponent<MeshCollider>();
-                    col.convex = true;
-                    col.sharedMesh = _waterMeshFilters[i].sharedMesh;
+                    var col = meshObj.AddComponent<SphereCollider>();
+                    col.radius = planetShapeSettings.planetRadius * waterLevel;
                     col.isTrigger = true;
                     col.gameObject.layer = (int)Layers.Water;
 
                     meshObj.AddComponent<WaterPhysics>();
+                    meshObj.AddComponent<LowPolyWater.LowPolyWater>();
                 }
 
                 _waterMeshFilters[i].GetComponent<MeshRenderer>().sharedMaterial = _waterMaterial;
