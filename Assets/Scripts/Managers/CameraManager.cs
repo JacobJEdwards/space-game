@@ -4,37 +4,37 @@ using UnityEngine;
 
 namespace Managers
 {
-public class CameraController : MonoBehaviour
-{
-    private static readonly List<CinemachineCamera> Cameras = new();
-
-    private static CinemachineCamera ActiveCamera { get; set; }
-
-    public static bool IsActive(CinemachineCamera cam)
+    public class CameraController : MonoBehaviour
     {
-        return ActiveCamera == cam;
-    }
+        private static readonly List<CinemachineCamera> Cameras = new();
 
-    public static void Register(CinemachineCamera cam)
-    {
-        if (!Cameras.Contains(cam))
-            Cameras.Add(cam);
+        private static CinemachineCamera ActiveCamera { get; set; }
 
-        if (!ActiveCamera)
-            SetActiveCamera(cam);
-    }
+        public static bool IsActive(CinemachineCamera cam)
+        {
+            return ActiveCamera == cam;
+        }
 
-    public static void Unregister(CinemachineCamera cam)
-    {
-        Cameras.Remove(cam);
-        if (ActiveCamera == cam)
-            SetActiveCamera(Cameras.Count > 0 ? Cameras[0] : null);
-    }
+        public static void Register(CinemachineCamera cam)
+        {
+            if (!Cameras.Contains(cam))
+                Cameras.Add(cam);
 
-    public static void SetActiveCamera(CinemachineCamera cam)
-    {
-        ActiveCamera = cam;
-        foreach (var c in Cameras) c.Priority = c == cam ? 10 : 0;
+            if (!ActiveCamera)
+                SetActiveCamera(cam);
+        }
+
+        public static void Unregister(CinemachineCamera cam)
+        {
+            Cameras.Remove(cam);
+            if (ActiveCamera == cam)
+                SetActiveCamera(Cameras.Count > 0 ? Cameras[0] : null);
+        }
+
+        public static void SetActiveCamera(CinemachineCamera cam)
+        {
+            ActiveCamera = cam;
+            foreach (var c in Cameras) c.Priority = c == cam ? 10 : 0;
+        }
     }
-}
 }

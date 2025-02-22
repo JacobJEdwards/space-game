@@ -1,16 +1,15 @@
-using System.Runtime.InteropServices;
 using Interfaces;
 using JetBrains.Annotations;
-using UnityEngine;
 using Player;
+using UnityEngine;
 
 namespace Spaceship
 {
     [RequireComponent(typeof(Collider))]
     public class InteractableShip : MonoBehaviour, IInteractable
     {
-        private ShipController _shipController;
         [CanBeNull] private PlayerController _player;
+        private ShipController _shipController;
 
         private void Start()
         {
@@ -45,6 +44,5 @@ namespace Spaceship
         {
             return _shipController.IsOccupied ? "Press F to exit" : "Press F to enter";
         }
-
     }
 }

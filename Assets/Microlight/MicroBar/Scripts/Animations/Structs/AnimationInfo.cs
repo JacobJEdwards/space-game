@@ -26,25 +26,25 @@ namespace Microlight.MicroBar
         internal AnimationInfo(IReadOnlyList<AnimCommand> commands, Image target, MicroBar bar,
             MicroBarAnimation animation)
         {
-            this.Commands = commands;
+            Commands = commands;
             IsImage = true;
             TargetImage = target;
             TargetSprite = null;
             TargetSpriteMask = null;
-            this.Bar = bar;
-            this.Animation = animation;
+            Bar = bar;
+            Animation = animation;
         }
 
         internal AnimationInfo(IReadOnlyList<AnimCommand> commands, SpriteRenderer target, Transform targetMask,
             MicroBar bar, MicroBarAnimation animation)
         {
-            this.Commands = commands;
+            Commands = commands;
             IsImage = false;
             TargetImage = null;
             TargetSprite = target;
             TargetSpriteMask = targetMask;
-            this.Bar = bar;
-            this.Animation = animation;
+            Bar = bar;
+            Animation = animation;
         }
     }
 }

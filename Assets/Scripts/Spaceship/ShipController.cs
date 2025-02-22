@@ -1,10 +1,10 @@
-using UnityEngine;
 using System;
 using JetBrains.Annotations;
-using Unity.Cinemachine;
-using Player;
 using Managers;
 using Movement;
+using Player;
+using Unity.Cinemachine;
+using UnityEngine;
 
 namespace Spaceship
 {
@@ -19,40 +19,18 @@ namespace Spaceship
     [RequireComponent(typeof(Rigidbody))]
     public class ShipController : MonoBehaviour
     {
-        [Serializable]
-        private class CameraSettings
-        {
-            public CinemachineCamera thirdPersonCamera;
-            public CinemachineCamera firstPersonCamera;
-        }
-
-        [Serializable]
-        private class LandingSettings
-        {
-            public LayerMask landingLayer;
-            public float detectionRadius = 100f;
-            public float landingThreshold = 500f;
-            public float approachDistance = 20f;
-            public float hoverDistance = 2f;
-            public float rotationSpeed = 2f;
-            public float approachSpeed = 5f;
-            public LayerMask landingLayers;
-            public int landingRayCount = 16;
-            public float landingRayRadius = 50f;
-        }
-
         [SerializeField] private CameraSettings cameraSettings;
         [SerializeField] private LandingSettings landingSettings;
         [SerializeField] private CameraController cameraController;
         [SerializeField] private UiManager uiManager;
+        private PlayerController _currentPlayer;
+        private bool _hasValidLandingPoint;
+        private Vector3 _landingNormal;
 
         private Vector3 _landingPoint;
-        private Vector3 _landingNormal;
-        private bool _hasValidLandingPoint;
         [CanBeNull] private Collider _nearestLandingZone;
-        private SpaceMovement _spaceMovement;
         private Rigidbody _rb;
-        private PlayerController _currentPlayer;
+        private SpaceMovement _spaceMovement;
 
         public bool IsOccupied => _currentPlayer;
         public ShipState CurrentState { get; private set; } = ShipState.SpaceIdle;
@@ -60,16 +38,6 @@ namespace Spaceship
         private void Awake()
         {
             InitializeComponents();
-        }
-
-        private void InitializeComponents()
-        {
-            _rb = GetComponent<Rigidbody>();
-            _spaceMovement = GetComponentInChildren<SpaceMovement>();
-
-            var inputManager = FindFirstObjectByType<InputManager>();
-
-            inputManager.SetOnLandingPressed(HandleLandingOrTakeoff);
         }
 
         private void Start()
@@ -80,6 +48,32 @@ namespace Spaceship
         private void FixedUpdate()
         {
             UpdateShipState();
+        }
+
+        private void OnEnable()
+        {
+            RegisterCameras();
+        }
+
+        private void OnDisable()
+        {
+            UnregisterCameras();
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            DrawLandingZoneGizmos();
+            DrawShipStateGizmos();
+        }
+
+        private void InitializeComponents()
+        {
+            _rb = GetComponent<Rigidbody>();
+            _spaceMovement = GetComponentInChildren<SpaceMovement>();
+
+            var inputManager = FindFirstObjectByType<InputManager>();
+
+            inputManager.SetOnLandingPressed(HandleLandingOrTakeoff);
         }
 
         private void UpdateShipState()
@@ -150,10 +144,7 @@ namespace Spaceship
 
             UpdateLandingPositionAndRotation(desiredPosition, desiredRotation, distanceToLanding);
 
-            if (IsLandingComplete(distanceToLanding, desiredRotation))
-            {
-                CompleteLanding();
-            }
+            if (IsLandingComplete(distanceToLanding, desiredRotation)) CompleteLanding();
         }
 
         private Quaternion CalculateLandingRotation()
@@ -164,16 +155,15 @@ namespace Spaceship
             );
         }
 
-        private void UpdateLandingPositionAndRotation(Vector3 desiredPosition, Quaternion desiredRotation, float distanceToLanding)
+        private void UpdateLandingPositionAndRotation(Vector3 desiredPosition, Quaternion desiredRotation,
+            float distanceToLanding)
         {
             if (distanceToLanding < landingSettings.approachDistance)
-            {
                 transform.rotation = Quaternion.Slerp(
                     transform.rotation,
                     desiredRotation,
                     landingSettings.rotationSpeed * Time.deltaTime
                 );
-            }
 
             transform.position = Vector3.MoveTowards(
                 transform.position,
@@ -256,12 +246,8 @@ namespace Spaceship
             var foundPoint = false;
 
             for (var i = 0; i < landingSettings.landingRayCount; i++)
-            {
                 if (TryFindLandingPointInDirection(i, center, ref closestDistance))
-                {
                     foundPoint = true;
-                }
-            }
 
             _hasValidLandingPoint = foundPoint;
         }
@@ -277,11 +263,9 @@ namespace Spaceship
 
             if (!Physics.Raycast(center, direction, out var hit, landingSettings.landingRayRadius,
                     landingSettings.landingLayers))
-            {
                 return false;
-            }
 
-            if (hit.transform.gameObject.layer != LayerMask.NameToLayer("PlanetSurface")) return false;
+            if (hit.transform.gameObject.layer != (int)Layers.PlanetSurface) return false;
 
             var distance = Vector3.Distance(transform.position, hit.point);
             if (distance >= closestDistance) return false;
@@ -290,16 +274,6 @@ namespace Spaceship
             _landingNormal = hit.normal;
             closestDistance = distance;
             return true;
-        }
-
-        private void OnEnable()
-        {
-            RegisterCameras();
-        }
-
-        private void OnDisable()
-        {
-            UnregisterCameras();
         }
 
         private void RegisterCameras()
@@ -323,10 +297,7 @@ namespace Spaceship
             _currentPlayer = player;
             CameraController.SetActiveCamera(cameraSettings.thirdPersonCamera);
 
-            if (CurrentState == ShipState.SpaceIdle)
-            {
-                CurrentState = ShipState.Flying;
-            }
+            if (CurrentState == ShipState.SpaceIdle) CurrentState = ShipState.Flying;
         }
 
         public void PlayerExitShip()
@@ -338,18 +309,12 @@ namespace Spaceship
             uiManager.ClearHint();
             uiManager.TransitionToState(UIState.ZeroG);
 
-            if (CurrentState == ShipState.Flying)
-            {
-                CurrentState = ShipState.SpaceIdle;
-            }
+            if (CurrentState == ShipState.Flying) CurrentState = ShipState.SpaceIdle;
         }
 
         public void OnInteract()
         {
-            if (IsOccupied)
-            {
-                PlayerExitShip();
-            }
+            if (IsOccupied) PlayerExitShip();
         }
 
         public void OnSwitchCamera()
@@ -420,12 +385,6 @@ namespace Spaceship
             uiManager.SetInfo("Ship Landed", 5);
         }
 
-        private void OnDrawGizmosSelected()
-        {
-            DrawLandingZoneGizmos();
-            DrawShipStateGizmos();
-        }
-
         private void DrawLandingZoneGizmos()
         {
             Gizmos.color = Color.red;
@@ -476,6 +435,28 @@ namespace Spaceship
 
             Gizmos.color = new Color(1f, 1f, 0f, 0.2f);
             Gizmos.DrawWireSphere(_landingPoint, landingSettings.approachDistance);
+        }
+
+        [Serializable]
+        private class CameraSettings
+        {
+            public CinemachineCamera thirdPersonCamera;
+            public CinemachineCamera firstPersonCamera;
+        }
+
+        [Serializable]
+        private class LandingSettings
+        {
+            public LayerMask landingLayer;
+            public float detectionRadius = 100f;
+            public float landingThreshold = 500f;
+            public float approachDistance = 20f;
+            public float hoverDistance = 2f;
+            public float rotationSpeed = 2f;
+            public float approachSpeed = 5f;
+            public LayerMask landingLayers;
+            public int landingRayCount = 16;
+            public float landingRayRadius = 50f;
         }
     }
 }

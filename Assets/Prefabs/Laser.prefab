@@ -154,13 +154,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6ba36241324e45e487b9567e773d6b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  laserHitEffect: {fileID: 5444105318733727396, guid: cf82839c411151342a7b2337bda9fb34, type: 3}
-  laserRange: 100
-  mask:
-    serializedVersion: 2
-    m_Bits: 64
-  range: 100
-  damage: 50
+  settings:
+    laserHitEffect: {fileID: 5444105318733727396, guid: cf82839c411151342a7b2337bda9fb34, type: 3}
+    laserRange: 100
+    mask:
+      serializedVersion: 2
+      m_Bits: 592
+    range: 100
+    damage: 50
 --- !u!198 &6068184739034622775
 ParticleSystem:
   m_ObjectHideFlags: 0

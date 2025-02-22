@@ -1,61 +1,77 @@
+using System;
 using System.Collections.Generic;
+using Interfaces;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Pool;
-using Resource = CollectableResources.Resource;
+using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 namespace Objects
 {
-
-public class Asteroid : MonoBehaviour, Interfaces.IPoolable<Asteroid>
-{
-    [CanBeNull] private ObjectPool<Asteroid> _asteroidPool;
-    private Fracture _fracture;
-
-    [SerializeField] private GameObject rock;
-    public Health health;
-
-    private List<GameObject> _possibleDrops;
-
-    public void SetPossibleDrops(List<GameObject> drops)
+    public class Asteroid : MonoBehaviour, IPoolable<Asteroid>
     {
-        _possibleDrops = drops;
+        [SerializeField] private GameObject rock;
+        public Health health;
+
+        public Rigidbody rb;
+        [CanBeNull] private ObjectPool<Asteroid> _asteroidPool;
+        private Fracture _fracture;
+
+        [SerializeField]
+        private List<GameObject> possibleDrops;
+
+        private void Awake()
+        {
+            rb = GetComponent<Rigidbody>();
+            Assert.IsNotNull(rb);
+        }
+
+        private void Start()
+        {
+            health = GetComponent<Health>();
+            health.onDeath.AddListener(OnDie);
+            _fracture = GetComponentInChildren<Fracture>();
+            rb = GetComponent<Rigidbody>();
+        }
+
+        // Start is called once before the first execution of Update after the MonoBehaviour is created
+        private void OnCollisionEnter(Collision other)
+        {
+            health.TakeDamage(other.relativeVelocity.magnitude);
+        }
+
+        public void SetPool(ObjectPool<Asteroid> pool)
+        {
+            _asteroidPool = pool;
+        }
+
+        public void SetPossibleDrops(List<GameObject> drops)
+        {
+            possibleDrops = drops;
+        }
+
+        private void OnDie()
+        {
+            Explode();
+        }
+
+        private void Explode()
+        {
+            _fracture?.FractureObject();
+
+            if (_asteroidPool != null) _asteroidPool.Release(this);
+            else Destroy(gameObject);
+
+            health.Reset();
+
+            var resourceIndex = Random.Range(0, possibleDrops.Count);
+            var possibleDrop = possibleDrops[resourceIndex];
+            for (var i = 0; i < Random.Range(1, 3); i++)
+            {
+                Instantiate(possibleDrop, transform.position + Random.insideUnitSphere, Random.rotation);
+            }
+        }
     }
-
-    public void SetPool(ObjectPool<Asteroid> pool)
-    {
-        _asteroidPool = pool;
-    }
-
-    private void Start()
-    {
-        health = GetComponent<Health>();
-        health.onDeath.AddListener(OnDie);
-        _fracture = GetComponentInChildren<Fracture>();
-    }
-
-    private void OnDie()
-    {
-        Explode();
-    }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    private void OnCollisionEnter(Collision other)
-    {
-        health.TakeDamage(other.relativeVelocity.magnitude);
-    }
-
-    private void Explode()
-    {
-        _fracture?.FractureObject();
-
-        if (_asteroidPool != null) _asteroidPool.Release(this);
-        else Destroy(gameObject);
-
-        health.Reset();
-
-        var resourceIndex = Random.Range(0, _possibleDrops.Count);
-        Instantiate(_possibleDrops[resourceIndex], transform.position, Quaternion.identity);
-    }
-}
 }

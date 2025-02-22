@@ -57,12 +57,14 @@ namespace Movement
             _rb.AddRelativeTorque(Vector3.back * (inputManager.GetRoll() * config.RollTorque * Time.fixedDeltaTime));
 
             // Pitch/Yaw
-            _rb.AddRelativeTorque(Vector3.right * (Math.Clamp(-inputManager.GetPitchYaw().y, -1f, 1f) * config.PitchTorque * Time
-                .fixedDeltaTime));
+            _rb.AddRelativeTorque(Vector3.right * (Math.Clamp(-inputManager.GetPitchYaw().y, -1f, 1f) *
+                                                   config.PitchTorque * Time
+                                                       .fixedDeltaTime));
 
             // Yaw
-            _rb.AddRelativeTorque(Vector3.up * (Math.Clamp(inputManager.GetPitchYaw().x, -1f, 1f) * config.YawTorque * Time
-                .fixedDeltaTime));
+            _rb.AddRelativeTorque(Vector3.up * (Math.Clamp(inputManager.GetPitchYaw().x, -1f, 1f) * config.YawTorque *
+                                                Time
+                                                    .fixedDeltaTime));
 
 
             // Thrust
@@ -96,8 +98,8 @@ namespace Movement
             // Strafe
             if (Mathf.Abs(inputManager.GetStrafe()) > 0.1f)
             {
-                    _rb.AddRelativeForce(right *
-                                         (inputManager.GetStrafe() * config.StrafeThrust * Time.fixedDeltaTime));
+                _rb.AddRelativeForce(right *
+                                     (inputManager.GetStrafe() * config.StrafeThrust * Time.fixedDeltaTime));
 
                 _horizontalGlide = inputManager.GetStrafe() * config.StrafeThrust;
             }

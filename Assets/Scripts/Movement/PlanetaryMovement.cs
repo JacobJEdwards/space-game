@@ -10,39 +10,27 @@ namespace Movement
     [RequireComponent(typeof(Rigidbody))]
     public class PlanetaryMovement : MonoBehaviour
     {
-        [Serializable]
-        public class MovementSettings
-        {
-            public float walkSpeed = 2.0f;
-            public float runSpeed = 6.0f;
-            public float jumpForce = 8.0f;
-            public float jetpackForce = 2.0f;
-            public float groundCheckDistance = 0.1f;
-            public float gravityMultiplier = 2.0f;
-            public LayerMask groundLayer;
-            public float maxSlopeAngle = 45.0f;
-            public float jetpackFuel = 100.0f;
-            public float jetpackFuelConsumptionRate = 10.0f;
-            public float mouseSensitivity = 2.0f;
-            public float maxVerticalAngle = 89.0f;
-        }
+        private static readonly int Walk = Animator.StringToHash("Walk");
+        private static readonly int Idle = Animator.StringToHash("Idle");
 
         [SerializeField] private MovementSettings movementSettings;
         [SerializeField] private InputManager inputManager;
         [SerializeField] private CinemachineCamera playerCamera;
         [SerializeField] private Transform head;
         [SerializeField] private HeadBobbing headBobbing;
-
-        private Rigidbody _rb;
-        private bool _isGrounded;
-        private bool _isSprinting;
-        private bool _isJetpacking;
-        private float _jetpackFuel;
+        [SerializeField] private Animator animator;
 
         private float _currentRotationX;
+        private bool _isGrounded;
+        private bool _isJetpacking;
+        private bool _isSprinting;
+        private float _jetpackFuel;
+
+        private Transform _planetTransform;
+
+        private Rigidbody _rb;
 
         private Vector3 _surfaceNormal;
-        private Transform _planetTransform;
 
         private void Start()
         {
@@ -63,12 +51,18 @@ namespace Movement
             inputManager.SetOnSprintPress(OnSprintPressed);
         }
 
-        private void CheckComponents()
+        private void Update()
         {
-            Assert.IsNotNull(inputManager, "InputManager is missing");
-            Assert.IsNotNull(playerCamera, "PlayerCamera is missing");
-            Assert.IsNotNull(head, "Head is missing");
-            Assert.IsNotNull(headBobbing, "HeadBobbing is missing");
+            HandleCameraRotation();
+        }
+
+        private void FixedUpdate()
+        {
+            if (!_planetTransform) FindPlanet();
+
+            UpdateGroundedState();
+            HandleMovement();
+            ApplyGravity();
         }
 
         private void OnEnable()
@@ -83,9 +77,23 @@ namespace Movement
                 headBobbing.enabled = false;
         }
 
-        private void Update()
+        private void OnDrawGizmos()
         {
-            HandleCameraRotation();
+            Gizmos.color = _isGrounded ? Color.green : Color.red;
+            Gizmos.DrawRay(transform.position, -transform.up * movementSettings.groundCheckDistance);
+
+            if (!_isGrounded) return;
+
+            Gizmos.color = Color.blue;
+            Gizmos.DrawRay(transform.position, _surfaceNormal * 2f);
+        }
+
+        private void CheckComponents()
+        {
+            Assert.IsNotNull(inputManager, "InputManager is missing");
+            Assert.IsNotNull(playerCamera, "PlayerCamera is missing");
+            Assert.IsNotNull(head, "Head is missing");
+            Assert.IsNotNull(headBobbing, "HeadBobbing is missing");
         }
 
         private void HandleCameraRotation()
@@ -93,23 +101,12 @@ namespace Movement
             var pitchYaw = inputManager.GetPitchYaw();
 
             _currentRotationX -= pitchYaw.y * movementSettings.mouseSensitivity;
-            _currentRotationX = Mathf.Clamp(_currentRotationX, -movementSettings.maxVerticalAngle, movementSettings.maxVerticalAngle);
+            _currentRotationX = Mathf.Clamp(_currentRotationX, -movementSettings.maxVerticalCameraAngle,
+                movementSettings.maxVerticalCameraAngle);
 
             transform.Rotate(Vector3.up * (pitchYaw.x * movementSettings.mouseSensitivity));
 
             head.localRotation = Quaternion.Euler(_currentRotationX, 0, 0);
-        }
-
-        private void FixedUpdate()
-        {
-            if (!_planetTransform)
-            {
-                FindPlanet();
-            }
-
-            UpdateGroundedState();
-            HandleMovement();
-            ApplyGravity();
         }
 
         private void FindPlanet()
@@ -117,10 +114,9 @@ namespace Movement
             var results = new Collider[1];
             var size = Physics.OverlapSphereNonAlloc(transform.position, 50, results, movementSettings.groundLayer);
 
-            if (size > 0)
-            {
-                _planetTransform = results[0].transform;
-            }
+            if (size <= 0) return;
+
+            _planetTransform = results[0].transform;
         }
 
         private void UpdateGroundedState()
@@ -168,6 +164,11 @@ namespace Movement
             {
                 var currentSpeed = _isSprinting ? movementSettings.runSpeed : movementSettings.walkSpeed;
                 _rb.AddForce(moveDirection * currentSpeed, ForceMode.Acceleration);
+
+                if (forward != 0 || strafe != 0)
+                    animator.Play(Walk);
+                else
+                    animator.Play(Idle);
             }
 
             _jetpackFuel = Mathf.Min(_jetpackFuel + movementSettings.jetpackFuelConsumptionRate * Time.deltaTime,
@@ -176,10 +177,7 @@ namespace Movement
 
         private void HandleJetpack()
         {
-            if (_jetpackFuel <= 0)
-            {
-                _isJetpacking = false;
-            }
+            if (_jetpackFuel <= 0) _isJetpacking = false;
 
             _rb.AddForce(transform.up * movementSettings.jetpackForce, ForceMode.Acceleration);
             _jetpackFuel -= movementSettings.jetpackFuelConsumptionRate * Time.deltaTime;
@@ -194,26 +192,23 @@ namespace Movement
 
         private void ApplyGravity()
         {
+            if (!_planetTransform) return;
+
             var gravityDir = -(transform.position - _planetTransform.position).normalized;
-            _rb.AddForce(gravityDir * (Physics.gravity.magnitude * movementSettings.gravityMultiplier), ForceMode.Acceleration);
+            _rb.AddForce(gravityDir * (Physics.gravity.magnitude * movementSettings.gravityMultiplier),
+                ForceMode.Acceleration);
 
-            if (!_isGrounded) return;
+            if (!_isGrounded)
+            {
+                var targetUp = -gravityDir;
+                var targetRot = Quaternion.FromToRotation(transform.up, targetUp) * transform.rotation;
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 2 * Time.fixedDeltaTime);
+                return;
+            }
 
-            // rotate player to match the surface normal
-            // TODO: fix !!
-            var targetRotation = Quaternion.FromToRotation(transform.up, _surfaceNormal) * transform.rotation;
+            var targetRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(transform.forward, _surfaceNormal),
+                _surfaceNormal);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10 * Time.fixedDeltaTime);
-        }
-
-        private void OnDrawGizmos()
-        {
-            Gizmos.color = _isGrounded ? Color.green : Color.red;
-            Gizmos.DrawRay(transform.position, -transform.up * movementSettings.groundCheckDistance);
-
-            if (!_isGrounded) return;
-
-            Gizmos.color = Color.blue;
-            Gizmos.DrawRay(transform.position, _surfaceNormal * 2f);
         }
 
         private void Jump()
@@ -224,10 +219,7 @@ namespace Movement
 
         private void OnJumpPressed()
         {
-            if (_isGrounded)
-            {
-                Jump();
-            }
+            if (_isGrounded) Jump();
         }
 
         private void OnJetpackPressed()
@@ -244,6 +236,24 @@ namespace Movement
         {
             _isSprinting = !_isSprinting;
             headBobbing.SetSprinting(_isSprinting);
+        }
+
+        [Serializable]
+        public class MovementSettings
+        {
+            public float walkSpeed = 2.0f;
+            public float runSpeed = 6.0f;
+            public float jumpForce = 8.0f;
+            public float jetpackForce = 2.0f;
+            public float groundCheckDistance = 0.1f;
+            public float gravityMultiplier = 2.0f;
+            public LayerMask groundLayer;
+            public float maxSlopeAngle = 45.0f;
+            public float jetpackFuel = 100.0f;
+            public float jetpackFuelConsumptionRate = 10.0f;
+            public float mouseSensitivity = 2.0f;
+            public float maxVerticalAngle = 89.0f;
+            public float maxVerticalCameraAngle = 80.0f;
         }
     }
 }

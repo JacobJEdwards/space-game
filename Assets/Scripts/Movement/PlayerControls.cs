@@ -209,6 +209,15 @@ namespace Movement
                     ""processors"": """",
                     ""interactions"": ""Tap"",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ToggleInventory"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""64c02273-353c-4b7d-9b26-bb760acb1ca5"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press"",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -453,6 +462,17 @@ namespace Movement
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""77637da7-ce45-4270-92c5-a9bd50b6b7e0"",
+                    ""path"": ""<Keyboard>/i"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleInventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -474,6 +494,7 @@ namespace Movement
             m_SpaceControls_Sprint = m_SpaceControls.FindAction("Sprint", throwIfNotFound: true);
             m_SpaceControls_Jetpack = m_SpaceControls.FindAction("Jetpack", throwIfNotFound: true);
             m_SpaceControls_Jump = m_SpaceControls.FindAction("Jump", throwIfNotFound: true);
+            m_SpaceControls_ToggleInventory = m_SpaceControls.FindAction("ToggleInventory", throwIfNotFound: true);
         }
 
         ~@PlayerControls()
@@ -567,6 +588,7 @@ namespace Movement
         private readonly InputAction m_SpaceControls_Sprint;
         private readonly InputAction m_SpaceControls_Jetpack;
         private readonly InputAction m_SpaceControls_Jump;
+        private readonly InputAction m_SpaceControls_ToggleInventory;
         /// <summary>
         /// Provides access to input actions defined in input action map "SpaceControls".
         /// </summary>
@@ -630,6 +652,10 @@ namespace Movement
             /// Provides access to the underlying input action "SpaceControls/Jump".
             /// </summary>
             public InputAction @Jump => m_Wrapper.m_SpaceControls_Jump;
+            /// <summary>
+            /// Provides access to the underlying input action "SpaceControls/ToggleInventory".
+            /// </summary>
+            public InputAction @ToggleInventory => m_Wrapper.m_SpaceControls_ToggleInventory;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -695,6 +721,9 @@ namespace Movement
                 @Jump.started += instance.OnJump;
                 @Jump.performed += instance.OnJump;
                 @Jump.canceled += instance.OnJump;
+                @ToggleInventory.started += instance.OnToggleInventory;
+                @ToggleInventory.performed += instance.OnToggleInventory;
+                @ToggleInventory.canceled += instance.OnToggleInventory;
             }
 
             /// <summary>
@@ -745,6 +774,9 @@ namespace Movement
                 @Jump.started -= instance.OnJump;
                 @Jump.performed -= instance.OnJump;
                 @Jump.canceled -= instance.OnJump;
+                @ToggleInventory.started -= instance.OnToggleInventory;
+                @ToggleInventory.performed -= instance.OnToggleInventory;
+                @ToggleInventory.canceled -= instance.OnToggleInventory;
             }
 
             /// <summary>
@@ -876,6 +908,13 @@ namespace Movement
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnJump(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "ToggleInventory" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnToggleInventory(InputAction.CallbackContext context);
         }
     }
 }

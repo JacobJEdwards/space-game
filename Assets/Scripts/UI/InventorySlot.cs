@@ -1,20 +1,17 @@
-using System;
 using CollectableResources;
 using Player;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Scripting;
 using UnityEngine.UIElements;
 
 namespace UI
 {
     public class InventorySlot : VisualElement
     {
-        private ResourceObject _resource;
-        private readonly Image _icon;
         private readonly Label _amountLabel;
-        private readonly Label _nameLabel;
+        private readonly Image _icon;
         private readonly InventoryUI _inventoryUI;
+        private readonly Label _nameLabel;
+        private ResourceObject _resource;
 
         public InventorySlot(InventoryUI inventoryUI)
         {

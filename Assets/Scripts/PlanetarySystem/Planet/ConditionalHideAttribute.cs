@@ -1,28 +1,27 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
+using UnityEngine;
 
 //Original version of the ConditionalHideAttribute created by Brecht Lecluyse (www.brechtos.com)
 //Modified by: Sebastian Lague
 
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property |
-    AttributeTargets.Class | AttributeTargets.Struct, Inherited = true)]
-public class ConditionalHideAttribute : PropertyAttribute
+namespace PlanetarySystem.Planet
 {
-    public readonly string ConditionalSourceField;
-    public readonly int EnumIndex;
-
-    public ConditionalHideAttribute(string boolVariableName)
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property |
+                    AttributeTargets.Class | AttributeTargets.Struct)]
+    public class ConditionalHideAttribute : PropertyAttribute
     {
-        ConditionalSourceField = boolVariableName;
-    }
+        public readonly string ConditionalSourceField;
+        public readonly int EnumIndex;
 
-    public ConditionalHideAttribute(string enumVariableName, int enumIndex)
-    {
-        ConditionalSourceField = enumVariableName;
-        this.EnumIndex = enumIndex;
-    }
+        public ConditionalHideAttribute(string boolVariableName)
+        {
+            ConditionalSourceField = boolVariableName;
+        }
 
+        public ConditionalHideAttribute(string enumVariableName, int enumIndex)
+        {
+            ConditionalSourceField = enumVariableName;
+            EnumIndex = enumIndex;
+        }
+    }
 }
-
-
-

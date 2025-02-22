@@ -1,32 +1,22 @@
+using System;
 using Interfaces;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class Health : MonoBehaviour, IDamageable
 {
-    [System.Serializable]
-    public class HealthConfigg
-    {
-        [Header("Health Settings")] [SerializeField]
-        private float maxHealth = 100f;
-
-        [SerializeField] private float healRate = 1f;
-
-        [SerializeField] private float timeToHeal = 10f;
-
-
-        public float MaxHealth => maxHealth;
-        public float HealRate => healRate;
-        public float TimeToHeal => timeToHeal;
-    }
-
     [Header("Config")] [SerializeField] public HealthConfig config;
+
+    public UnityEvent<float> onHealthChanged;
+    public UnityEvent onDeath;
 
     private float _currentHealth;
     private float _timeSinceLastDamage;
 
-    public UnityEvent<float> onHealthChanged;
-    public UnityEvent onDeath;
+    public void Reset()
+    {
+        _currentHealth = config.MaxHealth;
+    }
 
     private void Start()
     {
@@ -35,10 +25,7 @@ public class Health : MonoBehaviour, IDamageable
 
     private void FixedUpdate()
     {
-        if (_currentHealth <= 0)
-        {
-            Die();
-        }
+        if (_currentHealth <= 0) Die();
 
         if (_timeSinceLastDamage >= config.TimeToHeal)
         {
@@ -69,8 +56,19 @@ public class Health : MonoBehaviour, IDamageable
         onDeath.Invoke();
     }
 
-    public void Reset()
+    [Serializable]
+    public class HealthConfigg
     {
-        _currentHealth = config.MaxHealth;
+        [Header("Health Settings")] [SerializeField]
+        private float maxHealth = 100f;
+
+        [SerializeField] private float healRate = 1f;
+
+        [SerializeField] private float timeToHeal = 10f;
+
+
+        public float MaxHealth => maxHealth;
+        public float HealRate => healRate;
+        public float TimeToHeal => timeToHeal;
     }
 }

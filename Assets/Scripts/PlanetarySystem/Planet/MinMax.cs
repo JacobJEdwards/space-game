@@ -1,21 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class MinMax {
-
-    public float Min { get; private set; } = float.MaxValue;
-    public float Max { get; private set; } = float.MinValue;
-
-    public void AddValue(float v)
+﻿namespace PlanetarySystem.Planet
+{
+    public class MinMax
     {
-        if (v > Max)
+        public float Min { get; private set; } = float.MaxValue;
+        public float Max { get; private set; } = float.MinValue;
+
+        public void AddValue(float v)
         {
-            Max = v;
-        }
-        if (v < Min)
-        {
-            Min = v;
+            if (v > Max) Max = v;
+
+            if (v < Min) Min = v;
         }
     }
 }

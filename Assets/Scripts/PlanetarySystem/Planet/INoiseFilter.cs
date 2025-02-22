@@ -1,8 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public interface INoiseFilter {
-
-    float Evaluate(Vector3 point);
+namespace PlanetarySystem.Planet
+{
+    public interface INoiseFilter
+    {
+        float Evaluate(Vector3 point);
+    }
 }

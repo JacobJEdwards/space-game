@@ -1,33 +1,32 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-[CreateAssetMenu()]
-public class ColourSettings : ScriptableObject
+namespace PlanetarySystem.Planet
 {
-
-    public Material planetMaterial;
-    public BiomeColourSettings biomeColourSettings;
-    public Gradient oceanColour;
-
-    [System.Serializable]
-    public class BiomeColourSettings
+    [CreateAssetMenu]
+    public class ColourSettings : ScriptableObject
     {
-        public Biome[] biomes;
-        public NoiseSettings noise;
-        public float noiseOffset;
-        public float noiseStrength;
-        [Range(0,1)]
-        public float blendAmount;
+        public Material planetMaterial;
+        public BiomeColourSettings biomeColourSettings;
+        public Gradient oceanColour;
 
-        [System.Serializable]
-        public class Biome
+        [Serializable]
+        public class BiomeColourSettings
         {
-            public Gradient gradient;
-            public Color tint;
-            [Range(0, 1)]
-            public float startHeight;
-            [Range(0, 1)]
-            public float tintPercent;
+            public Biome[] biomes;
+            public NoiseSettings noise;
+            public float noiseOffset;
+            public float noiseStrength;
+            [Range(0, 1)] public float blendAmount;
+
+            [Serializable]
+            public class Biome
+            {
+                public Gradient gradient;
+                public Color tint;
+                [Range(0, 1)] public float startHeight;
+                [Range(0, 1)] public float tintPercent;
+            }
         }
     }
-
 }

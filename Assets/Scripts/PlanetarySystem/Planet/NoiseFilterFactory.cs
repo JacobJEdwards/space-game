@@ -1,16 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public static class NoiseFilterFactory {
-
-    public static INoiseFilter CreateNoiseFilter(NoiseSettings settings)
+﻿namespace PlanetarySystem.Planet
+{
+    public static class NoiseFilterFactory
     {
-        return settings.filterType switch
+        public static INoiseFilter CreateNoiseFilter(NoiseSettings settings)
         {
-            NoiseSettings.FilterType.Simple => new SimpleNoiseFilter(settings.simpleNoiseSettings),
-            NoiseSettings.FilterType.Ridgid => new RidgidNoiseFilter(settings.ridgidNoiseSettings),
-            _ => null
-        };
+            return settings.filterType switch
+            {
+                NoiseSettings.FilterType.Simple => new SimpleNoiseFilter(settings.simpleNoiseSettings),
+                NoiseSettings.FilterType.Ridgid => new RidgidNoiseFilter(settings.ridgidNoiseSettings),
+                _ => null
+            };
+        }
     }
 }

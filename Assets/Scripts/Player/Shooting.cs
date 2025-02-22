@@ -1,5 +1,4 @@
 using Movement;
-using Spaceship;
 using UnityEngine;
 using Weapons;
 
@@ -7,97 +6,95 @@ namespace Player
 {
     public class Shooting : MonoBehaviour
     {
-            private PlayerController _playerController;
-            private InputManager _inputManager;
+        [SerializeField] private float laserMaxCharge = 10f;
+        [SerializeField] private float laserHeatRate = 1f;
+        [SerializeField] private float laserCoolRate = 2f;
 
-            [SerializeField] private float laserMaxCharge = 10f;
-            [SerializeField] private float laserHeatRate = 1f;
-            [SerializeField] private float laserCoolRate = 2f;
+        private bool _firing;
+        private InputManager _inputManager;
 
-            private LaserFire[] _lasers;
+        private LaserFire[] _lasers;
 
-            private bool _firing;
+        private bool _overheated;
+        private PlayerController _playerController;
 
-            private bool _overheated;
+        private bool _targetInRange;
 
-            private bool _targetInRange;
+        public float LaserMaxCharge => laserMaxCharge;
+        public float LaserCharge { get; private set; }
 
-            public float LaserMaxCharge => laserMaxCharge;
-            public float LaserCharge { get; private set; }
+        private void Start()
+        {
+            _playerController = GetComponent<PlayerController>();
+            LaserCharge = laserMaxCharge;
+            _lasers = GetComponentsInChildren<LaserFire>(true);
+            _inputManager = FindFirstObjectByType<InputManager>();
 
-            private void Start()
-            {
-                _playerController = GetComponent<PlayerController>();
-                LaserCharge = laserMaxCharge;
-                _lasers = GetComponentsInChildren<LaserFire>(true);
-                _inputManager = FindFirstObjectByType<InputManager>();
+            _inputManager.SetOnShootPressed(OnFire);
+            _inputManager.SetOnShootRelease(OnFireRelease);
+        }
 
-                _inputManager.SetOnShootPressed(OnFire);
-                _inputManager.SetOnShootRelease(OnFireRelease);
-            }
+        private void Update()
+        {
+            HandleLaserFiring();
+            CoolLasers();
+        }
 
-            private void Update()
-            {
-                HandleLaserFiring();
-                CoolLasers();
-            }
+        private void HandleLaserFiring()
+        {
+            if (_firing && !_overheated)
+                FireLasers();
+            else
+                StopLasers();
+        }
 
-            private void HandleLaserFiring()
-            {
-                if (_firing && !_overheated)
-                    FireLasers();
-                else
-                    StopLasers();
-            }
+        private void CoolLasers()
+        {
+            if (_firing) return;
 
-            private void CoolLasers()
-            {
-                if (_firing) return;
+            var cooling = laserCoolRate * Time.deltaTime;
 
-                var cooling = laserCoolRate * Time.deltaTime;
+            LaserCharge += cooling;
 
-                LaserCharge += cooling;
+            if (LaserCharge >= laserMaxCharge) _overheated = false;
 
-                if (LaserCharge >= laserMaxCharge) _overheated = false;
+            LaserCharge = Mathf.Clamp(LaserCharge, 0, laserMaxCharge);
+        }
 
-                LaserCharge = Mathf.Clamp(LaserCharge, 0, laserMaxCharge);
-            }
+        private void FireLasers()
+        {
+            foreach (var laser in _lasers) laser.Fire();
 
-            private void FireLasers()
-            {
-                foreach (var laser in _lasers) laser.Fire();
+            HeatLasers();
+        }
 
-                HeatLasers();
-            }
+        private void HeatLasers()
+        {
+            if (!_firing || _overheated) return;
 
-            private void HeatLasers()
-            {
-                if (!_firing || _overheated) return;
+            var heat = laserHeatRate * Time.deltaTime;
+            LaserCharge -= heat;
 
-                var heat = laserHeatRate * Time.deltaTime;
-                LaserCharge -= heat;
+            if (LaserCharge > 0) return;
 
-                if (LaserCharge > 0) return;
+            _overheated = true;
+            _firing = false;
+        }
 
-                _overheated = true;
-                _firing = false;
-            }
+        private void StopLasers()
+        {
+            foreach (var laser in _lasers) laser.StopFire();
+            _firing = false;
+        }
 
-            private void StopLasers()
-            {
-                foreach (var laser in _lasers) laser.StopFire();
-                _firing = false;
-            }
+        public void OnFire()
+        {
+            _firing = true;
+        }
 
-            public void OnFire()
-            {
-                _firing = true;
-            }
-
-            public void OnFireRelease()
-            {
-                _firing = false;
-            }
-
+        public void OnFireRelease()
+        {
+            _firing = false;
+        }
     }
 }

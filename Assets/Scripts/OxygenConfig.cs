@@ -6,8 +6,7 @@ public class OxygenConfig : ScriptableObject
     [Header("Oxygen Settings")] [SerializeField]
     private float maxOxygen;
 
-    [SerializeField]
-    private float oxygenRegenRate;
+    [SerializeField] private float oxygenRegenRate;
 
     public float MaxOxygen => maxOxygen;
     public float OxygenRegenRate => oxygenRegenRate;

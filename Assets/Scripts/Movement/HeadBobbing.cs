@@ -5,24 +5,14 @@ namespace Movement
 {
     public class HeadBobbing : MonoBehaviour
     {
-        [Serializable]
-        public class BobbingSettings
-        {
-            public float walkingBobbingSpeed = 14f;
-            public float runningBobbingSpeed = 18f;
-            public float bobbingAmount = 0.05f;
-            public float sprintBobbingAmount = 0.075f;
-            public float smoothing = 16f;
-        }
-
         [SerializeField] private BobbingSettings settings;
         [SerializeField] private InputManager inputManager;
         [SerializeField] private Transform target;
 
         private float _defaultPosY;
-        private float _timer;
         private bool _isSprinting;
         private Vector3 _targetPos;
+        private float _timer;
 
         private void Start()
         {
@@ -60,6 +50,16 @@ namespace Movement
         public void SetSprinting(bool isSprinting)
         {
             _isSprinting = isSprinting;
+        }
+
+        [Serializable]
+        public class BobbingSettings
+        {
+            public float walkingBobbingSpeed = 14f;
+            public float runningBobbingSpeed = 18f;
+            public float bobbingAmount = 0.05f;
+            public float sprintBobbingAmount = 0.075f;
+            public float smoothing = 16f;
         }
     }
 }

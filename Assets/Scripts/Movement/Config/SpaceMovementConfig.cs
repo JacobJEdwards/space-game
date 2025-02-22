@@ -36,8 +36,7 @@ public class SpaceMovementConfig : MovementConfig
 
     [SerializeField] private bool useCameraDirection;
 
-    [SerializeField]
-    private float rotationSpeed = 10f;
+    [SerializeField] private float rotationSpeed = 10f;
 
     [SerializeField] private float maxSpeed = 100f;
 

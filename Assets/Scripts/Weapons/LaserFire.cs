@@ -1,70 +1,88 @@
 using Interfaces;
+using JetBrains.Annotations;
+using Unity.Assertions;
 using UnityEngine;
 
 namespace Weapons
 {
-public class LaserFire : MonoBehaviour, IFireable
-{
-    private LineRenderer _laser;
-
-    [SerializeField] public ParticleSystem laserHitEffect;
-
-    [SerializeField] private float laserRange = 100f;
-
-    private Transform _aim;
-
-    [SerializeField] private LayerMask mask;
-
-    [SerializeField] private float range = 100f;
-
-    [SerializeField] private float damage = 50f;
-
-    private void Start()
+    [RequireComponent(typeof(LineRenderer))]
+    public class LaserFire : MonoBehaviour, IFireable
     {
-        _laser = GetComponent<LineRenderer>();
-        _laser.gameObject.SetActive(false);
-        _aim = transform.parent;
-        mask = LayerMask.GetMask("Shootable", "PlanetSurface", "Interaction");
-    }
-
-    public void StopFire()
-    {
-        _laser.gameObject.SetActive(false);
-    }
-
-    public void Fire()
-    {
-        if (IsInRange(out var hit))
+        [System.Serializable]
+        public class LaserSettings
         {
-            var localHitPosition = _laser.transform.InverseTransformPoint(hit.point);
-            SetPosition(localHitPosition);
-            Instantiate(laserHitEffect, hit.point, Quaternion.identity);
-            MaybeDamageTarget(hit);
-        }
-        else
-        {
-            SetPosition(Vector3.forward * range);
+            public ParticleSystem laserHitEffect;
+
+            public LayerMask mask;
+
+            public float range = 100f;
+
+            public float damage = 50f;
         }
 
-        _laser.gameObject.SetActive(true);
-    }
+        [SerializeField] private LaserSettings settings;
 
-    public bool IsInRange(out RaycastHit hit)
-    {
-        return TargetInfo.IsTargetInRange(_aim.transform.position, _aim.transform.forward, out hit, range, mask);
-    }
+        private LineRenderer _laser;
+        private Camera _mainCam;
 
-    private void MaybeDamageTarget(RaycastHit hit)
-    {
-        if (hit.collider.transform.GetComponent<IDamageable>() is { } damageable)
+        private void Start()
         {
-            damageable.TakeDamage(damage * Time.deltaTime);
+            _mainCam = Camera.main;
+            _laser = GetComponent<LineRenderer>();
+            _laser.gameObject.SetActive(false);
+            settings.mask = LayerMask.GetMask("Shootable", "PlanetSurface", "Water");
+            ValidateComponents();
+        }
+
+        private void ValidateComponents()
+        {
+            Assert.IsNotNull(_mainCam);
+            Assert.IsNotNull(_laser);
+        }
+
+        public void StopFire()
+        {
+            _laser.gameObject.SetActive(false);
+        }
+
+        public void Fire()
+        {
+            if (IsInRange(out var hit))
+            {
+                if (hit.collider.gameObject.layer == (int)Layers.Water) return;
+
+                var localHitPosition = _laser.transform.InverseTransformPoint(hit.point);
+                SetPosition(localHitPosition);
+                Instantiate(settings.laserHitEffect, hit.point, Quaternion.identity);
+                MaybeDamageTarget(hit);
+            }
+            else
+            {
+                var hitPos = Vector3.forward * settings.range;
+                SetPosition(hitPos);
+            }
+
+            _laser.gameObject.SetActive(true);
+        }
+
+        private bool IsInRange(out RaycastHit hit)
+        {
+            return TargetInfo.IsTargetInRange(_mainCam, out hit, settings.range, settings.mask);
+        }
+
+        private void MaybeDamageTarget(RaycastHit hit)
+        {
+            if (hit.collider.gameObject.layer != (int)Layers.Shootable) return;
+
+            if (hit.collider.transform.GetComponent<IDamageable>() is { } damageable)
+            {
+                damageable.TakeDamage(settings.damage * Time.deltaTime);
+            }
+        }
+
+        private void SetPosition(Vector3 hitPos)
+        {
+            _laser.SetPosition(1, hitPos);
         }
     }
-
-    private void SetPosition(Vector3 hitPos)
-    {
-        _laser.SetPosition(1, hitPos);
-    }
-}
 }

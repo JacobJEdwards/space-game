@@ -30,8 +30,7 @@ namespace Microlight.MicroBar
         // Colors
         [SerializeField] private bool _adaptiveColor = true; // Does health bar uses adaptive color based on current hp
 
-        [SerializeField]
-        private Color
+        [SerializeField] private Color
             _barPrimaryColor =
                 new(1f, 1f, 1f); // Color of the main health bar, also used as a color for full health in adaptive color
 
@@ -44,8 +43,7 @@ namespace Microlight.MicroBar
         [SerializeField]
         private bool _dualGhostBars; // Are ghost bars two separate bars for healing and damaging or single bar for both
 
-        [SerializeField]
-        private Color
+        [SerializeField] private Color
             _ghostBarDamageColor = new(1f, 0f, 0f); // Color of ghost bar in single mode and when hurt in dual mode
 
         [SerializeField] private Color _ghostBarHealColor = new(1f, 1f, 1f); // Color of ghost bar when healed

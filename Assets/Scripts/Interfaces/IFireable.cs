@@ -1,8 +1,8 @@
 namespace Interfaces
 {
-public interface IFireable
-{
-    void Fire();
-    void StopFire();
-}
+    public interface IFireable
+    {
+        void Fire();
+        void StopFire();
+    }
 }

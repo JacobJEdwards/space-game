@@ -2,10 +2,10 @@ using Managers;
 
 namespace Interfaces
 {
-public interface IUIPanel
-{
-    void Show();
-    void Hide();
-    UIState AssociatedState { get; }
-}
+    public interface IUIPanel
+    {
+        UIState AssociatedState { get; }
+        void Show();
+        void Hide();
+    }
 }

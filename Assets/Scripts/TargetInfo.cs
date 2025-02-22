@@ -1,10 +1,15 @@
+using DG.Tweening;
+using Unity.Assertions;
 using UnityEngine;
 
 public static class TargetInfo
 {
-    public static bool IsTargetInRange(Vector3 rayPosition, Vector3 rayDirection, out RaycastHit hitInfo, float range,
-        LayerMask mask)
+    public static bool IsTargetInRange(Camera cam, out RaycastHit hitInfo, float range, LayerMask mask)
     {
-        return Physics.Raycast(rayPosition, rayDirection, out hitInfo, range, mask);
+        var x = Screen.width / 2;
+        var y = Screen.height / 2;
+        var ray = cam.ScreenPointToRay(new Vector3(x, y));
+
+        return Physics.Raycast(ray, out hitInfo, range, mask);
     }
 }

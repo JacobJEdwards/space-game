@@ -1,14 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ExampleFracture : MonoBehaviour
 {
     public GameObject[] asteroids;
     public GameObject chonker;
-    private int counter = 0;
+    private int counter;
 
-    void Update()
+    private void Update()
     {
         //Code loops through asteroids and fractures them on space
         if (Input.GetKeyDown(KeyCode.Space))
@@ -16,10 +14,7 @@ public class ExampleFracture : MonoBehaviour
             asteroids[counter].GetComponent<Fracture>().FractureObject();
             counter++;
         }
-        if (Input.GetKey(KeyCode.I))
-        {
-            chonker.gameObject.SetActive(true);
-        }
 
+        if (Input.GetKey(KeyCode.I)) chonker.gameObject.SetActive(true);
     }
 }

@@ -1,35 +1,37 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-[System.Serializable]
-public class TerrainFace
+namespace PlanetarySystem.Planet
 {
-    private readonly ShapeGenerator _shapeGenerator;
-    private readonly Mesh _mesh;
-    private readonly int _resolution;
-    private readonly Vector3 _localUp;
-    private readonly Vector3 _axisA;
-    private readonly Vector3 _axisB;
-
-    public TerrainFace(ShapeGenerator shapeGenerator, Mesh mesh, int resolution, Vector3 localUp)
+    [Serializable]
+    public class TerrainFace
     {
-        _shapeGenerator = shapeGenerator;
-        _mesh = mesh;
-        _resolution = resolution;
-        _localUp = localUp;
+        private readonly Vector3 _axisA;
+        private readonly Vector3 _axisB;
+        private readonly Vector3 _localUp;
+        private readonly Mesh _mesh;
+        private readonly int _resolution;
+        private readonly ShapeGenerator _shapeGenerator;
 
-        _axisA = new Vector3(localUp.y, localUp.z, localUp.x);
-        _axisB = Vector3.Cross(localUp, _axisA);
-    }
-
-    public void ConstructMesh()
-    {
-        var vertices = new Vector3[_resolution * _resolution];
-        var triangles = new int[(_resolution - 1) * (_resolution - 1) * 6];
-        var triIndex = 0;
-        var uv = _mesh.uv.Length == vertices.Length ? _mesh.uv : new Vector2[vertices.Length];
-
-        for (var y = 0; y < _resolution; y++)
+        public TerrainFace(ShapeGenerator shapeGenerator, Mesh mesh, int resolution, Vector3 localUp)
         {
+            _shapeGenerator = shapeGenerator;
+            _mesh = mesh;
+            _resolution = resolution;
+            _localUp = localUp;
+
+            _axisA = new Vector3(localUp.y, localUp.z, localUp.x);
+            _axisB = Vector3.Cross(localUp, _axisA);
+        }
+
+        public void ConstructMesh()
+        {
+            var vertices = new Vector3[_resolution * _resolution];
+            var triangles = new int[(_resolution - 1) * (_resolution - 1) * 6];
+            var triIndex = 0;
+            var uv = _mesh.uv.Length == vertices.Length ? _mesh.uv : new Vector2[vertices.Length];
+
+            for (var y = 0; y < _resolution; y++)
             for (var x = 0; x < _resolution; x++)
             {
                 var i = x + y * _resolution;
@@ -51,20 +53,19 @@ public class TerrainFace
                 triangles[triIndex + 5] = i + _resolution + 1;
                 triIndex += 6;
             }
+
+            _mesh.Clear();
+            _mesh.vertices = vertices;
+            _mesh.triangles = triangles;
+            _mesh.RecalculateNormals();
+            _mesh.uv = uv;
         }
-        _mesh.Clear();
-        _mesh.vertices = vertices;
-        _mesh.triangles = triangles;
-        _mesh.RecalculateNormals();
-        _mesh.uv = uv;
-    }
 
-    public void UpdateUVs(ColourGenerator colourGenerator)
-    {
-        var uv = _mesh.uv;
-
-        for (var y = 0; y < _resolution; y++)
+        public void UpdateUVs(ColourGenerator colourGenerator)
         {
+            var uv = _mesh.uv;
+
+            for (var y = 0; y < _resolution; y++)
             for (var x = 0; x < _resolution; x++)
             {
                 var i = x + y * _resolution;
@@ -74,8 +75,8 @@ public class TerrainFace
 
                 uv[i].x = colourGenerator.BiomePercentFromPoint(pointOnUnitSphere);
             }
-        }
-        _mesh.uv = uv;
-    }
 
+            _mesh.uv = uv;
+        }
+    }
 }

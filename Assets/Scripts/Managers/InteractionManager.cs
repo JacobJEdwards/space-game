@@ -1,4 +1,3 @@
-using System;
 using Interfaces;
 using UnityEngine;
 
@@ -10,18 +9,18 @@ namespace Managers
         [SerializeField] private float interactionRange = 5f;
         [SerializeField] private UiManager uiManager;
 
-        private Camera _mainCamera;
-
         private IInteractable _currentTarget;
 
-        private void Start()
-        {
-            interactionLayer = LayerMask.GetMask("Interaction");
-        }
+        private Camera _mainCamera;
 
         private void Awake()
         {
             _mainCamera = Camera.main;
+        }
+
+        private void Start()
+        {
+            interactionLayer = LayerMask.GetMask("Interaction");
         }
 
         private void Update()
@@ -61,15 +60,7 @@ namespace Managers
         public void OnInteractInput()
         {
             if (_currentTarget != null && _currentTarget.CanInteract(gameObject))
-            {
                 _currentTarget.OnInteract(gameObject);
-            }
-
-            else
-            {
-                // TODO: move elsewhere
-                uiManager.ToggleInventory();
-            }
         }
     }
 }

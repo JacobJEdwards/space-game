@@ -29,12 +29,10 @@ namespace Player
             foreach (var t in resources.Where(t => t.resourceName == resource.resourceName))
             {
                 t.resourceAmount -= resource.resourceAmount;
-                if (t.resourceAmount <= 0)
-                {
-                    resources.Remove(t);
-                }
+                if (t.resourceAmount <= 0) resources.Remove(t);
                 return;
             }
+
             OnInventoryChanged?.Invoke(this);
         }
 

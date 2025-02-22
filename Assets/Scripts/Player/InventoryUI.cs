@@ -1,11 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.Assertions;
 using Interfaces;
 using Managers;
 using UI;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.UIElements;
 
 namespace Player
@@ -15,42 +15,24 @@ namespace Player
         [SerializeField] private Inventory inventory;
         [SerializeField] private UiManager uiManager;
 
-        [System.Serializable]
-        public class ShipInfo
-        {
-            public Sprite shipSprite;
-            public string shipName;
-        }
+        [SerializeField] public ShipInfo currentShip;
 
-        [SerializeField]
-        public ShipInfo currentShip;
+        [SerializeField] public WeaponInfo currentWeapon;
 
-        [System.Serializable]
-        public class WeaponInfo
-        {
-            public Sprite weaponSprite;
-            public string weaponName;
-        }
-
-        [SerializeField]
-        public WeaponInfo currentWeapon;
-
-        public UIState AssociatedState => UIState.Inventory;
+        [SerializeField] private int slotsCount = 6;
         private readonly List<InventorySlot> _inventorySlots = new();
+        private InventorySlot _draggedSlot;
+        private VisualElement _ghostIcon;
+
+        private bool _isDragging;
 
         private VisualElement _root;
-        private VisualElement _slotsContainer;
-        private VisualElement _ghostIcon;
 
         private VisualElement _shipIcon;
         private Label _shipName;
+        private VisualElement _slotsContainer;
         private VisualElement _weaponIcon;
         private Label _weaponName;
-
-        private bool _isDragging;
-        private InventorySlot _draggedSlot;
-
-        [SerializeField] private int slotsCount = 6;
 
         private void Awake()
         {
@@ -79,10 +61,28 @@ namespace Player
             UpdateEquipmentDisplay();
         }
 
+        private void Start()
+        {
+            uiManager.RegisterPanel(this);
+            inventory.OnInventoryChanged += _ => UpdateInventory();
+        }
+
         private void OnEnable()
         {
             _root.RegisterCallback<PointerMoveEvent>(OnPointerMove);
             _root.RegisterCallback<PointerUpEvent>(OnPointerUp);
+        }
+
+        public UIState AssociatedState => UIState.Inventory;
+
+        public void Hide()
+        {
+            _root.style.display = DisplayStyle.None;
+        }
+
+        public void Show()
+        {
+            _root.style.display = DisplayStyle.Flex;
         }
 
         private void UpdateEquipmentDisplay()
@@ -124,34 +124,15 @@ namespace Player
             UpdateInventory();
         }
 
-        private void Start()
-        {
-            uiManager.RegisterPanel(this);
-            inventory.OnInventoryChanged += _ => UpdateInventory();
-        }
-
         private void UpdateInventory()
         {
-            foreach (var slot in _inventorySlots)
-            {
-                slot.ClearSlot();
-            }
+            foreach (var slot in _inventorySlots) slot.ClearSlot();
 
             foreach (var resource in inventory.resources)
             {
                 var emptySlot = _inventorySlots.FirstOrDefault(x => !x.GetResource());
                 emptySlot?.SetResource(resource);
             }
-        }
-
-        public void Hide()
-        {
-            _root.style.display = DisplayStyle.None;
-        }
-
-        public void Show()
-        {
-            _root.style.display = DisplayStyle.Flex;
         }
 
         public void StartDrag(Vector2 position, InventorySlot slot)
@@ -178,7 +159,8 @@ namespace Player
             if (!_isDragging || _draggedSlot == null) return;
 
             var slots = _inventorySlots.Where(x => x.worldBound.Overlaps(_ghostIcon.worldBound));
-            var targetSlot = slots.OrderBy(x => Vector2.Distance(x.worldBound.center, _ghostIcon.worldBound.center)).FirstOrDefault();
+            var targetSlot = slots.OrderBy(x => Vector2.Distance(x.worldBound.center, _ghostIcon.worldBound.center))
+                .FirstOrDefault();
 
             if (targetSlot != null && targetSlot != _draggedSlot)
             {
@@ -187,7 +169,7 @@ namespace Player
 
                 if (targetResource)
                 {
-                    if(targetResource.resourceName == draggedResource.resourceName)
+                    if (targetResource.resourceName == draggedResource.resourceName)
                     {
                         targetResource.resourceAmount += draggedResource.resourceAmount;
                         _draggedSlot.ClearSlot();
@@ -210,6 +192,20 @@ namespace Player
             _ghostIcon.style.visibility = Visibility.Hidden;
             _draggedSlot = null;
             UpdateInventory();
+        }
+
+        [Serializable]
+        public class ShipInfo
+        {
+            public Sprite shipSprite;
+            public string shipName;
+        }
+
+        [Serializable]
+        public class WeaponInfo
+        {
+            public Sprite weaponSprite;
+            public string weaponName;
         }
     }
 }
