@@ -58,7 +58,9 @@ namespace Objects
         private Asteroid CreateAsteroid()
         {
             var asteroid = Instantiate(asteroidPrefabs[Random.Range(0, asteroidPrefabs.Count)]);
-            asteroid.SetPossibleDrops(possibleDrops);
+            asteroid.gameObject.SetActive(false);
+            var onDeath = asteroid.GetComponent<DropOnDeath>();
+            if (onDeath) onDeath.possibleDrops = possibleDrops;
             asteroid.SetPool(_asteroidPool);
             return asteroid;
         }

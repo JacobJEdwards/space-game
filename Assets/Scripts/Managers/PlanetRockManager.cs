@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Objects;
 using PlanetarySystem.Planet;
@@ -11,14 +10,16 @@ namespace Managers
     public class PlanetRockManager : MonoBehaviour
     {
         private Planet _planet;
-        private readonly List<GameObject> _activeRocks = new ();
-        private readonly Dictionary<GameObject, IObjectPool<GameObject>> _rockPools = new ();
-        private readonly Dictionary<GameObject, Vector3> _rockPositions = new ();
+        private readonly List<Rock> _activeRocks = new ();
+        private readonly Dictionary<Rock, IObjectPool<Rock>> _rockPools = new ();
+        private readonly Dictionary<Rock, Vector3> _rockPositions = new ();
         private Transform _playerTransform;
+        private Vector3 _lastUpdatePosition;
 
         [SerializeField] private float spawnRadius = 1000f;
         [SerializeField] private float despawnRadius = 1200f;
         [SerializeField] private float checkInterval = 1f;
+        [SerializeField] private float distanceCheck = 50f;
 
         private float _nextCheckTime;
 
@@ -26,13 +27,21 @@ namespace Managers
         {
             _planet = GetComponent<Planet>();
             _playerTransform = GameObject.FindWithTag("Player").transform;
+            _lastUpdatePosition = _playerTransform.position;
         }
 
         private void Update()
         {
             if (Time.time < _nextCheckTime) return;
 
-            UpdateRockVisibility();
+            var distanceMoved = Vector3.Distance(_playerTransform.position, _lastUpdatePosition);
+
+            if (distanceMoved >= distanceCheck)
+            {
+                UpdateRockVisibility();
+                _lastUpdatePosition = _playerTransform.position;
+            }
+
             _nextCheckTime = Time.time + checkInterval;
         }
 
@@ -49,11 +58,11 @@ namespace Managers
                 var heightAtPoint = _planet.ShapeGenerator.GetScaledElevation(
                     _planet.ShapeGenerator.CalculateUnscaledElevation(pos)
                 );
-                pos *= heightAtPoint;
+                pos *= heightAtPoint * 1.1f;
 
                 var rockPool = RockSpawner.Instance.GetPoolForPrefab(rockPrefab);
                 var rock = rockPool.Get();
-                rock.SetActive(false);
+                rock.gameObject.SetActive(false);
                 _rockPositions.Add(rock, pos);
                 _rockPools.Add(rock, rockPool);
             }
@@ -62,6 +71,7 @@ namespace Managers
         private void UpdateRockVisibility()
         {
             var planetWorldPos = _planet.transform.position;
+
             var playerDistance = Vector3.Distance(_playerTransform.position, planetWorldPos);
 
             if (playerDistance > despawnRadius)
@@ -70,40 +80,36 @@ namespace Managers
                 return;
             }
 
-            if (playerDistance < spawnRadius)
+            if (!(playerDistance < spawnRadius)) return;
+
+            foreach (var (rock, rockPos) in _rockPositions)
             {
-                foreach (var rockData in _rockPositions)
+                var rockWorldPos = rockPos + planetWorldPos;
+                var distance = Vector3.Distance(_playerTransform.position, rockWorldPos);
+
+                if (distance < spawnRadius && !rock.gameObject.activeSelf)
                 {
-                    var rock = rockData.Key;
-                    var rockPos = rockData.Value;
-                    var rockWorldPos = rockPos + planetWorldPos;
-
-                    var distance = Vector3.Distance(_playerTransform.position, rockWorldPos);
-
-                    if (distance < spawnRadius && !rock.activeSelf)
-                    {
-                        SpawnRock(rock, rockPos);
-                    }
-                    else if (distance > despawnRadius && rock.activeSelf)
-                    {
-                        DespawnRock(rock);
-                    }
+                    SpawnRock(rock, rockPos);
+                }
+                else if (distance > despawnRadius && rock.gameObject.activeSelf)
+                {
+                    DespawnRock(rock);
                 }
             }
         }
 
-        private void SpawnRock(GameObject rock, Vector3 rockPos)
+        private void SpawnRock(Rock rock, Vector3 rockPos)
         {
             rock.transform.parent = _planet.transform;
-            rock.SetActive(true);
+            rock.gameObject.SetActive(true);
             rock.transform.localPosition = rockPos;
             rock.transform.localScale = Vector3.one * Random.Range(2f, 10f);
             rock.transform.rotation = Random.rotation;
-            rock.SetActive(true);
+            rock.gameObject.SetActive(true);
             _activeRocks.Add(rock);
         }
 
-        private void DespawnRock(GameObject rock)
+        private void DespawnRock(Rock rock)
         {
             _rockPools[rock].Release(rock);
             _activeRocks.Remove(rock);
@@ -121,6 +127,20 @@ namespace Managers
         private void OnDestroy()
         {
             DespawnAllRocks();
+        }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, spawnRadius);
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position, despawnRadius);
+
+            foreach (var (_, rockPos) in _rockPositions)
+            {
+                Gizmos.color = Color.gray;
+                Gizmos.DrawWireSphere(rockPos + transform.position, 10f);
+            }
         }
     }
 }

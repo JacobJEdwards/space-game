@@ -76,11 +76,9 @@ namespace PlanetarySystem
 
             planet.hasWater = _random.NextDouble() < _settings.waterChance;
             planet.numRocks = _random.Next(0, 40);
+            planet.hasLife = _random.NextDouble() < 0.5f;
 
             planet.GeneratePlanet();
-
-            if (_random.NextDouble() < 0.5)
-                planet.GenerateLife();
         }
 
         private ShapeSettings.NoiseLayer GenerateBaseNoiseLayer()

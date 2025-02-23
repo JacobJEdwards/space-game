@@ -73,7 +73,7 @@ namespace Weapons
 
         private void MaybeDamageTarget(RaycastHit hit)
         {
-            if (hit.collider.gameObject.layer != (int)Layers.Shootable) return;
+            // if (hit.collider.gameObject.layer != (int)Layers.Shootable) return;
 
             if (hit.collider.transform.GetComponent<IDamageable>() is { } damageable)
             {

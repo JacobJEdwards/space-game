@@ -8,6 +8,7 @@ using Random = UnityEngine.Random;
 
 namespace Objects
 {
+    [RequireComponent(typeof(Health), typeof(Rigidbody), typeof(DropOnDeath))]
     public class Asteroid : MonoBehaviour, IPoolable<Asteroid>
     {
         [SerializeField] private GameObject rock;
@@ -16,9 +17,6 @@ namespace Objects
         public Rigidbody rb;
         [CanBeNull] private IObjectPool<Asteroid> _asteroidPool;
         private Fracture _fracture;
-
-        [SerializeField]
-        private List<GameObject> possibleDrops;
 
         private void Awake()
         {
@@ -45,11 +43,6 @@ namespace Objects
             _asteroidPool = pool;
         }
 
-        public void SetPossibleDrops(List<GameObject> drops)
-        {
-            possibleDrops = drops;
-        }
-
         private void OnDie()
         {
             Explode();
@@ -63,13 +56,6 @@ namespace Objects
             else Destroy(gameObject);
 
             health.Reset();
-
-            var resourceIndex = Random.Range(0, possibleDrops.Count);
-            var possibleDrop = possibleDrops[resourceIndex];
-            for (var i = 0; i < Random.Range(1, 3); i++)
-            {
-                Instantiate(possibleDrop, transform.position + Random.insideUnitSphere, Random.rotation);
-            }
         }
     }
 }

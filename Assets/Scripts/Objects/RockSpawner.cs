@@ -1,10 +1,7 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using Interfaces;
 using UnityEngine;
 using UnityEngine.Pool;
-using Random = UnityEngine.Random;
 
 namespace Objects
 {
@@ -26,9 +23,9 @@ namespace Objects
             }
         }
 
-        private Dictionary<GameObject, IObjectPool<GameObject>> _rockPools = new();
+        private readonly Dictionary<Rock, IObjectPool<Rock>> _rockPools = new();
         private Transform _poolContainer;
-        private List<GameObject> _activeRocks = new();
+        private readonly List<Rock> _activeRocks = new();
 
         private void Awake()
         {
@@ -43,12 +40,12 @@ namespace Objects
             _poolContainer.parent = transform;
         }
 
-        public IObjectPool<GameObject> GetPoolForPrefab(GameObject prefab)
+        public IObjectPool<Rock> GetPoolForPrefab(Rock prefab)
         {
             if (_rockPools.TryGetValue(prefab, out var forPrefab))
                 return forPrefab;
 
-            var pool = new ObjectPool<GameObject>(
+            var pool = new ObjectPool<Rock>(
                 createFunc: () => CreateRock(prefab),
                 actionOnGet: GetRockFromPool,
                 actionOnRelease: ReleaseRock,
@@ -61,27 +58,28 @@ namespace Objects
             return pool;
         }
 
-        private GameObject CreateRock(GameObject prefab)
+        private Rock CreateRock(Rock prefab)
         {
             var rock = Instantiate(prefab, _poolContainer);
-            rock.SetActive(false);
+            rock.gameObject.SetActive(false);
+            rock.SetPool(GetPoolForPrefab(prefab));
             return rock;
         }
 
-        private void GetRockFromPool(GameObject rock)
+        private void GetRockFromPool(Rock rock)
         {
-            rock.SetActive(true);
+            rock.gameObject.SetActive(true);
             _activeRocks.Add(rock);
         }
 
-        private void ReleaseRock(GameObject rock)
+        private void ReleaseRock(Rock rock)
         {
             rock.transform.parent = _poolContainer;
-            rock.SetActive(false);
+            rock.gameObject.SetActive(false);
             _activeRocks.Remove(rock);
         }
 
-        private void DestroyRock(GameObject rock)
+        private void DestroyRock(Rock rock)
         {
             Destroy(rock);
         }

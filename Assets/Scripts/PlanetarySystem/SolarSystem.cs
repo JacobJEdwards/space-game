@@ -62,6 +62,7 @@ namespace PlanetarySystem
                 {
                     planet = planetObj.AddComponent<Planet.Planet>();
                 }
+
                 _planetGenerator.GeneratePlanet(planet);
 
                 var position = new Vector3(

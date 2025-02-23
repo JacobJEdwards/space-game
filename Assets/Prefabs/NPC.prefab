@@ -45,8 +45,8 @@ GameObject:
   - component: {fileID: 7885794070665261163}
   - component: {fileID: 847266856017484266}
   - component: {fileID: 8980207639587933587}
-  - component: {fileID: 4919417476869430511}
   - component: {fileID: 2835397966967939697}
+  - component: {fileID: 7866805020946256775}
   m_Layer: 6
   m_Name: NPC
   m_TagString: Untagged
@@ -186,35 +186,6 @@ CapsuleCollider:
   m_Height: 5
   m_Direction: 1
   m_Center: {x: 0, y: 2.5, z: 0}
---- !u!114 &4919417476869430511
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7670075372788274160}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 96169c9e5f1b48679d39936629493a4c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  activationDistance: 50
-  behaviorUpdateInterval: 0.5
-  idleWanderRadius: 10
-  pointOfInterestRadius: 15
-  lookAtDuration: 2
-  pointsOfInterestLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  neighborRadius: 5
-  separationWeight: 1.5
-  alignmentWeight: 1
-  cohesionWeight: 1
-  obstacleDetectionRange: 3
-  obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 16
-  avoidanceWeight: 2
 --- !u!114 &2835397966967939697
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -234,6 +205,18 @@ MonoBehaviour:
   onDeath:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7866805020946256775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7670075372788274160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3cecc8f2ecd43eaa344763d9fcabeb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1219694820205860700
 PrefabInstance:
   m_ObjectHideFlags: 0

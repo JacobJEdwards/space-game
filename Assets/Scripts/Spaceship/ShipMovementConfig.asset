@@ -19,11 +19,13 @@ MonoBehaviour:
   thrust: 100
   upThrust: 50
   strafeThrust: 50
-  thrustGlideReduction: 0.99
-  upDownGlideReduction: 0.99
-  leftRightGlideReduction: 0.99
-  maxBoostAmount: 2
+  thrustGlideReduction: 0.126
+  upDownGlideReduction: 0.096
+  leftRightGlideReduction: 0.074
+  maxBoostAmount: 4
   boostDepreciationRate: 0.25
   boostRechargeRate: 0.1
   boostMultiplier: 5
   useCameraDirection: 0
+  rotationSpeed: 10
+  maxSpeed: 100

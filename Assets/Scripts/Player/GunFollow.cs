@@ -1,6 +1,9 @@
 using Unity.Assertions;
 using UnityEngine;
 
+namespace Player
+{
+
 public class GunFollow : MonoBehaviour
 {
     [SerializeField] private Transform head;
@@ -14,4 +17,5 @@ public class GunFollow : MonoBehaviour
 
         gun.SetParent(head);
     }
+}
 }

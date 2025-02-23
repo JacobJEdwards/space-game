@@ -2,6 +2,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+namespace NPC
+{
+
 internal enum NpcState
 {
     Idle,
@@ -13,7 +16,7 @@ internal enum NpcState
 }
 
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Rigidbody), typeof(Life))]
 public class NpcMovement : MonoBehaviour
 {
 
@@ -439,4 +442,5 @@ public class NpcMovement : MonoBehaviour
             Gizmos.DrawLine(transform.position, _wanderTarget);
         }
     }
+}
 }
