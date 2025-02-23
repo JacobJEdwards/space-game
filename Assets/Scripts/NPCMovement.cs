@@ -19,7 +19,7 @@ public class NpcMovement : MonoBehaviour
 
     [Header("References")]
     [SerializeField] public Transform planet;
-    [SerializeField] private Transform target;
+    [SerializeField] public Transform target;
     [SerializeField] private Animator animator;
 
     [Header("Movement Settings")]

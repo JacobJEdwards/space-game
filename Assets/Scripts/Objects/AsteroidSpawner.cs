@@ -18,7 +18,7 @@ namespace Objects
         public int maxAsteroids = 200;
         private readonly List<Asteroid> _activeAsteroids = new(100);
 
-        private ObjectPool<Asteroid> _asteroidPool;
+        private IObjectPool<Asteroid> _asteroidPool;
 
         private void Awake()
         {

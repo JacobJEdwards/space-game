@@ -1,9 +1,19 @@
+using System;
 using PlanetarySystem.Planet;
 using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 
 namespace PlanetarySystem
 {
+    public enum Biome
+    {
+        Ocean,
+        Volcano,
+        Ice,
+        Desert,
+        Forest
+    }
+
     [System.Serializable]
     public class PlanetGenerationSettings
     {
@@ -11,14 +21,7 @@ namespace PlanetarySystem
         public float maxRadius = 120f;
         public float minNoiseScale = 0.3f;
         public float maxNoiseScale = 2f;
-        public float minWaterLevel;
-        public float maxWaterLevel = 1.02f;
         public float waterChance = 0.5f;
-
-        public float volcanoChance = 0.2f;
-        public float iceChance = 0.25f;
-        public float desertChance = 0.3f;
-
         public Material planetMaterial;
     }
 
@@ -26,10 +29,12 @@ namespace PlanetarySystem
     {
         private readonly PlanetGenerationSettings _settings;
         private readonly System.Random _random;
+        private readonly Transform _player;
 
-        public PlanetGenerator(PlanetGenerationSettings settings, int seed)
+        public PlanetGenerator(PlanetGenerationSettings settings, int seed, Transform player)
         {
             _settings = settings;
+            _player = player;
             _random = new System.Random(seed);
         }
 
@@ -46,7 +51,9 @@ namespace PlanetarySystem
             colourSettings.oceanColour = CreateGradient(Color.blue, Color.cyan, Color.white);
             colourSettings.planetMaterial = new Material(_settings.planetMaterial);
 
-            SetPlanetBiome(colourSettings);
+            var biome = GetBiome();
+            planet.biome = biome;
+            SetPlanetBiome(colourSettings, biome);
 
             colourSettings.biomeColourSettings.noise = new NoiseSettings
             {
@@ -63,6 +70,7 @@ namespace PlanetarySystem
                 }
             };
 
+            planet.playerTransform = _player;
             planet.shapeSettings = shapeSettings;
             planet.colourSettings = colourSettings;
 
@@ -70,6 +78,9 @@ namespace PlanetarySystem
             planet.numRocks = _random.Next(0, 40);
 
             planet.GeneratePlanet();
+
+            if (_random.NextDouble() < 0.5)
+                planet.GenerateLife();
         }
 
         private ShapeSettings.NoiseLayer GenerateBaseNoiseLayer()
@@ -121,13 +132,17 @@ namespace PlanetarySystem
             };
         }
 
-        private void SetPlanetBiome(ColourSettings colourSettings)
+        private Biome GetBiome()
         {
-            var biomeRoll = GetRandomFloat(0.0f, 1f);
+            var biomeRoll = _random.Next(0, Enum.GetValues(typeof(Biome)).Length);
+            return (Biome)biomeRoll;
+        }
 
-            if (biomeRoll < _settings.volcanoChance)
+        private void SetPlanetBiome(ColourSettings colourSettings, Biome biome = Biome.Forest)
+        {
+            colourSettings.biomeColourSettings = biome switch
             {
-                colourSettings.biomeColourSettings = new ColourSettings.BiomeColourSettings
+                Biome.Volcano => new ColourSettings.BiomeColourSettings
                 {
                     biomes = new ColourSettings.BiomeColourSettings.Biome[]
                     {
@@ -139,11 +154,8 @@ namespace PlanetarySystem
                             tintPercent = 0.5f
                         }
                     }
-                };
-            }
-            else if (biomeRoll < _settings.volcanoChance + _settings.iceChance)
-            {
-                colourSettings.biomeColourSettings = new ColourSettings.BiomeColourSettings
+                },
+                Biome.Ice => new ColourSettings.BiomeColourSettings
                 {
                     biomes = new ColourSettings.BiomeColourSettings.Biome[]
                     {
@@ -155,11 +167,8 @@ namespace PlanetarySystem
                             tintPercent = 0.5f
                         }
                     }
-                };
-            }
-            else if (biomeRoll < _settings.volcanoChance + _settings.iceChance + _settings.desertChance)
-            {
-                colourSettings.biomeColourSettings = new ColourSettings.BiomeColourSettings
+                },
+                Biome.Desert => new ColourSettings.BiomeColourSettings
                 {
                     biomes = new ColourSettings.BiomeColourSettings.Biome[]
                     {
@@ -171,11 +180,8 @@ namespace PlanetarySystem
                             tintPercent = 0.5f
                         }
                     }
-                };
-            }
-            else
-            {
-                colourSettings.biomeColourSettings = new ColourSettings.BiomeColourSettings
+                },
+                Biome.Forest => new ColourSettings.BiomeColourSettings
                 {
                     biomes = new ColourSettings.BiomeColourSettings.Biome[]
                     {
@@ -187,8 +193,22 @@ namespace PlanetarySystem
                             tintPercent = 0.5f
                         }
                     }
-                };
-            }
+                },
+                Biome.Ocean => new ColourSettings.BiomeColourSettings
+                {
+                    biomes = new ColourSettings.BiomeColourSettings.Biome[]
+                    {
+                        new()
+                        {
+                            gradient = CreateGradient(Color.blue, Color.cyan, Color.white),
+                            startHeight = 0.1f,
+                            tint = Color.blue,
+                            tintPercent = 0.5f
+                        }
+                    }
+                },
+                _ => colourSettings.biomeColourSettings
+            };
         }
 
         private float GetRandomFloat(float min, float max)

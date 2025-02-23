@@ -1,4 +1,5 @@
-﻿using Unity.Serialization;
+﻿using Managers;
+using Unity.Serialization;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -7,31 +8,25 @@ namespace PlanetarySystem.Planet
 {
     public class Planet : MonoBehaviour
     {
-        public enum FaceRenderMask
-        {
-            All,
-            Top,
-            Bottom,
-            Left,
-            Right,
-            Front,
-            Back
-        }
-
         [Range(2, 256)] public int resolution = 10;
         [Range(0, 512)] public int numRocks = 40;
-        public bool autoUpdate = true;
 
-        public FaceRenderMask faceRenderMask = FaceRenderMask.All;
         public PlanetWater waterSystem;
         public Material waterMaterial;
 
-        public bool hasWater;
+        public Transform playerTransform;
 
-        [DontSerialize]
-        public ShapeSettings shapeSettings;
-        [DontSerialize]
-        public ColourSettings colourSettings;
+        public bool hasWater;
+        public Biome biome;
+
+        [SerializeField]
+        private float rockSpawnRadius = 800f;
+
+        [SerializeField]
+        private float rockCheckInterval = 1f;
+
+        [DontSerialize] public ShapeSettings shapeSettings;
+        [DontSerialize] public ColourSettings colourSettings;
 
         [SerializeField] public GameObject[] rockPrefabs;
         private GameObject[] _activeRocks;
@@ -39,26 +34,35 @@ namespace PlanetarySystem.Planet
         [HideInInspector] public bool shapeSettingsFoldout;
         [HideInInspector] public bool colourSettingsFoldout;
 
-        [DontSerialize]
-        private MeshFilter[] _meshFilters;
+        [DontSerialize] private MeshFilter[] _meshFilters;
 
-        [DontSerialize]
-        private TerrainFace[] _terrainFaces;
+        [DontSerialize] private TerrainFace[] _terrainFaces;
+
+        private GameObject _meshContainer;
 
         private GameObject _atmosphere;
-        private readonly ColourGenerator _colourGenerator = new();
 
-        private readonly ShapeGenerator _shapeGenerator = new();
+        public readonly ColourGenerator ColourGenerator = new();
+        public readonly ShapeGenerator ShapeGenerator = new();
 
-        private void Start()
-        {
-            GeneratePlanet();
-        }
+        public GameObject[] lifePrefabs;
+
+        [SerializeField] private PlanetRockManager rockManager;
 
         private void Initialize()
         {
-            _shapeGenerator.UpdateSettings(shapeSettings);
-            _colourGenerator.UpdateSettings(colourSettings);
+            ShapeGenerator.UpdateSettings(shapeSettings);
+            ColourGenerator.UpdateSettings(colourSettings);
+
+            _meshContainer = new GameObject("PlanetMesh")
+            {
+                transform =
+                {
+                    parent = transform,
+                    position = transform.position
+                },
+                layer = (int)Layers.PlanetSurface
+            };
 
             if (_meshFilters == null || _meshFilters.Length == 0) _meshFilters = new MeshFilter[6];
 
@@ -75,6 +79,7 @@ namespace PlanetarySystem.Planet
                     {
                         transform =
                         {
+                            // parent = _meshContainer.transform,
                             parent = transform,
                             position = transform.position
                         }
@@ -82,30 +87,23 @@ namespace PlanetarySystem.Planet
 
                     meshObj.AddComponent<MeshRenderer>();
                     _meshFilters[i] = meshObj.AddComponent<MeshFilter>();
-                    _meshFilters[i].sharedMesh = new Mesh();
+                    var mesh = new Mesh
+                    {
+                        name = $"PlanetMesh_{i}"
+                    };
+                    _meshFilters[i].sharedMesh = mesh;
                 }
 
                 _meshFilters[i].GetComponent<MeshRenderer>().sharedMaterial = colourSettings.planetMaterial;
-                var meshCollider = _meshFilters[i].GetComponent<MeshCollider>();
-                if (!meshCollider)
-                {
-                    meshCollider = _meshFilters[i].gameObject.AddComponent<MeshCollider>();
-                }
 
-                meshCollider.sharedMesh = _meshFilters[i].sharedMesh;
-
-
-                _terrainFaces[i] = new TerrainFace(_shapeGenerator, _meshFilters[i].sharedMesh, resolution, directions[i]);
-
-                var renderFace = faceRenderMask == FaceRenderMask.All || (int) faceRenderMask - 1 == i;
-                _meshFilters[i].gameObject.SetActive(renderFace);
-                _meshFilters[i].gameObject.layer = (int) Layers.PlanetSurface;
+                _terrainFaces[i] =
+                    new TerrainFace(ShapeGenerator, _meshFilters[i].sharedMesh, resolution, directions[i]);
+                _meshFilters[i].gameObject.layer = (int)Layers.PlanetSurface;
 
             }
 
-            gameObject.layer = (int) Layers.PlanetSurface;
+            gameObject.layer = (int)Layers.PlanetSurface;
         }
-
 
         public void GeneratePlanet()
         {
@@ -115,6 +113,35 @@ namespace PlanetarySystem.Planet
             GenerateAtmosphere();
             if (hasWater) GenerateWater();
             GenerateRocks();
+
+            foreach (var meshFilter in _meshFilters)
+            {
+                var col = meshFilter.gameObject.AddComponent<MeshCollider>();
+                col.sharedMesh = meshFilter.sharedMesh;
+            }
+        }
+
+        // TODO, make better
+        public void GenerateLife()
+        {
+            if (lifePrefabs.Length == 0) return;
+
+            for (var i = 0; i < 10; i++)
+            {
+                var prefab = lifePrefabs[Random.Range(0, lifePrefabs.Length)];
+                var pos = Random.onUnitSphere;
+                var heightAtPoint = ShapeGenerator.GetScaledElevation(ShapeGenerator.CalculateUnscaledElevation(pos));
+                pos *= heightAtPoint * 1.1f;
+
+                var life = Instantiate(prefab, pos, Quaternion.identity);
+                life.transform.parent = transform;
+                life.transform.localScale = Vector3.one * Random.Range(0.5f, 1.5f);
+                life.transform.position += transform.position;
+
+                var controller = life.GetComponent<NpcMovement>();
+                controller.planet = transform;
+                controller.target = playerTransform;
+            }
         }
 
         // WATER IS CIRCULAR
@@ -151,7 +178,7 @@ namespace PlanetarySystem.Planet
 
 
             var sphere = _atmosphere.AddComponent<SphereCollider>();
-            sphere.radius = shapeSettings.planetRadius * 1.5f;
+            sphere.radius = shapeSettings.planetRadius * 1.8f;
             sphere.isTrigger = true;
 
             _atmosphere.layer = (int)Layers.Atmosphere;
@@ -159,43 +186,21 @@ namespace PlanetarySystem.Planet
 
         private void GenerateRocks()
         {
-            if (_activeRocks != null)
+            if (_activeRocks != null) {
                 foreach (var rock in _activeRocks)
                     Destroy(rock);
-
-            _activeRocks = new GameObject[numRocks];
-
-            for (var i = 0; i < numRocks; i++)
-            {
-                // doesnt work ??
-                var rock = Instantiate(rockPrefabs[Random.Range(0, rockPrefabs.Length)], transform);
-                var pos = Random.onUnitSphere;
-
-                // find position on surface based on mesh
-                var heightAtPoint = _shapeGenerator.GetScaledElevation(_shapeGenerator.CalculateUnscaledElevation(pos));
-                pos *= heightAtPoint;
-
-                rock.transform.localPosition = pos;
-                rock.transform.localScale = Vector3.one * Random.Range(2f, 10f);
-                rock.transform.rotation = Random.rotation;
-                _activeRocks[i] = rock;
+                _activeRocks = null;
             }
-        }
 
-        public void OnShapeSettingsUpdated()
-        {
-            if (!autoUpdate) return;
+            if (rockPrefabs.Length == 0) return;
+            if (numRocks == 0) return;
 
-            Initialize();
-            GenerateMesh();
-        }
+            if (!rockManager)
+            {
+                rockManager = gameObject.AddComponent<PlanetRockManager>();
+            }
 
-        public void OnColourSettingsUpdated()
-        {
-            if (!autoUpdate) return;
-
-            Initialize();
-            GenerateColours();
+            rockManager.GenerateRockPositions();
         }
 
         private void GenerateMesh()
@@ -204,15 +209,15 @@ namespace PlanetarySystem.Planet
                 if (_meshFilters[i].gameObject.activeSelf)
                     _terrainFaces[i].ConstructMesh();
 
-            _colourGenerator.UpdateElevation(_shapeGenerator.ElevationMinMax);
+            ColourGenerator.UpdateElevation(ShapeGenerator.ElevationMinMax);
         }
 
         private void GenerateColours()
         {
-            _colourGenerator.UpdateColours();
+            ColourGenerator.UpdateColours();
             for (var i = 0; i < 6; i++)
                 if (_meshFilters[i].gameObject.activeSelf)
-                    _terrainFaces[i].UpdateUVs(_colourGenerator);
+                    _terrainFaces[i].UpdateUVs(ColourGenerator);
         }
     }
 }

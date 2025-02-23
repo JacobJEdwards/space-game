@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4110372195919071009}
   - component: {fileID: 2221597234033060044}
+  - component: {fileID: -8072175513796385072}
   m_Layer: 9
   m_Name: Planet
   m_TagString: Untagged
@@ -46,123 +47,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   resolution: 10
   numRocks: 100
-  autoUpdate: 1
-  faceRenderMask: 0
   waterSystem: {fileID: 0}
   waterMaterial: {fileID: 2100000, guid: 8538bd626cb3e80478f62e319f75e337, type: 2}
+  hasWater: 0
+  biome: 0
+  rockSpawnRadius: 800
+  rockCheckInterval: 1
   shapeSettings: {fileID: 11400000, guid: bb563e90654574d4cb7d931456630f79, type: 2}
   colourSettings: {fileID: 11400000, guid: 4d2914748ff1c4089acd77328cfcb02e, type: 2}
   rockPrefabs:
   - {fileID: 110610, guid: 75283e9ef15245c4aab126ec6525dd2a, type: 3}
-  activeRocks:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
   shapeSettingsFoldout: 0
   colourSettingsFoldout: 0
-  meshFilters:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  terrainFaces: []
-  atmosphere: {fileID: 0}
+  lifePrefabs:
+  - {fileID: 7670075372788274160, guid: 0c45c204bda6b4c98bd14bf60b142b7d, type: 3}
+  rockManager: {fileID: -8072175513796385072}
+--- !u!114 &-8072175513796385072
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225937356025052187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bdb72ef54b34f56b9493bb0336f55a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnRadius: 1000
+  despawnRadius: 1200
+  checkInterval: 1

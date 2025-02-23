@@ -93,17 +93,15 @@ namespace PlanetarySystem.Planet
     {
         [Range(2, 256)] public int resolution = 30;
         public float waterLevel = 1.02f;
+
         private Transform _planetTransform;
         private WaterFace[] _waterFaces;
-
         private Material _waterMaterial;
-
         private MeshFilter[] _waterMeshFilters;
 
         private void Initialise(ShapeSettings planetShapeSettings)
         {
-            if (_waterMeshFilters == null || _waterMeshFilters.Length == 0) _waterMeshFilters = new MeshFilter[6];
-
+            _waterMeshFilters = new MeshFilter[6];
             _waterFaces = new WaterFace[6];
 
             Vector3[] directions =
@@ -118,24 +116,18 @@ namespace PlanetarySystem.Planet
                         transform =
                         {
                             parent = transform,
-                            position = transform.position
+                            localPosition = Vector3.zero
                         }
                     };
 
-                    meshObj.AddComponent<MeshRenderer>();
+                    var render = meshObj.AddComponent<MeshRenderer>();
                     _waterMeshFilters[i] = meshObj.AddComponent<MeshFilter>();
                     _waterMeshFilters[i].sharedMesh = new Mesh();
+                    // meshObj.AddComponent<LowPolyWater.LowPolyWater>(); - causes it to be circular, fix later
 
-                    var col = meshObj.AddComponent<SphereCollider>();
-                    col.radius = planetShapeSettings.planetRadius * waterLevel;
-                    col.isTrigger = true;
-                    col.gameObject.layer = (int)Layers.Water;
-
-                    meshObj.AddComponent<WaterPhysics>();
-                    meshObj.AddComponent<LowPolyWater.LowPolyWater>();
+                    render.sharedMaterial = _waterMaterial;
                 }
 
-                _waterMeshFilters[i].GetComponent<MeshRenderer>().sharedMaterial = _waterMaterial;
                 _waterFaces[i] = new WaterFace(_waterMeshFilters[i].sharedMesh, resolution, directions[i],
                     planetShapeSettings.planetRadius * waterLevel);
             }
@@ -143,6 +135,12 @@ namespace PlanetarySystem.Planet
 
         public void GenerateWater(ShapeSettings planetShapeSettings, Material waterMaterial)
         {
+            var mainCollider = gameObject.AddComponent<SphereCollider>();
+            mainCollider.radius = planetShapeSettings.planetRadius * waterLevel;
+            mainCollider.isTrigger = true;
+            mainCollider.gameObject.layer = (int)Layers.Water;
+            mainCollider.AddComponent<WaterPhysics>();
+
             _waterMaterial = waterMaterial;
             Initialise(planetShapeSettings);
             GenerateWaterMesh();
@@ -150,7 +148,10 @@ namespace PlanetarySystem.Planet
 
         private void GenerateWaterMesh()
         {
-            foreach (var waterFace in _waterFaces) waterFace.ConstructMesh();
+            foreach (var waterFace in _waterFaces)
+            {
+                waterFace.ConstructMesh();
+            }
         }
     }
 }

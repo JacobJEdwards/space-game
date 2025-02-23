@@ -6383,12 +6383,9 @@ MonoBehaviour:
     maxRadius: 120
     minNoiseScale: 0.3
     maxNoiseScale: 1
-    minWaterLevel: 0
-    maxWaterLevel: 1.02
-    volcanoChance: 0.2
-    iceChance: 0.25
-    desertChance: 0.3
+    waterChance: 0.5
     planetMaterial: {fileID: -876546973899608171, guid: 6830c3c5382349447ac5db3934cefde3, type: 3}
+  planets: []
   planetAmount: 5
   seed: 12345
   minOrbitRadius: 2000

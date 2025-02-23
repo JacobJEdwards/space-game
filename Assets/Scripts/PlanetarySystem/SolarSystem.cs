@@ -30,12 +30,11 @@ namespace PlanetarySystem
             skyMaterial.SetColor(ColorB, Color.HSVToRGB(0.5f, 0.27f, 0.3f));
             RenderSettings.fogColor = Color.HSVToRGB(0.5f, 0.35f, 0.47f);
 
-            _planetGenerator = new PlanetGenerator(planetGenerationSettings, seed);
+            _planetGenerator = new PlanetGenerator(planetGenerationSettings, seed, player);
         }
 
         private void Start()
         {
-            starsBackground.transform.parent = player;
             starsBackground.Play();
 
             GeneratePlanetSystem();
@@ -43,7 +42,7 @@ namespace PlanetarySystem
 
         private void LateUpdate()
         {
-            // starsBackground.transform.position = player.position;
+            starsBackground.transform.position = player.position;
         }
 
         private void GeneratePlanetSystem()

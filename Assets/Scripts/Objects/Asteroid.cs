@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using Interfaces;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Pool;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace Objects
@@ -16,7 +14,7 @@ namespace Objects
         public Health health;
 
         public Rigidbody rb;
-        [CanBeNull] private ObjectPool<Asteroid> _asteroidPool;
+        [CanBeNull] private IObjectPool<Asteroid> _asteroidPool;
         private Fracture _fracture;
 
         [SerializeField]
@@ -42,7 +40,7 @@ namespace Objects
             health.TakeDamage(other.relativeVelocity.magnitude);
         }
 
-        public void SetPool(ObjectPool<Asteroid> pool)
+        public void SetPool(IObjectPool<Asteroid> pool)
         {
             _asteroidPool = pool;
         }
