@@ -1,4 +1,7 @@
+#nullable enable
+
 using Movement;
+using Unity.Assertions;
 using UnityEngine;
 using Weapons;
 
@@ -11,12 +14,11 @@ namespace Player
         [SerializeField] private float laserCoolRate = 2f;
 
         private bool _firing;
-        private InputManager _inputManager;
 
-        private LaserFire[] _lasers;
+        private InputManager _inputManager = null!;
+        private LaserFire[] _lasers = null!;
 
         private bool _overheated;
-        private PlayerController _playerController;
 
         private bool _targetInRange;
 
@@ -25,13 +27,15 @@ namespace Player
 
         private void Start()
         {
-            _playerController = GetComponent<PlayerController>();
             LaserCharge = laserMaxCharge;
             _lasers = GetComponentsInChildren<LaserFire>(true);
-            _inputManager = FindFirstObjectByType<InputManager>();
+            _inputManager = InputManager.Instance;
 
             _inputManager.SetOnShootPressed(OnFire);
             _inputManager.SetOnShootRelease(OnFireRelease);
+
+            Assert.IsNotNull(_inputManager, "InputManager is not set!");
+            Assert.IsNotNull(_lasers, "Lasers are not set!");
         }
 
         private void Update()

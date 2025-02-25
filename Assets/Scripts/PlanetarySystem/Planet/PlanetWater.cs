@@ -1,3 +1,5 @@
+#nullable enable
+
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -94,10 +96,9 @@ namespace PlanetarySystem.Planet
         [Range(2, 256)] public int resolution = 30;
         public float waterLevel = 1.02f;
 
-        private Transform _planetTransform;
-        private WaterFace[] _waterFaces;
-        private Material _waterMaterial;
-        private MeshFilter[] _waterMeshFilters;
+        private WaterFace[] _waterFaces = null!;
+        private Material _waterMaterial = null!;
+        private MeshFilter[] _waterMeshFilters = null!;
 
         private void Initialise(ShapeSettings planetShapeSettings)
         {

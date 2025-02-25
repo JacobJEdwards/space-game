@@ -1,35 +1,40 @@
+#nullable enable
+
 using System;
 using Interfaces;
+using Unity.Assertions;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class Health : MonoBehaviour, IDamageable
 {
-    [Header("Config")] [SerializeField] public HealthConfig config;
+    [Header("Config")] [SerializeField] public HealthConfig config = null!;
 
-    public UnityEvent<float> onHealthChanged;
-    public UnityEvent onDeath;
+    public UnityEvent<float> onHealthChanged = new();
+    public UnityEvent onDeath = new();
 
-    private float _currentHealth;
+    public float CurrentHealth { get; private set; }
+    public float MaxHealth => config.MaxHealth;
     private float _timeSinceLastDamage;
 
     public void Reset()
     {
-        _currentHealth = config.MaxHealth;
+        CurrentHealth = config.MaxHealth;
     }
 
     private void Start()
     {
-        _currentHealth = config.MaxHealth;
+        Assert.IsNotNull(config, "Health config is not set!");
+        CurrentHealth = config.MaxHealth;
     }
 
     private void FixedUpdate()
     {
-        if (_currentHealth <= 0) Die();
+        if (CurrentHealth <= 0) Die();
 
         if (_timeSinceLastDamage >= config.TimeToHeal)
         {
-            _currentHealth = Mathf.Clamp(_currentHealth + config.HealRate, 0, config.MaxHealth);
+            CurrentHealth = Mathf.Clamp(CurrentHealth + config.HealRate, 0, config.MaxHealth);
             _timeSinceLastDamage = 0;
         }
         else
@@ -40,15 +45,15 @@ public class Health : MonoBehaviour, IDamageable
 
     public void TakeDamage(float damage)
     {
-        _currentHealth = Mathf.Clamp(_currentHealth - damage, 0, config.MaxHealth);
+        CurrentHealth = Mathf.Clamp(CurrentHealth - damage, 0, config.MaxHealth);
         _timeSinceLastDamage = 0;
-        onHealthChanged.Invoke(_currentHealth);
+        onHealthChanged.Invoke(CurrentHealth);
     }
 
     public void Heal(float healAmount)
     {
-        _currentHealth = Mathf.Clamp(_currentHealth + healAmount, 0, config.MaxHealth);
-        onHealthChanged.Invoke(_currentHealth);
+        CurrentHealth = Mathf.Clamp(CurrentHealth + healAmount, 0, config.MaxHealth);
+        onHealthChanged.Invoke(CurrentHealth);
     }
 
     private void Die()
@@ -65,7 +70,6 @@ public class Health : MonoBehaviour, IDamageable
         [SerializeField] private float healRate = 1f;
 
         [SerializeField] private float timeToHeal = 10f;
-
 
         public float MaxHealth => maxHealth;
         public float HealRate => healRate;

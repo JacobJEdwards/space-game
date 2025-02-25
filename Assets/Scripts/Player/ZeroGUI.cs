@@ -1,6 +1,9 @@
+#nullable enable
+
 using Interfaces;
 using Managers;
 using Microlight.MicroBar;
+using Unity.Assertions;
 using UnityEngine;
 
 namespace Player
@@ -8,19 +11,23 @@ namespace Player
     public class ZeroGUI : MonoBehaviour, IUIPanel
     {
         [Header("ZeroG Settings")] [SerializeField]
-        private Oxygen oxygen;
+        private Oxygen oxygen = null!;
 
-        [SerializeField] private OxygenConfig playerOxygenConfig;
+        [SerializeField] private OxygenConfig playerOxygenConfig = null!;
 
         [Header("UI Settings")] [SerializeField]
-        private MicroBar oxygenUI;
+        private MicroBar oxygenUI = null!;
 
-        [SerializeField] private UiManager uiManager;
+        [SerializeField] private UiManager uiManager = null!;
 
         private bool _zeroGUIActive;
 
         private void Start()
         {
+            Assert.IsNotNull(oxygen, "Oxygen is not assigned");
+            Assert.IsNotNull(playerOxygenConfig, "Oxygen config is not assigned");
+            Assert.IsNotNull(oxygenUI, "Oxygen UI is not assigned");
+
             oxygenUI.Initialize(playerOxygenConfig.MaxOxygen);
             uiManager.RegisterPanel(this);
             uiManager.TransitionToState(UIState.ZeroG);

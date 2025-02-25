@@ -1,22 +1,20 @@
-using System.Collections.Generic;
+#nullable enable
 using Interfaces;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Pool;
-using Random = UnityEngine.Random;
 
 namespace Objects
 {
     [RequireComponent(typeof(Health), typeof(Rigidbody), typeof(DropOnDeath))]
     public class Asteroid : MonoBehaviour, IPoolable<Asteroid>
     {
-        [SerializeField] private GameObject rock;
-        public Health health;
+        [SerializeField] private GameObject rock = null!;
+        public Health health = null!;
 
-        public Rigidbody rb;
-        [CanBeNull] private IObjectPool<Asteroid> _asteroidPool;
-        private Fracture _fracture;
+        public Rigidbody rb = null!;
+        private IObjectPool<Asteroid>? _asteroidPool;
+        private Fracture _fracture = null!;
 
         private void Awake()
         {
@@ -50,7 +48,7 @@ namespace Objects
 
         private void Explode()
         {
-            _fracture?.FractureObject();
+            _fracture.FractureObject();
 
             if (_asteroidPool != null) _asteroidPool.Release(this);
             else Destroy(gameObject);

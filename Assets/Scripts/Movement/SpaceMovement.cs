@@ -1,17 +1,24 @@
+#nullable enable
+
 using System;
 using UnityEngine;
+using Movement.Config;
+using Unity.Assertions;
 
 namespace Movement
 {
+    [RequireComponent(typeof(Rigidbody))]
     public class SpaceMovement : MonoBehaviour
     {
-        [SerializeField] private SpaceMovementConfig config;
-        [SerializeField] private InputManager inputManager;
+        [SerializeField] private SpaceMovementConfig config = null!;
+        private InputManager _inputManager = null!;
+
+        private Animator? _animator;
 
         private float _glide;
         private float _horizontalGlide;
 
-        private Rigidbody _rb;
+        private Rigidbody _rb = null!;
 
         private float _rotationX;
 
@@ -19,14 +26,22 @@ namespace Movement
 
         public float CurrentBoostAmount { get; private set; }
 
+
         private void Start()
         {
+            _inputManager = InputManager.Instance;
             _rb = GetComponent<Rigidbody>();
+            _animator = GetComponentInChildren<Animator>();
+            print(_animator);
 
             CurrentBoostAmount = config.MaxBoostAmount;
 
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+
+            Assert.IsNotNull(config, "Config is not assigned");
+            Assert.IsNotNull(_inputManager, "InputManager is not assigned");
+            Assert.IsNotNull(_rb, "RB is not assigned");
         }
 
         private void FixedUpdate()
@@ -37,7 +52,7 @@ namespace Movement
 
         private void HandleBoosting()
         {
-            if (inputManager.GetBoost() && CurrentBoostAmount > 0f)
+            if (_inputManager.GetBoost() && CurrentBoostAmount > 0f)
             {
                 CurrentBoostAmount -= config.BoostDepreciationRate;
             }
@@ -53,27 +68,36 @@ namespace Movement
             var right = Vector3.right;
             var up = Vector3.up;
 
+            if (forward == Vector3.zero && right == Vector3.zero && up == Vector3.zero)
+            {
+                _animator?.Play("Floating");
+            }
+            else
+            {
+                _animator?.Play("Idle");
+            }
+
             // Roll
-            _rb.AddRelativeTorque(Vector3.back * (inputManager.GetRoll() * config.RollTorque * Time.fixedDeltaTime));
+            _rb.AddRelativeTorque(Vector3.back * (_inputManager.GetRoll() * config.RollTorque * Time.fixedDeltaTime));
 
             // Pitch/Yaw
-            _rb.AddRelativeTorque(Vector3.right * (Math.Clamp(-inputManager.GetPitchYaw().y, -1f, 1f) *
+            _rb.AddRelativeTorque(Vector3.right * (Math.Clamp(-_inputManager.GetPitchYaw().y, -1f, 1f) *
                                                    config.PitchTorque * Time
                                                        .fixedDeltaTime));
 
             // Yaw
-            _rb.AddRelativeTorque(Vector3.up * (Math.Clamp(inputManager.GetPitchYaw().x, -1f, 1f) * config.YawTorque *
+            _rb.AddRelativeTorque(Vector3.up * (Math.Clamp(_inputManager.GetPitchYaw().x, -1f, 1f) * config.YawTorque *
                                                 Time
                                                     .fixedDeltaTime));
 
 
             // Thrust
-            if (Mathf.Abs(inputManager.GetForward()) > 0.1f)
+            if (Mathf.Abs(_inputManager.GetForward()) > 0.1f)
             {
                 var currentThrust = config.Thrust;
-                if (inputManager.GetBoost()) currentThrust *= config.BoostMultiplier;
+                if (_inputManager.GetBoost()) currentThrust *= config.BoostMultiplier;
 
-                _rb.AddRelativeForce(forward * (inputManager.GetForward() * currentThrust * Time.fixedDeltaTime));
+                _rb.AddRelativeForce(forward * (_inputManager.GetForward() * currentThrust * Time.fixedDeltaTime));
 
                 _glide = currentThrust;
             }
@@ -84,10 +108,10 @@ namespace Movement
             }
 
             // Up/Down
-            if (Mathf.Abs(inputManager.GetUpDown()) > 0.1f)
+            if (Mathf.Abs(_inputManager.GetUpDown()) > 0.1f)
             {
-                _rb.AddRelativeForce(up * (inputManager.GetUpDown() * config.UpThrust * Time.fixedDeltaTime));
-                _verticalGlide = inputManager.GetUpDown() * config.UpThrust;
+                _rb.AddRelativeForce(up * (_inputManager.GetUpDown() * config.UpThrust * Time.fixedDeltaTime));
+                _verticalGlide = _inputManager.GetUpDown() * config.UpThrust;
             }
             else
             {
@@ -96,12 +120,12 @@ namespace Movement
             }
 
             // Strafe
-            if (Mathf.Abs(inputManager.GetStrafe()) > 0.1f)
+            if (Mathf.Abs(_inputManager.GetStrafe()) > 0.1f)
             {
                 _rb.AddRelativeForce(right *
-                                     (inputManager.GetStrafe() * config.StrafeThrust * Time.fixedDeltaTime));
+                                     (_inputManager.GetStrafe() * config.StrafeThrust * Time.fixedDeltaTime));
 
-                _horizontalGlide = inputManager.GetStrafe() * config.StrafeThrust;
+                _horizontalGlide = _inputManager.GetStrafe() * config.StrafeThrust;
             }
             else
             {

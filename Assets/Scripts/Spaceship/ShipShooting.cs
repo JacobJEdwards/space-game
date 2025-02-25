@@ -1,9 +1,15 @@
+#nullable enable
+
+using System.Collections.Generic;
+using System.Linq;
 using Movement;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Weapons;
 
 namespace Spaceship
 {
+    [RequireComponent(typeof(ShipController))]
     public class ShipShooting : MonoBehaviour
     {
         [SerializeField] private float laserMaxCharge = 10f;
@@ -11,12 +17,12 @@ namespace Spaceship
         [SerializeField] private float laserCoolRate = 2f;
 
         private bool _firing;
-        private InputManager _inputManager;
+        private InputManager _inputManager = null!;
 
-        private LaserFire[] _lasers;
+        private List<LaserFire> _lasers = new ();
 
         private bool _overheated;
-        private ShipController _shipController;
+        private ShipController _shipController = null!;
 
         private bool _targetInRange;
 
@@ -27,11 +33,15 @@ namespace Spaceship
         {
             _shipController = GetComponent<ShipController>();
             LaserCharge = laserMaxCharge;
-            _lasers = GetComponentsInChildren<LaserFire>(true);
+            _lasers = GetComponentsInChildren<LaserFire>(true).ToList();
             _inputManager = FindFirstObjectByType<InputManager>();
 
             _inputManager.SetOnShootPressed(OnFire);
             _inputManager.SetOnShootRelease(OnFireRelease);
+
+            Assert.IsNotNull(_shipController, "Ship controller is not set!");
+            Assert.IsNotNull(_inputManager, "Input manager is not set!");
+            Assert.IsNotNull(_lasers, "Lasers are not set!");
         }
 
         private void Update()
@@ -96,7 +106,7 @@ namespace Spaceship
             _firing = true;
         }
 
-        public void OnFireRelease()
+        private void OnFireRelease()
         {
             _firing = false;
         }

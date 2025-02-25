@@ -1,3 +1,5 @@
+#nullable enable
+
 using CollectableResources;
 using Player;
 using UnityEngine;
@@ -11,7 +13,7 @@ namespace UI
         private readonly Image _icon;
         private readonly InventoryUI _inventoryUI;
         private readonly Label _nameLabel;
-        private ResourceObject _resource;
+        private ResourceObject? _resource;
 
         public InventorySlot(InventoryUI inventoryUI)
         {
@@ -57,7 +59,7 @@ namespace UI
             _nameLabel.text = string.Empty;
         }
 
-        public ResourceObject GetResource()
+        public ResourceObject? GetResource()
         {
             return _resource;
         }

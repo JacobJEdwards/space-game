@@ -1,7 +1,9 @@
 {
   "dependencies": {
+    "com.coffee.softmask-for-ugui": "3.2.2",
+    "com.nobi.roundedcorners": "3.5.0",
     "com.unity.2d.sprite": "1.0.0",
-    "com.unity.adaptiveperformance": "5.1.1",
+    "com.unity.adaptiveperformance": "5.1.2",
     "com.unity.ai.navigation": "2.0.6",
     "com.unity.burst": "1.8.19",
     "com.unity.charactercontroller": "1.2.4",
@@ -52,9 +54,7 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0",
-    "com.coffee.softmask-for-ugui": "3.2.2",
-    "com.nobi.roundedcorners": "3.5.0"
+    "com.unity.modules.xr": "1.0.0"
   },
   "scopedRegistries": [
     {

@@ -1,3 +1,5 @@
+#nullable enable
+
 using Managers;
 
 namespace Interfaces

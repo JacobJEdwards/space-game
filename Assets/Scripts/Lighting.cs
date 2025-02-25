@@ -1,14 +1,21 @@
+#nullable enable
+
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class Lighting : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    [SerializeField] public Light light1;
-    [SerializeField] public Light light2;
-    [SerializeField] public Light light3;
+    [SerializeField] public Light light1 = null!;
+    [SerializeField] public Light light2 = null!;
+    [SerializeField] public Light light3 = null!;
 
     private void Start()
     {
+        Assert.IsNotNull(light1, "Light1 is not set!");
+        Assert.IsNotNull(light2, "Light2 is not set!");
+        Assert.IsNotNull(light3, "Light3 is not set!");
+
         var shadowCullDistances = new float[32];
         light1.layerShadowCullDistances = light2.layerShadowCullDistances = shadowCullDistances;
 

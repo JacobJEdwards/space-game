@@ -1,13 +1,21 @@
-using UnityEngine;
+#nullable enable
 
+using UnityEngine;
+using UnityEngine.Assertions;
+
+namespace PlanetarySystem
+{
 public class Sun : MonoBehaviour
 {
-    [SerializeField] public ParticleSystem sunCrown;
-    [SerializeField] public ParticleSystem sunPlasma;
+    [SerializeField] public ParticleSystem sunCrown = null!;
+    [SerializeField] public ParticleSystem sunPlasma = null!;
 
     private void Start()
     {
-        var sunParticleColor = Color.HSVToRGB(0.4f, 1, 0.1f);
+        Assert.IsNotNull(sunCrown, "SunCrown is not set!");
+        Assert.IsNotNull(sunPlasma, "SunPlasma is not set!");
+
+        var sunParticleColor = Color.yellow;
         var sunCrownMain = sunCrown.main;
         sunCrownMain.startColor =
             new ParticleSystem.MinMaxGradient(new Color(sunParticleColor.r, sunParticleColor.g, sunParticleColor.b,
@@ -21,4 +29,5 @@ public class Sun : MonoBehaviour
     {
         transform.Rotate(Vector3.up * 0.02f);
     }
+}
 }

@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿#nullable enable
+
+using UnityEditor;
 using UnityEngine;
 
 //Original version of the ConditionalHideAttribute created by Brecht Lecluyse (www.brechtos.com)

@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,30 +14,32 @@ namespace Player
 {
     public class InventoryUI : MonoBehaviour, IUIPanel
     {
-        [SerializeField] private Inventory inventory;
-        [SerializeField] private UiManager uiManager;
+        [SerializeField] private Inventory inventory = null!;
+        [SerializeField] private UiManager uiManager = null!;
 
-        [SerializeField] public ShipInfo currentShip;
-
-        [SerializeField] public WeaponInfo currentWeapon;
+        [SerializeField] public ShipInfo? currentShip;
+        [SerializeField] public WeaponInfo? currentWeapon;
 
         [SerializeField] private int slotsCount = 6;
         private readonly List<InventorySlot> _inventorySlots = new();
-        private InventorySlot _draggedSlot;
-        private VisualElement _ghostIcon;
+        private InventorySlot? _draggedSlot;
+        private VisualElement _ghostIcon = null!;
 
         private bool _isDragging;
 
-        private VisualElement _root;
+        private VisualElement _root = null!;
 
-        private VisualElement _shipIcon;
-        private Label _shipName;
-        private VisualElement _slotsContainer;
-        private VisualElement _weaponIcon;
-        private Label _weaponName;
+        private VisualElement _shipIcon = null!;
+        private Label _shipName = null!;
+        private VisualElement _slotsContainer = null!;
+        private VisualElement _weaponIcon = null!;
+        private Label _weaponName = null!;
 
         private void Awake()
         {
+            Assert.IsNotNull(inventory, "Inventory is not assigned");
+            Assert.IsNotNull(uiManager, "UI Manager is not assigned");
+
             _root = GetComponentInChildren<UIDocument>().rootVisualElement;
             Assert.IsNotNull(_root, "Root is not found");
 
@@ -140,7 +144,7 @@ namespace Player
             _isDragging = true;
             _draggedSlot = slot;
 
-            _ghostIcon.style.backgroundImage = new StyleBackground(slot.GetResource().resourceSprite);
+            _ghostIcon.style.backgroundImage = new StyleBackground(slot.GetResource()?.resourceSprite);
             _ghostIcon.style.display = DisplayStyle.Flex;
             _ghostIcon.style.left = position.x - _ghostIcon.layout.width / 2;
             _ghostIcon.style.top = position.y - _ghostIcon.layout.height / 2;
@@ -166,6 +170,8 @@ namespace Player
             {
                 var draggedResource = _draggedSlot.GetResource();
                 var targetResource = targetSlot.GetResource();
+
+                if (!draggedResource) return;
 
                 if (targetResource)
                 {
@@ -197,15 +203,15 @@ namespace Player
         [Serializable]
         public class ShipInfo
         {
-            public Sprite shipSprite;
-            public string shipName;
+            public Sprite? shipSprite;
+            public string? shipName;
         }
 
         [Serializable]
         public class WeaponInfo
         {
-            public Sprite weaponSprite;
-            public string weaponName;
+            public Sprite? weaponSprite;
+            public string? weaponName;
         }
     }
 }

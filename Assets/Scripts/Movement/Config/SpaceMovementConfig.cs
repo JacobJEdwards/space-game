@@ -1,5 +1,9 @@
+#nullable enable
+
 using UnityEngine;
 
+namespace Movement.Config
+{
 [CreateAssetMenu(fileName = "SpaceMovementConfig", menuName = "Movement/SpaceMovementConfig", order = 1)]
 public class SpaceMovementConfig : MovementConfig
 {
@@ -57,4 +61,5 @@ public class SpaceMovementConfig : MovementConfig
     public float MaxSpeed => maxSpeed;
 
     public bool UseCameraDirection => useCameraDirection;
+}
 }

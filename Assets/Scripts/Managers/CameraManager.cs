@@ -1,3 +1,5 @@
+#nullable enable
+
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -8,7 +10,7 @@ namespace Managers
     {
         private static readonly List<CinemachineCamera> Cameras = new();
 
-        private static CinemachineCamera ActiveCamera { get; set; }
+        private static CinemachineCamera? ActiveCamera { get; set; }
 
         public static bool IsActive(CinemachineCamera cam)
         {
@@ -31,7 +33,7 @@ namespace Managers
                 SetActiveCamera(Cameras.Count > 0 ? Cameras[0] : null);
         }
 
-        public static void SetActiveCamera(CinemachineCamera cam)
+        public static void SetActiveCamera(CinemachineCamera? cam)
         {
             ActiveCamera = cam;
             foreach (var c in Cameras) c.Priority = c == cam ? 10 : 0;

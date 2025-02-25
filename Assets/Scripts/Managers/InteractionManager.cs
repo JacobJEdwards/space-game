@@ -1,3 +1,5 @@
+#nullable enable
+
 using Interfaces;
 using UnityEngine;
 
@@ -7,11 +9,11 @@ namespace Managers
     {
         [SerializeField] private LayerMask interactionLayer;
         [SerializeField] private float interactionRange = 5f;
-        [SerializeField] private UiManager uiManager;
+        [SerializeField] private UiManager? uiManager;
 
-        private IInteractable _currentTarget;
+        private IInteractable? _currentTarget;
 
-        private Camera _mainCamera;
+        private Camera? _mainCamera;
 
         private void Awake()
         {
@@ -30,6 +32,8 @@ namespace Managers
 
         private void HandleInteractionRaycast()
         {
+            if (!_mainCamera || !uiManager) return;
+
             var ray = _mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
             if (Physics.Raycast(ray, out var hit, interactionRange, interactionLayer))

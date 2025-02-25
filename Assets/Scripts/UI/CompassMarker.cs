@@ -1,23 +1,25 @@
-using System;
+#nullable enable
+
 using Managers;
-using Player;
+using Unity.Assertions;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
+namespace UI
+{
 public class CompassMarker : MonoBehaviour
 {
-    public Image markerImage;
+    public Image markerImage = null!;
     private bool IsActive { get; set; }
-    private RectTransform _rectTransform;
+    private RectTransform _rectTransform = null!;
 
     [SerializeField]
-    private Transform player;
+    private Transform player = null!;
 
-    [SerializeField] public Transform worldGameObject;
+    [SerializeField] public Transform worldGameObject = null!;
 
     [SerializeField]
-    public CompassManager compassManager;
+    public CompassManager compassManager = null!;
 
     [SerializeField]
     public float minVisibleDistance = 5f;
@@ -27,6 +29,10 @@ public class CompassMarker : MonoBehaviour
     private void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
+        Assert.IsNotNull(markerImage);
+        Assert.IsNotNull(player);
+        Assert.IsNotNull(worldGameObject);
+        Assert.IsNotNull(compassManager);
     }
 
     public CompassMarker Configure(Transform obj, Color color, Sprite sprite, Transform playerTrans)
@@ -68,23 +74,15 @@ public class CompassMarker : MonoBehaviour
 
     private void Update()
     {
+
         var targetScale = IsActive && worldGameObject ? Vector3.one : Vector3.zero;
         markerImage.transform.localScale = Vector3.Lerp(markerImage.transform.localScale, targetScale, Time.deltaTime * 10f);
     }
 
-    private float GetMarkerAngle()
-    {
-        return Vector3.SignedAngle(player.forward, GetMarkerDirection(), Vector3.up) / 180f;
-    }
-
-    private Vector3 GetMarkerDirection()
-    {
-        var direction = new Vector3(worldGameObject.position.x, player.position.y, worldGameObject.position.z) - player.position;
-        return direction.normalized;
-    }
-
     public void UpdateUIIndex(int index)
     {
+        if (!_rectTransform) throw new System.Exception("Missing components");
+
         _rectTransform.SetSiblingIndex(index);
         UpdateVisibility();
     }
@@ -100,4 +98,5 @@ public class CompassMarker : MonoBehaviour
         var currentDistance = Vector3.Distance(player.position, worldGameObject.position);
         IsActive = currentDistance >= minVisibleDistance && currentDistance <= maxVisibleDistance;
     }
+}
 }

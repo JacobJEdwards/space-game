@@ -1,3 +1,5 @@
+#nullable enable
+
 using System.Collections.Generic;
 using System.Linq;
 using CollectableResources;
@@ -9,19 +11,19 @@ namespace Player
     public class Inventory : MonoBehaviour
     {
         public List<ResourceObject> resources = new();
-        public event UnityAction<Inventory> OnInventoryChanged;
+        public event UnityAction<Inventory> OnInventoryChanged = delegate { };
 
         public void AddResource(ResourceObject resource)
         {
             foreach (var t in resources.Where(t => t.resourceName == resource.resourceName))
             {
                 t.resourceAmount += resource.resourceAmount;
-                OnInventoryChanged?.Invoke(this);
+                OnInventoryChanged.Invoke(this);
                 return;
             }
 
             resources.Add(resource);
-            OnInventoryChanged?.Invoke(this);
+            OnInventoryChanged.Invoke(this);
         }
 
         public void RemoveResource(ResourceObject resource)
@@ -33,10 +35,10 @@ namespace Player
                 return;
             }
 
-            OnInventoryChanged?.Invoke(this);
+            OnInventoryChanged.Invoke(this);
         }
 
-        public ResourceObject GetResource(string resourceName)
+        public ResourceObject? GetResource(string resourceName)
         {
             return resources.FirstOrDefault(t => t.resourceName == resourceName);
         }
@@ -49,7 +51,7 @@ namespace Player
         public void ClearInventory()
         {
             resources.Clear();
-            OnInventoryChanged?.Invoke(this);
+            OnInventoryChanged.Invoke(this);
         }
     }
 }

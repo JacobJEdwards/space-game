@@ -1,3 +1,5 @@
+#nullable enable
+
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "HealthConfig", menuName = "Scriptable Objects/HealthConfig")]

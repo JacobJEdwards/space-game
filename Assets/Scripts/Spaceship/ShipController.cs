@@ -1,10 +1,12 @@
+#nullable enable
+
 using System;
-using JetBrains.Annotations;
 using Managers;
 using Movement;
 using Player;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Spaceship
 {
@@ -16,21 +18,22 @@ namespace Spaceship
         SpaceIdle
     }
 
-    [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(Rigidbody), typeof(SpaceMovement))]
     public class ShipController : MonoBehaviour
     {
-        [SerializeField] private CameraSettings cameraSettings;
-        [SerializeField] private LandingSettings landingSettings;
-        [SerializeField] private CameraController cameraController;
-        [SerializeField] private UiManager uiManager;
-        private PlayerController _currentPlayer;
+        [SerializeField] private CameraSettings cameraSettings = null!;
+        [SerializeField] private LandingSettings landingSettings = null!;
+        [SerializeField] private CameraController cameraController = null!;
+        [SerializeField] private UiManager uiManager = null!;
+        private PlayerController? _currentPlayer;
         private bool _hasValidLandingPoint;
         private Vector3 _landingNormal;
 
         private Vector3 _landingPoint;
-        [CanBeNull] private Collider _nearestLandingZone;
-        private Rigidbody _rb;
-        private SpaceMovement _spaceMovement;
+        private Collider? _nearestLandingZone;
+
+        private Rigidbody _rb = null!;
+        private SpaceMovement _spaceMovement = null!;
 
         public bool IsOccupied => _currentPlayer;
         public ShipState CurrentState { get; private set; } = ShipState.SpaceIdle;
@@ -69,11 +72,20 @@ namespace Spaceship
         private void InitializeComponents()
         {
             _rb = GetComponent<Rigidbody>();
-            _spaceMovement = GetComponentInChildren<SpaceMovement>();
+            _spaceMovement = GetComponent<SpaceMovement>();
 
             var inputManager = FindFirstObjectByType<InputManager>();
 
             inputManager.SetOnLandingPressed(HandleLandingOrTakeoff);
+
+            Assert.IsNotNull(_rb, "Rigidbody is not set!");
+            Assert.IsNotNull(_spaceMovement, "Space movement is not set!");
+            Assert.IsNotNull(inputManager, "Input manager is not set!");
+            Assert.IsNotNull(uiManager, "UI manager is not set!");
+            Assert.IsNotNull(cameraSettings.thirdPersonCamera, "Third person camera is not set!");
+            Assert.IsNotNull(cameraSettings.firstPersonCamera, "First person camera is not set!");
+            Assert.IsNotNull(landingSettings, "Landing settings are not set!");
+
         }
 
         private void UpdateShipState()
@@ -129,7 +141,7 @@ namespace Spaceship
 
         private void SetKinematic(bool isKinematic)
         {
-            if (_rb) _rb.isKinematic = isKinematic;
+            _rb.isKinematic = isKinematic;
         }
 
         private void ExecuteLandingSequence()
@@ -200,10 +212,10 @@ namespace Spaceship
             UpdateLandingUI();
         }
 
-        private Collider GetNearestLandingZone(Collider[] landingZones)
+        private Collider? GetNearestLandingZone(Collider[] landingZones)
         {
             var nearestDistance = float.MaxValue;
-            Collider nearestLandingZone = null;
+            Collider? nearestLandingZone = null;
 
             foreach (var landingZone in landingZones)
             {
@@ -362,7 +374,6 @@ namespace Spaceship
             _hasValidLandingPoint = false;
             CurrentState = ShipState.Landing;
 
-            // run coroutine, lasts 5 seconds if landing not completed
             Invoke(nameof(MaybeFailLanding), 5);
         }
 
@@ -440,8 +451,8 @@ namespace Spaceship
         [Serializable]
         private class CameraSettings
         {
-            public CinemachineCamera thirdPersonCamera;
-            public CinemachineCamera firstPersonCamera;
+            public CinemachineCamera thirdPersonCamera = null!;
+            public CinemachineCamera firstPersonCamera = null!;
         }
 
         [Serializable]

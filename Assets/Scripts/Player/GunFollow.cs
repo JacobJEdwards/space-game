@@ -1,3 +1,6 @@
+#nullable enable
+
+using System;
 using Unity.Assertions;
 using UnityEngine;
 
@@ -6,9 +9,9 @@ namespace Player
 
 public class GunFollow : MonoBehaviour
 {
-    [SerializeField] private Transform head;
-    [SerializeField] private Transform gun;
-    [SerializeField] private Transform aim;
+    [SerializeField] private Transform head = null!;
+    [SerializeField] private Transform gun = null!;
+    [SerializeField] private Animator animator = null!;
 
     private void Start()
     {

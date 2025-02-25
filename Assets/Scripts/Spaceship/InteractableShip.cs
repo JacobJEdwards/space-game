@@ -1,6 +1,8 @@
+#nullable enable
+
 using Interfaces;
-using JetBrains.Annotations;
 using Player;
+using Unity.Assertions;
 using UnityEngine;
 
 namespace Spaceship
@@ -8,12 +10,13 @@ namespace Spaceship
     [RequireComponent(typeof(Collider))]
     public class InteractableShip : MonoBehaviour, IInteractable
     {
-        [CanBeNull] private PlayerController _player;
-        private ShipController _shipController;
+        private PlayerController? _player;
+        private ShipController _shipController = null!;
 
         private void Start()
         {
             _shipController = GetComponentInParent<ShipController>();
+            Assert.IsNotNull(_shipController, "Ship controller is not set!");
         }
 
         public bool CanInteract(GameObject interactor)
@@ -27,7 +30,10 @@ namespace Spaceship
         {
             _player = _player ? _player : interactor.GetComponent<PlayerController>();
 
-            if (!_player) return;
+            if (!_player)
+            {
+                return;
+            }
 
             if (_shipController.IsOccupied)
             {
@@ -35,8 +41,8 @@ namespace Spaceship
             }
             else
             {
-                _player?.EnterShip(_shipController);
-                _shipController.PlayerEnteredShip(_player);
+                _player.EnterShip(_shipController);
+                _shipController.PlayerEnteredShip(_player!);
             }
         }
 

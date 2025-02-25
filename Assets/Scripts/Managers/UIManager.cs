@@ -1,3 +1,5 @@
+#nullable enable
+
 using System.Collections.Generic;
 using Interfaces;
 using Player;
@@ -20,18 +22,18 @@ namespace Managers
     public class UiManager : MonoBehaviour
     {
         [Header("Spaceship Settings")] [SerializeField]
-        private ShipController shipController;
+        private ShipController? shipController;
 
-        [SerializeField] private ShipShooting shipShooting;
+        [SerializeField] private ShipShooting? shipShooting;
 
         [Header("ZeroG Settings")] [SerializeField]
-        private PlayerController playerController;
+        private PlayerController? playerController;
 
         [Header("Hint Settings")] [SerializeField]
-        private Text hint;
+        private Text? hint;
 
         [Header("Info Settings")] [SerializeField]
-        private Text info;
+        private Text? info;
 
         private readonly Dictionary<UIState, IUIPanel> _uiPanels = new();
         private UIState _currentState = UIState.None;
@@ -61,22 +63,28 @@ namespace Managers
 
         public void SetHint(string text)
         {
-            hint.text = text;
+            if (hint)
+                hint.text = text;
         }
 
         public void SetInfo(string text)
         {
-            info.text = text;
+            if (info)
+                info.text = text;
         }
 
         public void SetInfo(string text, float duration)
         {
+            if (!info) return;
+
             info.text = text;
             Invoke(nameof(ClearInfo), duration);
         }
 
         public void SetHint(string text, float duration)
         {
+            if (!hint) return;
+
             hint.text = text;
             Invoke(nameof(ClearHint), duration);
         }
@@ -84,12 +92,14 @@ namespace Managers
 
         public void ClearHint()
         {
-            hint.text = string.Empty;
+            if (hint)
+                hint.text = string.Empty;
         }
 
         public void ClearInfo()
         {
-            info.text = string.Empty;
+            if (info)
+                info.text = string.Empty;
         }
 
         public void ToggleInventory()

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using UnityEngine;
 
 namespace PlanetarySystem.Planet
@@ -7,14 +9,14 @@ namespace PlanetarySystem.Planet
     public class ShapeSettings : ScriptableObject
     {
         public float planetRadius = 1;
-        public NoiseLayer[] noiseLayers;
+        public NoiseLayer[] noiseLayers = Array.Empty<NoiseLayer>();
 
         [Serializable]
         public class NoiseLayer
         {
             public bool enabled = true;
             public bool useFirstLayerAsMask;
-            public NoiseSettings noiseSettings;
+            public NoiseSettings noiseSettings = new();
         }
     }
 }

@@ -1,5 +1,8 @@
+#nullable enable
+
 using System;
 using Interfaces;
+using Movement.Config;
 using UnityEngine;
 using Random = UnityEngine.Random;
 

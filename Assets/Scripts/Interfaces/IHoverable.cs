@@ -1,3 +1,4 @@
+#nullable enable
 namespace Interfaces
 {
     public interface IHoverable

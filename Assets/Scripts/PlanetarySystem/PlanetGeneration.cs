@@ -1,6 +1,7 @@
+#nullable enable
+
 using System;
 using PlanetarySystem.Planet;
-using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 
 namespace PlanetarySystem
@@ -14,7 +15,7 @@ namespace PlanetarySystem
         Forest
     }
 
-    [System.Serializable]
+    [Serializable]
     public class PlanetGenerationSettings
     {
         public float minRadius = 50f;
@@ -22,19 +23,17 @@ namespace PlanetarySystem
         public float minNoiseScale = 0.3f;
         public float maxNoiseScale = 2f;
         public float waterChance = 0.5f;
-        public Material planetMaterial;
+        public Material? planetMaterial;
     }
 
     public class PlanetGenerator
     {
         private readonly PlanetGenerationSettings _settings;
         private readonly System.Random _random;
-        private readonly Transform _player;
 
-        public PlanetGenerator(PlanetGenerationSettings settings, int seed, Transform player)
+        public PlanetGenerator(PlanetGenerationSettings settings, int seed)
         {
             _settings = settings;
-            _player = player;
             _random = new System.Random(seed);
         }
 
@@ -70,7 +69,6 @@ namespace PlanetarySystem
                 }
             };
 
-            planet.playerTransform = _player;
             planet.shapeSettings = shapeSettings;
             planet.colourSettings = colourSettings;
 

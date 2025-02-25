@@ -1,13 +1,18 @@
+#nullable enable
+
 using System;
+using Unity.Assertions;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Movement
 {
     public class HeadBobbing : MonoBehaviour
     {
-        [SerializeField] private BobbingSettings settings;
-        [SerializeField] private InputManager inputManager;
-        [SerializeField] private Transform target;
+        [SerializeField] private BobbingSettings settings = null!;
+        [SerializeField] private Transform target = null!;
+
+        private InputManager _inputManager = null!;
 
         private float _defaultPosY;
         private bool _isSprinting;
@@ -16,13 +21,18 @@ namespace Movement
 
         private void Start()
         {
+            _inputManager = InputManager.Instance;
+            Assert.IsNotNull(settings, "Settings is not assigned");
+            Assert.IsNotNull(_inputManager, "InputManager is not assigned");
+            Assert.IsNotNull(target, "Target is not assigned");
+
             _defaultPosY = target.localPosition.y;
         }
 
         private void Update()
         {
-            var horizontal = inputManager.GetStrafe();
-            var vertical = inputManager.GetForward();
+            var horizontal = _inputManager.GetStrafe();
+            var vertical = _inputManager.GetForward();
             var isMoving = Mathf.Abs(horizontal) > 0.1f || Mathf.Abs(vertical) > 0.1f;
 
             if (isMoving)

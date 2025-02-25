@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿#nullable enable
+
+using UnityEngine;
 
 namespace PlanetarySystem.Planet
 {
@@ -7,9 +9,9 @@ namespace PlanetarySystem.Planet
         private const int TextureResolution = 50;
         private static readonly int ElevationMinMax = Shader.PropertyToID("_elevationMinMax");
         private static readonly int Texture1 = Shader.PropertyToID("_texture");
-        private INoiseFilter _biomeNoiseFilter;
-        private ColourSettings _settings;
-        private Texture2D _texture;
+        private INoiseFilter _biomeNoiseFilter = null!;
+        private ColourSettings _settings = null!;
+        private Texture2D _texture = null!;
 
         public void UpdateSettings(ColourSettings settings)
         {

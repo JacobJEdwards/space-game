@@ -1,13 +1,21 @@
+#nullable enable
+
 using Interfaces;
 using Player;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace CollectableResources
 {
     public class Resource : MonoBehaviour, IInteractable
     {
-        public ResourceObject resourceObject;
+        public ResourceObject resourceObject = null!;
         public int amountMultiplier = 1;
+
+        private void Awake()
+        {
+            Assert.IsNotNull(resourceObject, "Resource object is not set!");
+        }
 
         private void OnDrawGizmos()
         {

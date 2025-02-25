@@ -1,3 +1,5 @@
+#nullable enable
+
 namespace Interfaces
 {
     public interface IDamageable

@@ -1,3 +1,5 @@
+#nullable enable
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,8 +8,8 @@ namespace Objects
     [RequireComponent(typeof(Health))]
     public class DropOnDeath : MonoBehaviour
     {
-        public Health health;
-        [SerializeField] public List<GameObject> possibleDrops;
+        public Health health = null!;
+        [SerializeField] public List<GameObject> possibleDrops = new ();
 
         private void Start()
         {

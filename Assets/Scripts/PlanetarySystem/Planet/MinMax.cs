@@ -1,4 +1,6 @@
-﻿namespace PlanetarySystem.Planet
+﻿#nullable enable
+
+namespace PlanetarySystem.Planet
 {
     public class MinMax
     {

@@ -1,4 +1,6 @@
-﻿namespace PlanetarySystem.Planet
+﻿#nullable enable
+
+namespace PlanetarySystem.Planet
 {
     public static class NoiseFilterFactory
     {
@@ -8,7 +10,7 @@
             {
                 NoiseSettings.FilterType.Simple => new SimpleNoiseFilter(settings.simpleNoiseSettings),
                 NoiseSettings.FilterType.Ridgid => new RidgidNoiseFilter(settings.ridgidNoiseSettings),
-                _ => null
+                _ => new SimpleNoiseFilter(settings.simpleNoiseSettings)
             };
         }
     }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using UnityEngine;
 
 namespace PlanetarySystem.Planet
@@ -14,8 +16,8 @@ namespace PlanetarySystem.Planet
 
         public FilterType filterType;
 
-        [ConditionalHide("filterType", 0)] public SimpleNoiseSettings simpleNoiseSettings;
-        [ConditionalHide("filterType", 1)] public RidgidNoiseSettings ridgidNoiseSettings;
+        [ConditionalHide("filterType", 0)] public SimpleNoiseSettings simpleNoiseSettings = new ();
+        [ConditionalHide("filterType", 1)] public RidgidNoiseSettings ridgidNoiseSettings = new ();
 
         [Serializable]
         public class SimpleNoiseSettings

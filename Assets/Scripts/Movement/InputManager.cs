@@ -1,3 +1,5 @@
+#nullable enable
+
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -5,21 +7,25 @@ namespace Movement
 {
     public class InputManager : MonoBehaviour
     {
-        private PlayerControls _playerControls;
+        public static InputManager Instance { get; private set; } = null!;
+
+        private PlayerControls _playerControls = null!;
 
         private void Awake()
         {
+            if (!Instance)
+            {
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+                return;
+            }
+
             _playerControls = new PlayerControls();
-        }
-
-        public void OnEnable()
-        {
             _playerControls.Enable();
-        }
-
-        public void OnDisable()
-        {
-            _playerControls.Disable();
         }
 
         public float GetForward()
@@ -29,7 +35,7 @@ namespace Movement
 
         public float GetUpDown()
         {
-            return _playerControls.SpaceControls.UpDown.ReadValue<float>();
+            return _playerControls.SpaceControls.UpDown.ReadValue<float>() ;
         }
 
         public float GetStrafe()

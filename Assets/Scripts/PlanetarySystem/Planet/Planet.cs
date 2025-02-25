@@ -1,4 +1,7 @@
-﻿using Managers;
+﻿#nullable enable
+
+using System;
+using Managers;
 using Objects;
 using Unity.Serialization;
 using NPC;
@@ -12,44 +15,38 @@ namespace PlanetarySystem.Planet
         [Range(2, 256)] public int resolution = 10;
         [Range(0, 512)] public int numRocks = 40;
 
-        public PlanetWater waterSystem;
-        public Material waterMaterial;
-
-        public Transform playerTransform;
+        public PlanetWater? waterSystem;
+        public Material waterMaterial = null!;
 
         public bool hasWater;
         public bool hasLife;
 
         public Biome biome;
 
-        [DontSerialize] public ShapeSettings shapeSettings;
-        [DontSerialize] public ColourSettings colourSettings;
+        [DontSerialize] public ShapeSettings shapeSettings = null!;
+        [DontSerialize] public ColourSettings colourSettings = null!;
 
-        [SerializeField] public Rock[] rockPrefabs;
-        [SerializeField] public Life[] lifePrefabs;
+        [SerializeField] public Rock[] rockPrefabs = Array.Empty<Rock>();
+        [SerializeField] public Life[] lifePrefabs = Array.Empty<Life>();
 
-        [HideInInspector] public bool shapeSettingsFoldout;
-        [HideInInspector] public bool colourSettingsFoldout;
+        [DontSerialize] private MeshFilter[] _meshFilters = Array.Empty<MeshFilter>();
 
-        [DontSerialize] private MeshFilter[] _meshFilters;
+        [DontSerialize] private TerrainFace[] _terrainFaces = Array.Empty<TerrainFace>();
 
-        [DontSerialize] private TerrainFace[] _terrainFaces;
-
-        private GameObject _atmosphere;
+        private GameObject _atmosphere = null!;
 
         private readonly ColourGenerator _colourGenerator = new();
         public readonly ShapeGenerator ShapeGenerator = new();
 
-
-        [SerializeField] private PlanetRockManager rockManager;
-        [SerializeField] private PlanetLifeManager lifeManager;
+        [SerializeField] private PlanetRockManager rockManager = null!;
+        [SerializeField] private PlanetLifeManager lifeManager = null!;
 
         private void Initialize()
         {
             ShapeGenerator.UpdateSettings(shapeSettings);
             _colourGenerator.UpdateSettings(colourSettings);
 
-            if (_meshFilters == null || _meshFilters.Length == 0) _meshFilters = new MeshFilter[6];
+            if (_meshFilters.Length == 0) _meshFilters = new MeshFilter[6];
 
             _terrainFaces = new TerrainFace[6];
 
@@ -150,10 +147,7 @@ namespace PlanetarySystem.Planet
 
         private void GenerateLife()
         {
-            if (lifePrefabs.Length == 0)
-            {
-                return;
-            }
+            if (lifePrefabs.Length == 0) return;
             if (!hasLife) return;
 
             if (!lifeManager)
@@ -161,7 +155,7 @@ namespace PlanetarySystem.Planet
                 lifeManager = gameObject.AddComponent<PlanetLifeManager>();
             }
 
-            lifeManager.GenerateLifeSpawns();
+            lifeManager.GenerateObjectPositions();
         }
 
         private void GenerateRocks()
@@ -174,7 +168,7 @@ namespace PlanetarySystem.Planet
                 rockManager = gameObject.AddComponent<PlanetRockManager>();
             }
 
-            rockManager.GenerateRockPositions();
+            rockManager.GenerateObjectPositions();
         }
 
         private void GenerateMesh()

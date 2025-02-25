@@ -1,5 +1,7 @@
+#nullable enable
+
 using Interfaces;
-using JetBrains.Annotations;
+using Managers;
 using Unity.Assertions;
 using UnityEngine;
 
@@ -11,26 +13,33 @@ namespace Weapons
         [System.Serializable]
         public class LaserSettings
         {
-            public ParticleSystem laserHitEffect;
-
+            public ParticleSystem laserHitEffect = null!;
             public LayerMask mask;
-
             public float range = 100f;
-
             public float damage = 50f;
+
+            public AudioSource audioSource = null!;
+            public AudioClip laserSound = null!;
+
+            public AudioSource hitAudioSource = null!;
+            public AudioClip hitSound = null!;
         }
 
-        [SerializeField] private LaserSettings settings;
+        [SerializeField] private LaserSettings settings = new();
 
-        private LineRenderer _laser;
-        private Camera _mainCam;
+        private LineRenderer _laser = null!;
+        private Camera _mainCam = null!;
+
+        private float _clipTime;
 
         private void Start()
         {
-            _mainCam = Camera.main;
+            _mainCam = Camera.main!;
             _laser = GetComponent<LineRenderer>();
             _laser.gameObject.SetActive(false);
-            settings.mask = LayerMask.GetMask("Shootable", "PlanetSurface", "Water", "Rock");
+            settings.mask = LayerMask.GetMask("Shootable", "PlanetSurface", "Water", "Rock", "NPC");
+            settings.audioSource.transform.parent = transform;
+            settings.hitAudioSource.transform.parent = transform;
             ValidateComponents();
         }
 
@@ -38,6 +47,7 @@ namespace Weapons
         {
             Assert.IsNotNull(_mainCam);
             Assert.IsNotNull(_laser);
+            Assert.IsNotNull(settings.laserHitEffect);
         }
 
         public void StopFire()
@@ -56,6 +66,9 @@ namespace Weapons
                 var effect = Instantiate(settings.laserHitEffect, hit.point, Quaternion.identity);
                 Destroy(effect.gameObject, effect.main.duration);
                 MaybeDamageTarget(hit);
+
+                // settings.hitAudioSource.transform.position = hit.point;
+                AudioManager.Instance.PlaySound(settings.hitAudioSource, settings.hitSound);
             }
             else
             {
@@ -64,6 +77,8 @@ namespace Weapons
             }
 
             _laser.gameObject.SetActive(true);
+
+            AudioManager.Instance.PlaySound(settings.audioSource, settings.laserSound);
         }
 
         private bool IsInRange(out RaycastHit hit)
@@ -73,8 +88,6 @@ namespace Weapons
 
         private void MaybeDamageTarget(RaycastHit hit)
         {
-            // if (hit.collider.gameObject.layer != (int)Layers.Shootable) return;
-
             if (hit.collider.transform.GetComponent<IDamageable>() is { } damageable)
             {
                 damageable.TakeDamage(settings.damage * Time.deltaTime);

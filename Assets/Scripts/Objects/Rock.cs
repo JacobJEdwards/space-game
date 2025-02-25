@@ -1,4 +1,4 @@
-using System;
+#nullable enable
 using Interfaces;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -8,8 +8,8 @@ namespace Objects
     [RequireComponent(typeof(Health), typeof(DropOnDeath))]
     public class Rock : MonoBehaviour, IPoolable<Rock>
     {
-        private IObjectPool<Rock> _rockPool;
-        private Health _health;
+        private IObjectPool<Rock>? _rockPool;
+        private Health _health = null!;
 
         private void Start()
         {

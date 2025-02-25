@@ -1,4 +1,6 @@
-﻿/*
+﻿#nullable enable
+
+/*
 This file is part of libnoise-dotnet.
 libnoise-dotnet is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -306,7 +308,7 @@ namespace PlanetarySystem.Planet
         private const int RandomSize = 256;
         private const double Sqrt3 = 1.7320508075688772935;
         private const double Sqrt5 = 2.2360679774997896964;
-        private int[] _random;
+        private int[] _random = new int[RandomSize * 2];
 
         /// Skewing and unskewing factors for 2D, 3D and 4D,
         /// some of them pre-multiplied.

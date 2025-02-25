@@ -1,0 +1,48 @@
+\begin{thebibliography}{}
+
+\bibitem[Developments, ]{frontier:ed}
+Developments, F.
+\newblock Elite dangerous.
+\newblock \url{https://www.elitedangerous.com/}.
+
+\bibitem[Games, ]{hellogames:nms}
+Games, H.
+\newblock Nms.
+\newblock \url{https://www.nomanssky.com/}.
+
+\bibitem[Microsoft, ]{csharp:home}
+Microsoft.
+\newblock C\#.
+\newblock \url{https://docs.microsoft.com/en-us/dotnet/csharp/}.
+
+\bibitem[Mixamo, ]{Mixamo:home}
+Mixamo.
+\newblock Mixamo.
+\newblock \url{https://www.mixamo.com/}.
+
+\bibitem[Technologies, a]{unity:animator}
+Technologies, U.
+\newblock Animator.
+\newblock \url{https://docs.unity3d.com/Manual/class-Animator.html}.
+
+\bibitem[Technologies, b]{unity:linerenderer}
+Technologies, U.
+\newblock Line renderer.
+\newblock \url{https://docs.unity3d.com/Manual/class-LineRenderer.html}.
+
+\bibitem[Technologies, c]{unity:inputsystem}
+Technologies, U.
+\newblock New input system.
+\newblock \url{https://docs.unity3d.com/Manual/com.unity.inputsystem.html}.
+
+\bibitem[Technologies, d]{unity:rigidbody}
+Technologies, U.
+\newblock Rigidbody.
+\newblock \url{https://docs.unity3d.com/Manual/class-Rigidbody.html}.
+
+\bibitem[Technologies, e]{unity:home}
+Technologies, U.
+\newblock Unity.
+\newblock \url{https://unity.com/}.
+
+\end{thebibliography}

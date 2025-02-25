@@ -1,5 +1,6 @@
+#nullable enable
+
 using System;
-using JetBrains.Annotations;
 using Managers;
 using Movement;
 using Spaceship;
@@ -23,28 +24,29 @@ namespace Player
     public class PlayerController : MonoBehaviour
     {
         [Header("Camera Settings")] [SerializeField]
-        private CinemachineCamera playerCamera;
+        private CinemachineCamera playerCamera = null!;
 
-        [SerializeField] private CameraController cameraController;
-        [SerializeField] private InteractionManager interactionManager;
-        [SerializeField] private UiManager uiManager;
-        [SerializeField] private Transform aim;
+        [SerializeField] private CameraController cameraController = null!;
+        [SerializeField] private InteractionManager interactionManager = null!;
+        [SerializeField] private UiManager uiManager = null!;
+        [SerializeField] private Transform aim = null!;
 
         [Header("Movement Settings")] [SerializeField]
-        private MovementSettings movementSettings;
+        private MovementSettings movementSettings = null!;
 
-        [CanBeNull] public ShipController shipToEnter;
+        public ShipController? shipToEnter;
 
-        public UnityEvent onEnterShip;
-        public UnityEvent onExitShip;
-        private PlanetaryMovement _planetaryMovement;
-        private Health _playerHealth;
-        private Oxygen _playerOxygen;
+        public UnityEvent onEnterShip = new();
+        public UnityEvent onExitShip = new();
+
+        private PlanetaryMovement _planetaryMovement = null!;
+        private Health _playerHealth = null!;
+        private Oxygen _playerOxygen = null!;
 
         private PlayerState _playerState = PlayerState.InZeroG;
-        private Rigidbody _rb;
+        private Rigidbody _rb = null!;
 
-        private SpaceMovement _spaceMovement;
+        private SpaceMovement _spaceMovement = null!;
 
         private void Start()
         {
@@ -150,8 +152,7 @@ namespace Player
         {
             var colliders = new Collider[1];
 
-            if (Physics.OverlapSphereNonAlloc(transform.position, 50, colliders, movementSettings.groundLayer) !=
-                0) return;
+            if (Physics.OverlapSphereNonAlloc(transform.position, 50, colliders, movementSettings.groundLayer) != 0) return;
 
             _playerState = PlayerState.InZeroG;
             UpdateMovementComponents();
@@ -159,17 +160,12 @@ namespace Player
 
         private void UpdateZeroGMovement()
         {
-            for (var i = 0; i < 16; i++)
-            {
-                var direction = Quaternion.Euler(0, i * 22.5f, 0) * transform.forward;
+            var colliders = new Collider[1];
 
-                if (!Physics.Raycast(transform.position, direction, out _, 20f, movementSettings.groundLayer))
-                    continue;
+            if (Physics.OverlapSphereNonAlloc(transform.position, 50, colliders, movementSettings.groundLayer) == 0) return;
 
-                _playerState = PlayerState.InGravity;
-                UpdateMovementComponents();
-                return;
-            }
+            _playerState = PlayerState.InGravity;
+            UpdateMovementComponents();
         }
 
         public void EnterShip(ShipController ship)
@@ -180,7 +176,7 @@ namespace Player
 
             _playerState = PlayerState.OnShip;
 
-            onEnterShip?.Invoke();
+            onEnterShip.Invoke();
             _playerOxygen.Reset();
             uiManager.ClearHint();
             uiManager.TransitionToState(UIState.Ship);
@@ -199,7 +195,7 @@ namespace Player
             else
                 _playerState = PlayerState.InZeroG;
 
-            onExitShip?.Invoke();
+            onExitShip.Invoke();
             shipToEnter = null;
             uiManager.ClearHint();
             uiManager.TransitionToState(UIState.ZeroG); // FIX
@@ -227,6 +223,7 @@ namespace Player
         private void EnableZeroGMovement()
         {
             _spaceMovement.enabled = true;
+            _planetaryMovement.planetTransform = null;
             _planetaryMovement.enabled = false;
             _rb.constraints = RigidbodyConstraints.None;
         }

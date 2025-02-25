@@ -1,13 +1,16 @@
+#nullable enable
+
 using Interfaces;
 using UnityEngine;
 using UnityEngine.Pool;
 
 namespace NPC
 {
+    [RequireComponent(typeof(Health))]
     public class Life : MonoBehaviour, IPoolable<Life>
     {
-        private IObjectPool<Life> _lifePool;
-        private Health _health;
+        private IObjectPool<Life>? _lifePool;
+        private Health _health = null!;
 
         private void Start()
         {
@@ -22,7 +25,6 @@ namespace NPC
 
         private void OnDie()
         {
-            gameObject.SetActive(false);
             _health.Reset();
         }
     }

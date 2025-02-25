@@ -1,3 +1,5 @@
+#nullable enable
+
 public enum Layers
 {
     Default = 0,

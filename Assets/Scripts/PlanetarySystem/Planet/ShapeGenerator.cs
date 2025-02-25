@@ -1,12 +1,15 @@
-﻿using UnityEngine;
+﻿#nullable enable
+
+using System;
+using UnityEngine;
 
 namespace PlanetarySystem.Planet
 {
     public class ShapeGenerator
     {
-        private INoiseFilter[] _noiseFilters;
-        private ShapeSettings _settings;
-        public MinMax ElevationMinMax;
+        private INoiseFilter[] _noiseFilters = Array.Empty<INoiseFilter>();
+        private ShapeSettings _settings = null!;
+        public MinMax ElevationMinMax = new();
 
         public void UpdateSettings(ShapeSettings settings)
         {

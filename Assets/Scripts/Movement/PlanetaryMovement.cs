@@ -1,7 +1,11 @@
+#nullable enable
+
 using System;
+using Managers;
 using Unity.Assertions;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Movement
 {
@@ -13,12 +17,21 @@ namespace Movement
         private static readonly int Walk = Animator.StringToHash("Walk");
         private static readonly int Idle = Animator.StringToHash("Idle");
 
-        [SerializeField] private MovementSettings movementSettings;
-        [SerializeField] private InputManager inputManager;
-        [SerializeField] private CinemachineCamera playerCamera;
-        [SerializeField] private Transform head;
-        [SerializeField] private HeadBobbing headBobbing;
-        [SerializeField] private Animator animator;
+        [SerializeField] private MovementSettings movementSettings = null!;
+        private InputManager _inputManager = null!;
+        [SerializeField] private CinemachineCamera playerCamera = null!;
+        [SerializeField] private Transform head = null!;
+        [SerializeField] private HeadBobbing headBobbing = null!;
+        [SerializeField] private Animator animator = null!;
+
+        [SerializeField] private AudioSource movementClipSource = null!;
+
+        [SerializeField] private AudioClip[] footstepClipsWalk = null!;
+        [SerializeField] private AudioClip[] footstepClipsRun = null!;
+
+        [SerializeField] private AudioClip jumpClip = null!;
+        [SerializeField] private AudioClip jetpackClip = null!;
+        [SerializeField] private AudioClip landClip = null!;
 
         private float _currentRotationX;
         private bool _isGrounded;
@@ -26,14 +39,22 @@ namespace Movement
         private bool _isSprinting;
         private float _jetpackFuel;
 
-        private Transform _planetTransform;
+        public Transform? planetTransform;
 
-        private Rigidbody _rb;
+        private Rigidbody _rb = null!;
 
         private Vector3 _surfaceNormal;
 
         private void Start()
         {
+            _inputManager = InputManager.Instance;
+            Assert.IsNotNull(movementSettings, "MovementSettings is missing");
+            Assert.IsNotNull(_inputManager, "InputManager is missing");
+            Assert.IsNotNull(playerCamera, "PlayerCamera is missing");
+            Assert.IsNotNull(head, "Head is missing");
+            Assert.IsNotNull(headBobbing, "HeadBobbing is missing");
+            Assert.IsNotNull(animator, "Animator is missing");
+
             _rb = GetComponent<Rigidbody>();
 
             _jetpackFuel = movementSettings.jetpackFuel;
@@ -43,12 +64,12 @@ namespace Movement
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
-            inputManager.SetOnJumpPressed(OnJumpPressed);
+            _inputManager.SetOnJumpPressed(OnJumpPressed);
 
-            inputManager.SetOnJetpackPress(OnJetpackPressed);
-            inputManager.SetOnJetpackRelease(OnJetpackReleased);
+            _inputManager.SetOnJetpackPress(OnJetpackPressed);
+            _inputManager.SetOnJetpackRelease(OnJetpackReleased);
 
-            inputManager.SetOnSprintPress(OnSprintPressed);
+            _inputManager.SetOnSprintPress(OnSprintPressed);
         }
 
         private void Update()
@@ -58,7 +79,7 @@ namespace Movement
 
         private void FixedUpdate()
         {
-            if (!_planetTransform) FindPlanet();
+            if (!planetTransform) FindPlanet();
 
             UpdateGroundedState();
             HandleMovement();
@@ -90,7 +111,7 @@ namespace Movement
 
         private void CheckComponents()
         {
-            Assert.IsNotNull(inputManager, "InputManager is missing");
+            Assert.IsNotNull(_inputManager, "InputManager is missing");
             Assert.IsNotNull(playerCamera, "PlayerCamera is missing");
             Assert.IsNotNull(head, "Head is missing");
             Assert.IsNotNull(headBobbing, "HeadBobbing is missing");
@@ -98,7 +119,9 @@ namespace Movement
 
         private void HandleCameraRotation()
         {
-            var pitchYaw = inputManager.GetPitchYaw();
+            if (!head || !_inputManager) return;
+
+            var pitchYaw = _inputManager.GetPitchYaw();
 
             _currentRotationX -= pitchYaw.y * movementSettings.mouseSensitivity;
             _currentRotationX = Mathf.Clamp(_currentRotationX, -movementSettings.maxVerticalCameraAngle,
@@ -116,19 +139,24 @@ namespace Movement
 
             if (size <= 0) return;
 
-            _planetTransform = results[0].transform;
+            planetTransform = results[0].transform;
         }
 
         private void UpdateGroundedState()
         {
-            if (!_planetTransform) return;
+            if (!planetTransform) return;
 
-            var direction = (_planetTransform.position - transform.position).normalized;
+            var direction = (planetTransform.position - transform.position).normalized;
 
             if (Physics.Raycast(transform.position, direction, out var hit,
                     20, movementSettings.groundLayer))
             {
-                _isGrounded = hit.distance <= movementSettings.groundCheckDistance + 0.1f;
+                var isGrounded = hit.distance <= movementSettings.groundCheckDistance + 0.1f;
+                if (isGrounded && !_isGrounded)
+                {
+                    AudioManager.Instance.PlaySound(movementClipSource, landClip);
+                }
+                _isGrounded = isGrounded;
                 _surfaceNormal = hit.normal;
             }
             else
@@ -136,7 +164,8 @@ namespace Movement
                 _isGrounded = false;
             }
 
-            headBobbing.enabled = _isGrounded;
+            if (headBobbing)
+                headBobbing.enabled = _isGrounded;
         }
 
         private void HandleMovement()
@@ -145,7 +174,7 @@ namespace Movement
             {
                 HandleJetpack();
             }
-            else if (_isGrounded && _planetTransform)
+            else if (_isGrounded && planetTransform)
             {
                 HandleGroundMovement();
             }
@@ -153,8 +182,8 @@ namespace Movement
 
         private void HandleGroundMovement()
         {
-            var forward = inputManager.GetForward();
-            var strafe = inputManager.GetStrafe();
+            var forward = _inputManager.GetForward();
+            var strafe = _inputManager.GetStrafe();
 
             var moveDirection = transform.forward * forward + transform.right * strafe;
             moveDirection = Vector3.ProjectOnPlane(moveDirection, _surfaceNormal).normalized;
@@ -166,9 +195,14 @@ namespace Movement
                 _rb.AddForce(moveDirection * currentSpeed, ForceMode.Acceleration);
 
                 if (forward != 0 || strafe != 0)
-                    animator.Play(Walk);
-                else
-                    animator.Play(Idle);
+                {
+                    if (Utils.IsNotPlaying(Walk, animator))
+                        animator.CrossFade(Walk, 0.1f);
+                    var clip = _isSprinting ? Utils.RandomElement(footstepClipsRun) : Utils.RandomElement(footstepClipsWalk);
+                    AudioManager.Instance.PlaySound(movementClipSource, clip);
+                }
+                else if (Utils.IsNotPlaying(Idle, animator))
+                    animator.CrossFade(Idle, 0.1f);
             }
 
             _jetpackFuel = Mathf.Min(_jetpackFuel + movementSettings.jetpackFuelConsumptionRate * Time.deltaTime,
@@ -182,19 +216,20 @@ namespace Movement
             _rb.AddForce(transform.up * movementSettings.jetpackForce, ForceMode.Acceleration);
             _jetpackFuel -= movementSettings.jetpackFuelConsumptionRate * Time.deltaTime;
 
-            var forward = inputManager.GetForward();
-            var strafe = inputManager.GetStrafe();
+            var forward = _inputManager.GetForward();
+            var strafe = _inputManager.GetStrafe();
 
             var moveDirection = transform.forward * forward + transform.right * strafe;
 
             _rb.AddForce(moveDirection * movementSettings.walkSpeed, ForceMode.Acceleration);
+            AudioManager.Instance.PlaySound(movementClipSource, jetpackClip);
         }
 
         private void ApplyGravity()
         {
-            if (!_planetTransform) return;
+            if (!planetTransform) return;
 
-            var gravityDir = -(transform.position - _planetTransform.position).normalized;
+            var gravityDir = -(transform.position - planetTransform.position).normalized;
             _rb.AddForce(gravityDir * (Physics.gravity.magnitude * movementSettings.gravityMultiplier),
                 ForceMode.Acceleration);
 
@@ -214,12 +249,16 @@ namespace Movement
         private void Jump()
         {
             Assert.IsTrue(_isGrounded, "Player is not grounded");
+
             _rb.AddForce(_surfaceNormal * movementSettings.jumpForce, ForceMode.Impulse);
         }
 
         private void OnJumpPressed()
         {
-            if (_isGrounded) Jump();
+            if (!_isGrounded) return;
+
+            AudioManager.Instance.PlaySound(movementClipSource, jumpClip);
+            Jump();
         }
 
         private void OnJetpackPressed()

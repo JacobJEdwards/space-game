@@ -1,4 +1,6 @@
+#nullable enable
 using System.Collections.Generic;
+using Unity.Assertions;
 using UnityEngine;
 using UnityEngine.Pool;
 using Random = UnityEngine.Random;
@@ -7,10 +9,10 @@ namespace Objects
 {
     public class AsteroidSpawner : MonoBehaviour
     {
-        public GameObject player;
+        public Transform player = null!;
 
-        public List<Asteroid> asteroidPrefabs;
-        public List<GameObject> possibleDrops;
+        public List<Asteroid> asteroidPrefabs = new();
+        public List<GameObject> possibleDrops = new();
 
         public float spawnRadius = 2000f;
         public float fromPlayerRadius = 200f;
@@ -18,10 +20,13 @@ namespace Objects
         public int maxAsteroids = 200;
         private readonly List<Asteroid> _activeAsteroids = new(100);
 
-        private IObjectPool<Asteroid> _asteroidPool;
+        private IObjectPool<Asteroid> _asteroidPool = null!;
 
         private void Awake()
         {
+            Assert.IsNotNull(player);
+            Assert.IsTrue(asteroidPrefabs.Count > 0, "No asteroid prefabs assigned");
+
             _asteroidPool = new ObjectPool<Asteroid>(
                 CreateAsteroid,
                 OnGetFromPool,
@@ -35,6 +40,8 @@ namespace Objects
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         private void Start()
         {
+            if (_asteroidPool == null) return;
+
             for (var i = 0; i < maxAsteroids; i++)
             {
                 var asteroid = _asteroidPool.Get();
@@ -95,6 +102,7 @@ namespace Objects
             asteroid.transform.localScale = Vector3.one * Random.Range(1f, 10f);
 
             var rb = asteroid.rb;
+            if (!rb) return;
             rb.linearVelocity = Random.insideUnitSphere * Random.Range(1f, 5f);
             rb.angularVelocity = Random.insideUnitSphere * Random.Range(1f, 5f);
         }
