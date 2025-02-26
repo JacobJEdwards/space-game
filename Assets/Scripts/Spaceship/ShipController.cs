@@ -23,8 +23,8 @@ namespace Spaceship
     {
         [SerializeField] private CameraSettings cameraSettings = null!;
         [SerializeField] private LandingSettings landingSettings = null!;
-        [SerializeField] private CameraController cameraController = null!;
-        [SerializeField] private UiManager uiManager = null!;
+        private CameraController _cameraController = null!;
+        private UiManager _uiManager = null!;
         private PlayerController? _currentPlayer;
         private bool _hasValidLandingPoint;
         private Vector3 _landingNormal;
@@ -45,7 +45,12 @@ namespace Spaceship
 
         private void Start()
         {
+            _uiManager = UiManager.Instance;
+            _cameraController = CameraController.Instance;
             landingSettings.landingLayers = LayerMask.GetMask("PlanetSurface", "Water");
+
+            var inputManager = InputManager.Instance;
+            inputManager.SetOnLandingPressed(HandleLandingOrTakeoff);
         }
 
         private void FixedUpdate()
@@ -74,14 +79,9 @@ namespace Spaceship
             _rb = GetComponent<Rigidbody>();
             _spaceMovement = GetComponent<SpaceMovement>();
 
-            var inputManager = FindFirstObjectByType<InputManager>();
-
-            inputManager.SetOnLandingPressed(HandleLandingOrTakeoff);
 
             Assert.IsNotNull(_rb, "Rigidbody is not set!");
             Assert.IsNotNull(_spaceMovement, "Space movement is not set!");
-            Assert.IsNotNull(inputManager, "Input manager is not set!");
-            Assert.IsNotNull(uiManager, "UI manager is not set!");
             Assert.IsNotNull(cameraSettings.thirdPersonCamera, "Third person camera is not set!");
             Assert.IsNotNull(cameraSettings.firstPersonCamera, "First person camera is not set!");
             Assert.IsNotNull(landingSettings, "Landing settings are not set!");
@@ -120,7 +120,7 @@ namespace Spaceship
 
             if (!_hasValidLandingPoint)
             {
-                uiManager.SetInfo("Finding Landing Zone...");
+                _uiManager.SetInfo("Finding Landing Zone...");
                 FindLandingPoint();
                 if (!_hasValidLandingPoint) return;
             }
@@ -147,7 +147,7 @@ namespace Spaceship
         private void ExecuteLandingSequence()
         {
             _spaceMovement.enabled = false;
-            uiManager.SetInfo("Landing...");
+            _uiManager.SetInfo("Landing...");
 
             var desiredPosition = _landingPoint + _landingNormal * landingSettings.hoverDistance;
             var desiredRotation = CalculateLandingRotation();
@@ -235,14 +235,14 @@ namespace Spaceship
         {
             if (!_nearestLandingZone)
             {
-                uiManager.ClearHint();
+                _uiManager.ClearHint();
                 return;
             }
 
             var closestPoint = _nearestLandingZone.ClosestPoint(transform.position);
             var distance = Vector3.Distance(transform.position, closestPoint);
 
-            uiManager.SetHint(distance < landingSettings.landingThreshold
+            _uiManager.SetHint(distance < landingSettings.landingThreshold
                 ? "Press L to land"
                 : "");
         }
@@ -251,7 +251,7 @@ namespace Spaceship
         {
             if (!_nearestLandingZone) return;
 
-            uiManager.SetInfo("Finding Landing Point...");
+            _uiManager.SetInfo("Finding Landing Point...");
 
             var center = _nearestLandingZone.ClosestPoint(transform.position);
             var closestDistance = float.MaxValue;
@@ -291,23 +291,23 @@ namespace Spaceship
         private void RegisterCameras()
         {
             if (cameraSettings.thirdPersonCamera)
-                CameraController.Register(cameraSettings.thirdPersonCamera);
+                _cameraController?.Register(cameraSettings.thirdPersonCamera);
             if (cameraSettings.firstPersonCamera)
-                CameraController.Register(cameraSettings.firstPersonCamera);
+                _cameraController?.Register(cameraSettings.firstPersonCamera);
         }
 
         private void UnregisterCameras()
         {
             if (cameraSettings.thirdPersonCamera)
-                CameraController.Unregister(cameraSettings.thirdPersonCamera);
+                _cameraController?.Unregister(cameraSettings.thirdPersonCamera);
             if (cameraSettings.firstPersonCamera)
-                CameraController.Unregister(cameraSettings.firstPersonCamera);
+                _cameraController?.Unregister(cameraSettings.firstPersonCamera);
         }
 
         public void PlayerEnteredShip(PlayerController player)
         {
             _currentPlayer = player;
-            CameraController.SetActiveCamera(cameraSettings.thirdPersonCamera);
+            _cameraController.SetActiveCamera(cameraSettings.thirdPersonCamera);
 
             if (CurrentState == ShipState.SpaceIdle) CurrentState = ShipState.Flying;
         }
@@ -318,8 +318,8 @@ namespace Spaceship
 
             _currentPlayer.ExitShip();
             _currentPlayer = null;
-            uiManager.ClearHint();
-            uiManager.TransitionToState(UIState.ZeroG);
+            _uiManager.ClearHint();
+            _uiManager.TransitionToState(UIState.ZeroG);
 
             if (CurrentState == ShipState.Flying) CurrentState = ShipState.SpaceIdle;
         }
@@ -333,11 +333,11 @@ namespace Spaceship
         {
             if (!IsOccupied) return;
 
-            var newCamera = CameraController.IsActive(cameraSettings.thirdPersonCamera)
+            var newCamera = _cameraController.IsActive(cameraSettings.thirdPersonCamera)
                 ? cameraSettings.firstPersonCamera
                 : cameraSettings.thirdPersonCamera;
 
-            CameraController.SetActiveCamera(newCamera);
+            _cameraController.SetActiveCamera(newCamera);
         }
 
         private void HandleLandingOrTakeoff()
@@ -348,7 +348,7 @@ namespace Spaceship
                     InitiateTakeoff();
                     break;
                 case ShipState.Flying:
-                    uiManager.ClearHint();
+                    _uiManager.ClearHint();
                     InitiateLanding();
                     break;
                 case ShipState.Landing:
@@ -364,7 +364,7 @@ namespace Spaceship
             CurrentState = ShipState.Flying;
             SetKinematic(false);
             _spaceMovement.enabled = true;
-            uiManager.SetInfo("Ship Launched", 5);
+            _uiManager.SetInfo("Ship Launched", 5);
         }
 
         private void InitiateLanding()
@@ -382,7 +382,7 @@ namespace Spaceship
             if (CurrentState != ShipState.Landing) return;
 
             _hasValidLandingPoint = false;
-            uiManager.SetInfo("Landing Failed", 5);
+            _uiManager.SetInfo("Landing Failed", 5);
             _spaceMovement.enabled = true;
 
             CurrentState = ShipState.Flying;
@@ -393,7 +393,7 @@ namespace Spaceship
             CurrentState = ShipState.Landed;
             SetKinematic(true);
             _spaceMovement.enabled = false;
-            uiManager.SetInfo("Ship Landed", 5);
+            _uiManager.SetInfo("Ship Landed", 5);
         }
 
         private void DrawLandingZoneGizmos()

@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using DG.Tweening;
 using Interfaces;
 using Unity.Assertions;
 using UnityEngine;
@@ -12,10 +13,12 @@ public class Health : MonoBehaviour, IDamageable
 
     public UnityEvent<float> onHealthChanged = new();
     public UnityEvent onDeath = new();
+    public UnityEvent onDamage = new();
 
     public float CurrentHealth { get; private set; }
     public float MaxHealth => config.MaxHealth;
     private float _timeSinceLastDamage;
+    private Tweener? _tween;
 
     public void Reset()
     {
@@ -48,6 +51,10 @@ public class Health : MonoBehaviour, IDamageable
         CurrentHealth = Mathf.Clamp(CurrentHealth - damage, 0, config.MaxHealth);
         _timeSinceLastDamage = 0;
         onHealthChanged.Invoke(CurrentHealth);
+        onDamage.Invoke();
+
+        _tween ??= transform.DOShakePosition(0.5f, 0.5f, 10, 90, false).OnComplete(() => _tween = null)
+            .OnKill(() => _tween = null);
     }
 
     public void Heal(float healAmount)
@@ -58,6 +65,7 @@ public class Health : MonoBehaviour, IDamageable
 
     private void Die()
     {
+        _tween?.Kill();
         onDeath.Invoke();
     }
 

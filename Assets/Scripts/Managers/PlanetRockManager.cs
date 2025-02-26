@@ -10,8 +10,6 @@ namespace Managers
     {
         public override void GenerateObjectPositions()
         {
-            if (!Planet || !ObjectSpawner) return;
-
             Positions.Clear();
             if (Planet.rockPrefabs.Length == 0) return;
             if (Planet.numRocks == 0) return;

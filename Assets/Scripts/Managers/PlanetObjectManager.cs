@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using Interfaces;
 using PlanetarySystem.Planet;
+using Unity.Assertions;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -12,14 +13,15 @@ namespace Managers
     public abstract class PlanetObjectManager<T> : MonoBehaviour
     where T : MonoBehaviour, IPoolable<T>
     {
-        protected Planet? Planet;
-        protected ObjectSpawner<T>? ObjectSpawner;
+        protected Planet Planet = null!;
+        protected ObjectSpawner<T> ObjectSpawner = null!;
 
         private readonly List<T> _activeObjects = new ();
         protected readonly Dictionary<T, IObjectPool<T>> Pools = new ();
         protected readonly Dictionary<T, Vector3> Positions = new ();
+        protected readonly Dictionary<T, Vector3> Rotations = new ();
 
-        protected Transform? PlayerTransform;
+        protected Transform PlayerTransform = null!;
         private Vector3 _lastUpdatePosition;
 
         [SerializeField] private float spawnRadius = 1000f;
@@ -35,12 +37,14 @@ namespace Managers
             PlayerTransform = GameObject.FindWithTag("Player").transform;
             _lastUpdatePosition = PlayerTransform.position;
             ObjectSpawner = FindFirstObjectByType<ObjectSpawner<T>>();
+
+            Assert.IsNotNull(Planet);
+            Assert.IsNotNull(PlayerTransform);
+            Assert.IsNotNull(ObjectSpawner);
         }
 
         private void Update()
         {
-            if (!PlayerTransform) return;
-
             if (Time.time < _nextCheckTime) return;
 
             var distanceMoved = Vector3.Distance(PlayerTransform.position, _lastUpdatePosition);
@@ -111,6 +115,10 @@ namespace Managers
             obj.transform.parent = Planet.transform;
             obj.gameObject.SetActive(true);
             obj.transform.localPosition = pos;
+            if (Rotations.TryGetValue(obj, out var rot))
+            {
+                obj.transform.localRotation = Quaternion.Euler(rot);
+            }
             _activeObjects.Add(obj);
             Spawn(obj);
         }

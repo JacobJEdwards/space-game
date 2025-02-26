@@ -18,7 +18,7 @@ namespace Player
         [Header("UI Settings")] [SerializeField]
         private MicroBar oxygenUI = null!;
 
-        [SerializeField] private UiManager uiManager = null!;
+        private UiManager _uiManager = null!;
 
         private bool _zeroGUIActive;
 
@@ -28,9 +28,11 @@ namespace Player
             Assert.IsNotNull(playerOxygenConfig, "Oxygen config is not assigned");
             Assert.IsNotNull(oxygenUI, "Oxygen UI is not assigned");
 
+            _uiManager = UiManager.Instance;
+
             oxygenUI.Initialize(playerOxygenConfig.MaxOxygen);
-            uiManager.RegisterPanel(this);
-            uiManager.TransitionToState(UIState.ZeroG);
+            _uiManager.RegisterPanel(this);
+            _uiManager.TransitionToState(UIState.ZeroG);
         }
 
         private void Update()

@@ -21,6 +21,8 @@ namespace Managers
 
     public class UiManager : MonoBehaviour
     {
+        public static UiManager Instance { get; private set; } = null!;
+
         [Header("Spaceship Settings")] [SerializeField]
         private ShipController? shipController;
 
@@ -40,6 +42,18 @@ namespace Managers
 
         private UIState _previousState = UIState.None;
 
+        private void Awake()
+        {
+            if (!Instance)
+            {
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
 
         public void RegisterPanel(IUIPanel panel)
         {

@@ -70,6 +70,34 @@
     margin-top: 10px;
 }
 
+/* New upgrade button styles */
+.upgradeButton {
+    background-color: rgb(47, 92, 48);
+    border-radius: 5px;
+    padding: 5px 10px;
+    color: white;
+    font-size: 16px;
+    margin-top: 10px;
+    align-self: center;
+    transition: all 0.2s;
+}
+
+.upgradeButton:hover {
+    background-color: rgb(72, 133, 73);
+    scale: 1.05;
+}
+
+.upgradeButton:active {
+    background-color: rgb(46, 99, 47);
+    scale: 0.95;
+}
+
+.upgradeButton:disabled {
+    background-color: rgb(64, 64, 64);
+    color: rgb(180, 180, 180);
+    opacity: 0.7;
+}
+
 .slotsContainer {
     -unity-background-image-tint-color: rgba(255, 255, 255, 0);
     flex-grow: 1;
@@ -118,4 +146,108 @@
     color: yellow;
     font-weight: normal;
     -unity-text-align: middle-center;
+}
+
+/* New upgrade panel styles */
+.upgradePanel {
+    position: absolute;
+    width: 400px;
+    background-color: rgb(28, 32, 36);
+    border-top-color: rgb(255, 197, 0);
+    border-top-width: 3px;
+    padding: 15px;
+    border-radius: 8px;
+    display: none;
+    flex-direction: column;
+}
+
+.upgradeHeader {
+    font-size: 24px;
+    color: rgb(255, 197, 0);
+    border-bottom-color: rgb(64, 74, 82);
+    border-bottom-width: 2px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+}
+
+.upgradeOption {
+    flex-direction: row;
+    padding: 10px;
+    margin: 5px 0;
+    background-color: rgba(9, 19, 21, 0.7);
+    border-radius: 5px;
+    align-items: center;
+}
+
+.upgradeOptionIcon {
+    width: 64px;
+    height: 64px;
+    background-color: rgba(48, 48, 48, 0.5);
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.upgradeInfo {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.upgradeTitle {
+    font-size: 18px;
+    color: rgb(255, 197, 0);
+    margin-bottom: 5px;
+}
+
+.upgradeDescription {
+    font-size: 14px;
+    color: white;
+    margin-bottom: 5px;
+}
+
+.resourceRequirement {
+    flex-direction: row;
+    align-items: center;
+    margin: 2px 0;
+}
+
+.resourceIcon {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}
+
+.resourceText {
+    font-size: 12px;
+    color: white;
+}
+
+.resourceAvailable {
+    color: rgb(130, 255, 130);
+}
+
+.resourceMissing {
+    color: rgb(255, 130, 130);
+}
+
+.upgradeOptionButton {
+    background-color: rgb(47, 92, 48);
+    border-radius: 5px;
+    padding: 5px 10px;
+    color: white;
+    font-size: 14px;
+    margin-left: 10px;
+    align-self: center;
+}
+
+.closeButton {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 24px;
+    height: 24px;
+    background-color: rgba(255, 85, 85, 0.7);
+    border-radius: 12px;
+    color: white;
+    -unity-text-align: middle-center;
+    font-size: 14px;
 }

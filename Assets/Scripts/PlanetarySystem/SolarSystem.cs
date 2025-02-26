@@ -86,7 +86,7 @@ namespace PlanetarySystem
                     Mathf.Sin(angle * Mathf.Deg2Rad) * orbitRadius
                 );
 
-                planetObj.transform.position = position + (sun?.transform.position ?? Vector3.zero);
+                planetObj.transform.position = position + sun.transform.position;
 
                 planets.Add(planet);
             }

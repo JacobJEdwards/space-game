@@ -21,21 +21,22 @@ namespace Spaceship
         [Header("UI Settings")] [SerializeField]
         private MicroBar overheatedUI = null!;
         [SerializeField] private MicroBar boostUI = null!;
-        [SerializeField] private UiManager uiManager = null!;
+        private UiManager _uiManager = null!;
 
         private void Start()
         {
+            _uiManager = UiManager.Instance;
             Assert.IsNotNull(shipMovement, "Ship movement is not set!");
             Assert.IsNotNull(shipShooting, "Ship shooting is not set!");
             Assert.IsNotNull(shipMovementConfig, "Ship movement config is not set!");
             Assert.IsNotNull(overheatedUI, "Overheated UI is not set!");
             Assert.IsNotNull(boostUI, "Boost UI is not set!");
-            Assert.IsNotNull(uiManager, "UI Manager is not set!");
+            Assert.IsNotNull(_uiManager, "UI Manager is not set!");
 
             overheatedUI.Initialize(shipShooting.LaserMaxCharge);
             boostUI.Initialize(shipMovementConfig.MaxBoostAmount);
 
-            uiManager.RegisterPanel(this);
+            _uiManager.RegisterPanel(this);
         }
 
         private void Update()

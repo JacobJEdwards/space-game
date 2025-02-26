@@ -1,5 +1,6 @@
 #nullable enable
 
+using DG.Tweening;
 using Interfaces;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -27,5 +28,6 @@ namespace NPC
         {
             _health.Reset();
         }
+
     }
 }

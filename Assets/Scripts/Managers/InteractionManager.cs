@@ -9,7 +9,7 @@ namespace Managers
     {
         [SerializeField] private LayerMask interactionLayer;
         [SerializeField] private float interactionRange = 5f;
-        [SerializeField] private UiManager? uiManager;
+        private UiManager _uiManager = null!;
 
         private IInteractable? _currentTarget;
 
@@ -22,6 +22,7 @@ namespace Managers
 
         private void Start()
         {
+            _uiManager = UiManager.Instance;
             interactionLayer = LayerMask.GetMask("Interaction");
         }
 
@@ -32,7 +33,7 @@ namespace Managers
 
         private void HandleInteractionRaycast()
         {
-            if (!_mainCamera || !uiManager) return;
+            if (!_mainCamera || !_uiManager) return;
 
             var ray = _mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
@@ -46,18 +47,18 @@ namespace Managers
 
                     _currentTarget = interactable;
 
-                    uiManager.SetHint(interactable.GetInteractionPrompt(gameObject));
+                    _uiManager.SetHint(interactable.GetInteractionPrompt(gameObject));
                 }
                 else
                 {
                     _currentTarget = null;
-                    uiManager.ClearHint();
+                    _uiManager.ClearHint();
                 }
             }
             else
             {
                 _currentTarget = null;
-                uiManager.ClearHint();
+                _uiManager.ClearHint();
             }
         }
 

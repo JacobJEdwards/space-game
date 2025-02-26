@@ -93,14 +93,14 @@ namespace Objects
 
             if (!asteroid) return;
 
+            asteroid.transform.parent = transform;
             asteroid.transform.position = player.transform.position +
                                           Random.insideUnitSphere.normalized *
                                           Random.Range(spawnRadius, fromPlayerRadius);
             asteroid.transform.rotation = Random.rotation;
-            asteroid.transform.localScale = Vector3.one * Random.Range(1f, 10f);
+            asteroid.transform.localScale = Vector3.one * Random.Range(10f, 30f);
 
             var rb = asteroid.rb;
-            if (!rb) return;
             rb.linearVelocity = Random.insideUnitSphere * Random.Range(1f, 5f);
             rb.angularVelocity = Random.insideUnitSphere * Random.Range(1f, 5f);
         }

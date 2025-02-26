@@ -26,9 +26,9 @@ namespace Player
         [Header("Camera Settings")] [SerializeField]
         private CinemachineCamera playerCamera = null!;
 
-        [SerializeField] private CameraController cameraController = null!;
+        private CameraController _cameraController = null!;
         [SerializeField] private InteractionManager interactionManager = null!;
-        [SerializeField] private UiManager uiManager = null!;
+        private UiManager _uiManager = null!;
         [SerializeField] private Transform aim = null!;
 
         [Header("Movement Settings")] [SerializeField]
@@ -50,6 +50,9 @@ namespace Player
 
         private void Start()
         {
+            _cameraController = CameraController.Instance;
+            _uiManager = UiManager.Instance;
+
             movementSettings.groundLayer = LayerMask.GetMask("PlanetSurface");
             InitialiseComponents();
             ValidateComponents();
@@ -66,13 +69,14 @@ namespace Player
 
         private void OnEnable()
         {
-            if (playerCamera) CameraController.Register(playerCamera);
-            CameraController.SetActiveCamera(playerCamera);
+            if (playerCamera) _cameraController?.Register(playerCamera);
+
+            _cameraController?.SetActiveCamera(playerCamera);
         }
 
         private void OnDisable()
         {
-            if (playerCamera) CameraController.Unregister(playerCamera);
+            if (playerCamera) _cameraController.Unregister(playerCamera);
         }
 
         private static void HideLockMouse(bool on)
@@ -121,7 +125,7 @@ namespace Player
 
         private void OnToggleInventory()
         {
-            uiManager.ToggleInventory();
+            _uiManager.ToggleInventory();
         }
 
         private void UpdateOxygenAndHealth()
@@ -178,8 +182,8 @@ namespace Player
 
             onEnterShip.Invoke();
             _playerOxygen.Reset();
-            uiManager.ClearHint();
-            uiManager.TransitionToState(UIState.Ship);
+            _uiManager.ClearHint();
+            _uiManager.TransitionToState(UIState.Ship);
             UpdateMovementComponents();
         }
 
@@ -188,7 +192,7 @@ namespace Player
             transform.parent = null;
             gameObject.SetActive(true);
 
-            CameraController.SetActiveCamera(playerCamera);
+            _cameraController.SetActiveCamera(playerCamera);
 
             if (shipToEnter && shipToEnter.CurrentState == ShipState.Landed)
                 _playerState = PlayerState.InGravity;
@@ -197,8 +201,8 @@ namespace Player
 
             onExitShip.Invoke();
             shipToEnter = null;
-            uiManager.ClearHint();
-            uiManager.TransitionToState(UIState.ZeroG); // FIX
+            _uiManager.ClearHint();
+            _uiManager.TransitionToState(UIState.ZeroG); // FIX
             UpdateMovementComponents();
         }
 

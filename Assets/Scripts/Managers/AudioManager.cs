@@ -26,6 +26,12 @@ namespace Managers
             }
         }
 
+        private void Start()
+        {
+            musicVolume = PlayerPrefs.GetFloat("MusicVolume", 100);
+            soundVolume = PlayerPrefs.GetFloat("SFXVolume", 100);
+        }
+
         public void PlayMusic(AudioSource audioSource, AudioClip clip)
         {
             if (audioSource.isPlaying) return;

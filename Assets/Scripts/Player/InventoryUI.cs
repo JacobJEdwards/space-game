@@ -15,7 +15,7 @@ namespace Player
     public class InventoryUI : MonoBehaviour, IUIPanel
     {
         [SerializeField] private Inventory inventory = null!;
-        [SerializeField] private UiManager uiManager = null!;
+        private UiManager _uiManager = null!;
 
         [SerializeField] public ShipInfo? currentShip;
         [SerializeField] public WeaponInfo? currentWeapon;
@@ -38,7 +38,6 @@ namespace Player
         private void Awake()
         {
             Assert.IsNotNull(inventory, "Inventory is not assigned");
-            Assert.IsNotNull(uiManager, "UI Manager is not assigned");
 
             _root = GetComponentInChildren<UIDocument>().rootVisualElement;
             Assert.IsNotNull(_root, "Root is not found");
@@ -67,7 +66,9 @@ namespace Player
 
         private void Start()
         {
-            uiManager.RegisterPanel(this);
+            _uiManager = UiManager.Instance;
+
+            _uiManager.RegisterPanel(this);
             inventory.OnInventoryChanged += _ => UpdateInventory();
         }
 

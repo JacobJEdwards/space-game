@@ -9,6 +9,15 @@
       },
       "url": "https://package.openupm.com"
     },
+    "com.hunter-production.new-libre-fracture": {
+      "version": "https://github.com/HunterProduction/unity-libre-fracture-2.0.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.ext.nunit": "1.0.0"
+      },
+      "hash": "374197229591a3946b9d8bce44df882bdd413dbc"
+    },
     "com.kybernetik.animancer": {
       "version": "file:com.kybernetik.animancer",
       "depth": 0,
@@ -142,7 +151,7 @@
     },
     "com.unity.ext.nunit": {
       "version": "2.0.5",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
@@ -192,6 +201,19 @@
       "depth": 1,
       "source": "registry",
       "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.memoryprofiler": {
+      "version": "1.1.5",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.burst": "1.8.0",
+        "com.unity.collections": "1.2.3",
+        "com.unity.mathematics": "1.2.1",
+        "com.unity.profiling.core": "1.0.0",
+        "com.unity.editorcoroutines": "1.0.0"
+      },
       "url": "https://packages.unity.com"
     },
     "com.unity.multiplayer.center": {
@@ -423,6 +445,12 @@
       "source": "builtin",
       "dependencies": {}
     },
+    "com.unity.modules.amd": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
     "com.unity.modules.androidjni": {
       "version": "1.0.0",
       "depth": 0,
@@ -483,6 +511,12 @@
       "dependencies": {}
     },
     "com.unity.modules.jsonserialize": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.nvidia": {
       "version": "1.0.0",
       "depth": 0,
       "source": "builtin",

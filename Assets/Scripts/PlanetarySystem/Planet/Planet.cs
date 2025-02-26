@@ -14,6 +14,7 @@ namespace PlanetarySystem.Planet
     {
         [Range(2, 256)] public int resolution = 10;
         [Range(0, 512)] public int numRocks = 40;
+        [Range(0, 60)] public int numTrees = 40;
 
         public PlanetWater? waterSystem;
         public Material waterMaterial = null!;
@@ -28,6 +29,7 @@ namespace PlanetarySystem.Planet
 
         [SerializeField] public Rock[] rockPrefabs = Array.Empty<Rock>();
         [SerializeField] public Life[] lifePrefabs = Array.Empty<Life>();
+        [SerializeField] public Objects.Tree[] treePrefabs = Array.Empty<Objects.Tree>();
 
         [DontSerialize] private MeshFilter[] _meshFilters = Array.Empty<MeshFilter>();
 
@@ -39,6 +41,7 @@ namespace PlanetarySystem.Planet
         public readonly ShapeGenerator ShapeGenerator = new();
 
         [SerializeField] private PlanetRockManager rockManager = null!;
+        [SerializeField] private PlanetTreeManager treeManager = null!;
         [SerializeField] private PlanetLifeManager lifeManager = null!;
 
         private void Initialize()
@@ -95,6 +98,7 @@ namespace PlanetarySystem.Planet
             GenerateAtmosphere();
             if (hasWater) GenerateWater();
             GenerateRocks();
+            GenerateTrees();
             GenerateLife();
 
             foreach (var meshFilter in _meshFilters)
@@ -169,6 +173,19 @@ namespace PlanetarySystem.Planet
             }
 
             rockManager.GenerateObjectPositions();
+        }
+
+        private void GenerateTrees()
+        {
+            if (treePrefabs.Length == 0) return;
+            if (numTrees == 0) return;
+
+            if (!treeManager)
+            {
+                treeManager = gameObject.AddComponent<PlanetTreeManager>();
+            }
+
+            treeManager.GenerateObjectPositions();
         }
 
         private void GenerateMesh()

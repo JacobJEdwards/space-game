@@ -9,18 +9,34 @@
                     <ui:Label text="Ship" class="equipmentLabel"/>
                     <ui:VisualElement name="ShipImage" class="equipmentImage"/>
                     <ui:Label name="ShipName" class="equipmentName"/>
+                    <ui:Button text="Upgrade" name="ShipUpgradeButton" class="upgradeButton"/>
                 </ui:VisualElement>
 
                 <ui:VisualElement name="WeaponContainer" class="equipmentSlot">
                     <ui:Label text="Weapon" class="equipmentLabel"/>
                     <ui:VisualElement name="WeaponImage" class="equipmentImage"/>
                     <ui:Label name="WeaponName" class="equipmentName"/>
+                    <ui:Button text="Upgrade" name="WeaponUpgradeButton" class="upgradeButton"/>
                 </ui:VisualElement>
             </ui:VisualElement>
 
             <ui:VisualElement name="SlotContainer" class="slotsContainer"
                               style="align-items: center; justify-content: center; flex-direction: row; margin-top: 0; margin-left: 0; margin-right: 0; margin-bottom: 0; flex-shrink: 1;"/>
         </ui:VisualElement>
+
+        <!-- Upgrade Panels -->
+        <ui:VisualElement name="ShipUpgradePanel" class="upgradePanel">
+            <ui:Label text="Ship Upgrades" name="ShipUpgradeHeader" class="upgradeHeader"/>
+            <ui:Button text="×" name="CloseShipUpgradeButton" class="closeButton"/>
+            <ui:ScrollView name="ShipUpgradeOptions"/>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="WeaponUpgradePanel" class="upgradePanel">
+            <ui:Label text="Weapon Upgrades" name="WeaponUpgradeHeader" class="upgradeHeader"/>
+            <ui:Button text="×" name="CloseWeaponUpgradeButton" class="closeButton"/>
+            <ui:ScrollView name="WeaponUpgradeOptions"/>
+        </ui:VisualElement>
+
         <ui:VisualElement name="GhostIcon"
                           style="visibility: hidden; position: absolute; width: 128px; height: 128px; background-image: none;"/>
     </ui:VisualElement>

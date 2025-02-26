@@ -76,6 +76,9 @@ namespace PlanetarySystem
             planet.numRocks = _random.Next(0, 40);
             planet.hasLife = _random.NextDouble() < 0.5f;
 
+            // make dependant on biome
+            planet.numTrees = _random.Next(0, 40);
+
             planet.GeneratePlanet();
         }
 

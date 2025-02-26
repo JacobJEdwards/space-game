@@ -38,6 +38,21 @@ namespace Player
             OnInventoryChanged.Invoke(this);
         }
 
+        public void RemoveResource(string resourceName, int amount)
+        {
+            foreach (var t in resources.Where(t => t.resourceName == resourceName))
+            {
+                t.resourceAmount -= amount;
+                if (t.resourceAmount <= 0)
+                    resources.Remove(t);
+
+                OnInventoryChanged.Invoke(this);
+                return;
+            }
+
+            OnInventoryChanged.Invoke(this);
+        }
+
         public ResourceObject? GetResource(string resourceName)
         {
             return resources.FirstOrDefault(t => t.resourceName == resourceName);
