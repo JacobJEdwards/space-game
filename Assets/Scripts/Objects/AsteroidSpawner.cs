@@ -11,7 +11,7 @@ namespace Objects
     {
         public Transform player = null!;
 
-        public List<Asteroid> asteroidPrefabs = new();
+        public Asteroid[] asteroidPrefabs = null!;
         public List<GameObject> possibleDrops = new();
 
         public float spawnRadius = 2000f;
@@ -25,7 +25,7 @@ namespace Objects
         private void Awake()
         {
             Assert.IsNotNull(player);
-            Assert.IsTrue(asteroidPrefabs.Count > 0, "No asteroid prefabs assigned");
+            Assert.IsTrue(asteroidPrefabs.Length > 0, "No asteroid prefabs assigned");
 
             _asteroidPool = new ObjectPool<Asteroid>(
                 CreateAsteroid,
@@ -40,8 +40,6 @@ namespace Objects
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         private void Start()
         {
-            if (_asteroidPool == null) return;
-
             for (var i = 0; i < maxAsteroids; i++)
             {
                 var asteroid = _asteroidPool.Get();
@@ -64,7 +62,7 @@ namespace Objects
 
         private Asteroid CreateAsteroid()
         {
-            var asteroid = Instantiate(asteroidPrefabs[Random.Range(0, asteroidPrefabs.Count)]);
+            var asteroid = Instantiate(Utils.RandomElement(asteroidPrefabs), transform);
             asteroid.gameObject.SetActive(false);
             var onDeath = asteroid.GetComponent<DropOnDeath>();
             if (onDeath) onDeath.possibleDrops = possibleDrops;

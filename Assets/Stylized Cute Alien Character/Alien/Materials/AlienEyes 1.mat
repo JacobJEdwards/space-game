@@ -53,6 +53,8 @@ Material:
     m_Floats:
     - Power: 4.05
     - Smoothness: 0.71
+    - _BUILTIN_QueueControl: 0
+    - _BUILTIN_QueueOffset: 0
     - _QueueControl: -1
     - _QueueOffset: 0
     m_Colors:

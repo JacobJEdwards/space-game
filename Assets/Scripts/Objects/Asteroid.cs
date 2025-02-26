@@ -25,6 +25,7 @@ namespace Objects
         private void Start()
         {
             health = GetComponent<Health>();
+            Assert.IsNotNull(health);
             health.onDeath.AddListener(OnDie);
             _fracture = GetComponentInChildren<Fracture>();
             rb = GetComponent<Rigidbody>();

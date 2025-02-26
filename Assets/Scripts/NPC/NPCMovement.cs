@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections;
+using Animancer;
 using Managers;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -28,7 +29,14 @@ namespace NPC
         [Header("References")]
         [SerializeField] public Transform planet = null!;
         [SerializeField] public Transform target = null!;
-        [SerializeField] private Animator animator = null!;
+        [SerializeField] private AnimancerComponent animancer = null!;
+
+        [SerializeField] private AnimationClip idleAnimation = null!;
+        [SerializeField] private AnimationClip walkAnimation = null!;
+        [SerializeField] private AnimationClip interactAnimation = null!;
+        [SerializeField] private AnimationClip deathAnimation = null!;
+        [SerializeField] private AnimationClip floatingAnimation = null!;
+        [SerializeField] private AnimationClip fleeAnimation = null!;
 
         [Header("Movement Settings")]
         [SerializeField] private float speed = 5f;
@@ -94,13 +102,6 @@ namespace NPC
         [SerializeField] private NpcState currentState = NpcState.Idle;
         private Quaternion _originalHeadRotation;
 
-        private static readonly int IsMoving = Animator.StringToHash("Walking");
-        private static readonly int Idle = Animator.StringToHash("Idle");
-        private static readonly int Interact = Animator.StringToHash("Interact");
-        private static readonly int Flee = Animator.StringToHash("Flee");
-        private static readonly int Death = Animator.StringToHash("Death");
-        private static readonly int Floating = Animator.StringToHash("Floating");
-
         private void Awake()
         {
             _rb = GetComponent<Rigidbody>();
@@ -148,8 +149,7 @@ namespace NPC
 
             _rb.isKinematic = true;
             currentState = NpcState.Death;
-            if (Utils.IsNotPlaying(Death, animator))
-                animator.CrossFade(Death, 0.1f);
+            animancer.Play(deathAnimation);
 
             Invoke(nameof(DestroyAfterAnimation), 1.5f);
 
@@ -524,7 +524,6 @@ namespace NPC
 
         private void ValidateComponents()
         {
-            Assert.IsNotNull(animator, "Animator is missing");
         }
 
         private void FixedUpdate()
@@ -716,24 +715,29 @@ namespace NPC
             switch (currentState)
             {
                 case NpcState.Interact:
-                        animator.Play(Interact);
+                        animancer.Play(interactAnimation);
                     break;
                 case NpcState.Flee:
-                        animator.Play(Flee);
+                        animancer.Play(fleeAnimation);
                     break;
                 case NpcState.Falling:
-                        animator.Play(Floating);
+                        animancer.Play(floatingAnimation);
                     break;
                 case NpcState.Death:
-                        animator.Play(Death);
+                    animancer.Play(deathAnimation);
+                    break;
+                case NpcState.Follow:
+                    animancer.Play(walkAnimation);
                     break;
                 case NpcState.Idle:
-                case NpcState.Follow:
                 case NpcState.ObservePlayer:
+                    animancer.Play(idleAnimation);
+                    break;
                 case NpcState.Wander:
+                    animancer.Play(walkAnimation);
+                    break;
                 default:
-                    var state = isMoving ? IsMoving : Idle;
-                        animator.Play(state);
+                    var s = animancer.Play(isMoving ? walkAnimation : idleAnimation);
                     break;
             }
         }
