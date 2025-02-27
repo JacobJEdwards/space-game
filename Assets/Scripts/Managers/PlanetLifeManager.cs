@@ -34,9 +34,12 @@ namespace Managers
         protected override void Spawn(Life life)
         {
             life.transform.localScale = Vector3.one * Random.Range(0.5f, 1.5f);
+
+            var lifeComp = life.GetComponent<Life>();
+            lifeComp.planet = Planet.transform;
+
             var movement = life.GetComponent<NpcMovement>();
-            movement.target = PlayerTransform;
-            movement.planet = Planet.transform;
+            movement.player = PlayerTransform;
         }
     }
 }

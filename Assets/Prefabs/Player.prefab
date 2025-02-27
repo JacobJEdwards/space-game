@@ -250,7 +250,6 @@ GameObject:
   - component: {fileID: 4030847463064640494}
   - component: {fileID: 6606475585345593096}
   - component: {fileID: 7280029632547988676}
-  - component: {fileID: 432734511424112297}
   - component: {fileID: 631537983138416811}
   - component: {fileID: 1630398587896513363}
   - component: {fileID: 3813215379205566857}
@@ -297,9 +296,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCamera: {fileID: 2313818296210678981}
-  cameraController: {fileID: 0}
-  interactionManager: {fileID: 432734511424112297}
-  uiManager: {fileID: 0}
+  interactionManager: {fileID: 0}
   aim: {fileID: 0}
   movementSettings:
     groundLayer:
@@ -397,23 +394,9 @@ MonoBehaviour:
   onDeath:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &432734511424112297
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2844745781105623541}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a5bc0a22c074dfda86d694c7238b0ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  interactionLayer:
-    serializedVersion: 2
-    m_Bits: 128
-  interactionRange: 5
-  uiManager: {fileID: 0}
+  onDamage:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &631537983138416811
 MonoBehaviour:
   m_ObjectHideFlags: 0

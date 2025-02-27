@@ -273,6 +273,8 @@ namespace Spaceship
                 _nearestLandingZone.transform.up
             ) * _nearestLandingZone.transform.forward;
 
+            Debug.DrawRay(center, direction, Color.red);
+
             if (!Physics.Raycast(center, direction, out var hit, landingSettings.landingRayRadius,
                     landingSettings.landingLayers))
                 return false;

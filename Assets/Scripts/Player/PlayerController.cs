@@ -27,9 +27,8 @@ namespace Player
         private CinemachineCamera playerCamera = null!;
 
         private CameraController _cameraController = null!;
-        [SerializeField] private InteractionManager interactionManager = null!;
+        private InteractionManager _interactionManager = null!;
         private UiManager _uiManager = null!;
-        [SerializeField] private Transform aim = null!;
 
         [Header("Movement Settings")] [SerializeField]
         private MovementSettings movementSettings = null!;
@@ -52,6 +51,7 @@ namespace Player
         {
             _cameraController = CameraController.Instance;
             _uiManager = UiManager.Instance;
+            _interactionManager = GetComponent<InteractionManager>();
 
             movementSettings.groundLayer = LayerMask.GetMask("PlanetSurface");
             InitialiseComponents();
@@ -96,7 +96,7 @@ namespace Player
 
         private void InitialiseComponents()
         {
-            var inputManager = FindFirstObjectByType<InputManager>();
+            var inputManager = InputManager.Instance;
             inputManager.SetOnInteractPressed(OnInteractionInput);
             inputManager.SetOnInventoryPress(OnToggleInventory);
 
@@ -120,7 +120,7 @@ namespace Player
 
         private void OnInteractionInput()
         {
-            interactionManager.OnInteractInput();
+            _interactionManager.OnInteractInput();
         }
 
         private void OnToggleInventory()

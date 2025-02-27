@@ -34,7 +34,6 @@ namespace Spaceship
             {
                 return;
             }
-
             if (_shipController.IsOccupied)
             {
                 _shipController.PlayerExitShip();

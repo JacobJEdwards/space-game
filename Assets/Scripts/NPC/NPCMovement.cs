@@ -26,9 +26,9 @@ namespace NPC
     [RequireComponent(typeof(Rigidbody), typeof(Life))]
     public class NpcMovement : MonoBehaviour
     {
+        [FormerlySerializedAs("target")]
         [Header("References")]
-        [SerializeField] public Transform planet = null!;
-        [SerializeField] public Transform target = null!;
+        [SerializeField] public Transform player = null!;
         [SerializeField] private AnimancerComponent animancer = null!;
 
         [SerializeField] private AnimationClip idleAnimation = null!;
@@ -98,6 +98,7 @@ namespace NPC
         private Vector3 _fleeTarget;
         private float _stateTimer;
         private float _originalSpeed;
+        private Life _life = null!;
 
         [SerializeField] private NpcState currentState = NpcState.Idle;
         private Quaternion _originalHeadRotation;
@@ -107,6 +108,7 @@ namespace NPC
             _rb = GetComponent<Rigidbody>();
             _health = GetComponent<Health>();
             _originalSpeed = speed;
+            _life = GetComponent<Life>();
             ConfigureRigidbody();
 
             if (headBone)
@@ -124,13 +126,11 @@ namespace NPC
 
         private void Start()
         {
-            ValidateComponents();
             waterLayer = LayerMask.GetMask("Water", "Rock");
             npcLayer = LayerMask.GetMask("NPC");
 
             _health.onHealthChanged.AddListener(OnHealthChanged);
             _health.onDeath.AddListener(OnDeath);
-
             ChangeState(NpcState.Idle);
         }
 
@@ -230,7 +230,7 @@ namespace NPC
         {
             while (true)
             {
-                if (target && Vector3.Distance(transform.position, target.position) < followDistance)
+                if (player && Vector3.Distance(transform.position, player.position) < followDistance)
                 {
                     ChangeState(NpcState.Follow);
                     yield break;
@@ -287,8 +287,8 @@ namespace NPC
         {
             while (Vector3.Distance(transform.position, _wanderTarget) > stopDistance)
             {
-                if (target && Vector3.Distance(transform.position, target.position) < followDistance
-                            && Vector3.Distance(transform.position, target.position) > minLookDistance)
+                if (player && Vector3.Distance(transform.position, player.position) < followDistance
+                            && Vector3.Distance(transform.position, player.position) > minLookDistance)
                 {
                     ChangeState(NpcState.Follow);
                     yield break;
@@ -355,7 +355,7 @@ namespace NPC
         {
             while (true)
             {
-                var direction = (target.position - transform.position).normalized;
+                var direction = (player.position - transform.position).normalized;
                 direction = Vector3.ProjectOnPlane(direction, _surfaceNormal).normalized;
 
                 var targetRotation = Quaternion.LookRotation(direction, _surfaceNormal);
@@ -372,7 +372,7 @@ namespace NPC
 
                 if (!ShouldObservePlayer())
                 {
-                    ChangeState(Vector3.Distance(target.transform.position, transform.position) < followDistance
+                    ChangeState(Vector3.Distance(player.transform.position, transform.position) < followDistance
                         ? NpcState.Follow
                         : NpcState.Idle);
 
@@ -382,7 +382,7 @@ namespace NPC
                 if (headBone)
                 {
 
-                    var lookDir = target.position - headBone.position;
+                    var lookDir = player.position - headBone.position;
                     var lookRot = Quaternion.LookRotation(lookDir, transform.up);
                     headBone.rotation = Quaternion.Slerp(headBone.rotation, lookRot, Time.deltaTime * headTrackingSpeed);
                 }
@@ -409,9 +409,9 @@ namespace NPC
 
             speed = fleeSpeed;
 
-            if (target)
+            if (player)
             {
-                var fleeDirection = (transform.position - target.position).normalized;
+                var fleeDirection = (transform.position - player.position).normalized;
                 _fleeTarget = transform.position + fleeDirection * fleeDistance;
 
                 if (IsWaterAhead(fleeDirection))
@@ -446,9 +446,9 @@ namespace NPC
                     yield break;
                 }
 
-                if (target && Vector3.Distance(transform.position, target.position) < fleeDistance * 0.5f)
+                if (player && Vector3.Distance(transform.position, player.position) < fleeDistance * 0.5f)
                 {
-                    var fleeDirection = (transform.position - target.position).normalized;
+                    var fleeDirection = (transform.position - player.position).normalized;
                     if (IsWaterAhead(fleeDirection))
                     {
                         fleeDirection = FindSafeDirection(fleeDirection);
@@ -482,7 +482,7 @@ namespace NPC
 
         private bool ShouldObservePlayer()
         {
-            var distanceToPlayer = Vector3.Distance(transform.position, target.position);
+            var distanceToPlayer = Vector3.Distance(transform.position, player.position);
             return distanceToPlayer <= observationDistance;
         }
 
@@ -522,14 +522,9 @@ namespace NPC
             return cohesion + separation;
         }
 
-        private void ValidateComponents()
-        {
-        }
-
         private void FixedUpdate()
         {
             UpdateGroundedState();
-            ApplyGravity();
 
             var moveDirection = Vector3.zero;
 
@@ -545,10 +540,10 @@ namespace NPC
                 case NpcState.Follow:
                 {
 
-                    var distanceToTarget = Vector3.Distance(transform.position, target.position);
+                    var distanceToTarget = Vector3.Distance(transform.position, player.position);
                     if (distanceToTarget <= stopDistance)
                     {
-                        moveDirection = CalculateMovementDirection(transform.position + (transform.position - target.position));
+                        moveDirection = CalculateMovementDirection(transform.position + (transform.position - player.position));
                     } else if (distanceToTarget <= minLookDistance)
                     {
                         ChangeState(NpcState.ObservePlayer);
@@ -558,7 +553,7 @@ namespace NPC
                     }
                     else
                     {
-                        moveDirection = CalculateMovementDirection(target.position);
+                        moveDirection = CalculateMovementDirection(player.position);
                     }
                 }
                     break;
@@ -570,12 +565,12 @@ namespace NPC
                 case NpcState.Interact:
                 case NpcState.ObservePlayer:
                 {
-                    var distanceToTarget = Vector3.Distance(transform.position, target.position);
+                    var distanceToTarget = Vector3.Distance(transform.position, player.position);
 
                     if (distanceToTarget <= minLookDistance)
                     {
                         moveDirection =
-                            CalculateMovementDirection(transform.position + (transform.position - target.position));
+                            CalculateMovementDirection(transform.position + (transform.position - player.position));
                     }
                     else if (distanceToTarget > followDistance)
                     {
@@ -614,25 +609,17 @@ namespace NPC
 
         private void UpdateGroundedState()
         {
-            var direction = -(transform.position - planet.position).normalized;
-
-            var origin = transform.position + _surfaceNormal * 0.1f;
-            if (Physics.Raycast(origin, direction, out var hit, 5f))
+            switch (_isGrounded)
             {
-                _surfaceNormal = hit.normal;
-                if (_isGrounded) return;
-
-                _isGrounded = true;
-                ChangeState(NpcState.Idle);
-            } else
-            {
-                _isGrounded = false;
-                if (currentState != NpcState.Falling)
-                {
+                case false when _life.isGrounded:
+                    _isGrounded = true;
+                    ChangeState(NpcState.Idle);
+                    break;
+                case true when !_life.isGrounded:
+                    _isGrounded = false;
                     ChangeState(NpcState.Falling);
-                }
+                    break;
             }
-
         }
 
         private bool IsWaterAhead(Vector3 moveDirection)
@@ -697,15 +684,6 @@ namespace NPC
             {
                 AudioManager.Instance.PlaySound(moveAudioSource, Utils.RandomElement(moveClips));
             }
-        }
-
-        private void ApplyGravity()
-        {
-            var gravityDir = -(transform.position - planet.position).normalized;
-            _rb.AddForce(gravityDir * (Physics.gravity.magnitude * gravityMultiplier), ForceMode.Acceleration);
-
-            var targetRotation = Quaternion.FromToRotation(transform.up, _surfaceNormal) * transform.rotation;
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * uprightSpeed);
         }
 
         private void UpdateAnimator()
@@ -782,13 +760,7 @@ namespace NPC
                 case NpcState.Interact:
                 case NpcState.ObservePlayer:
                 case NpcState.Death:
-                    break;
                 case NpcState.Falling:
-                {
-                    var direction = (planet.position - transform.position).normalized;
-                    Gizmos.color = Color.red;
-                    Gizmos.DrawRay(transform.position, direction * groundCheckDistance);
-                }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
