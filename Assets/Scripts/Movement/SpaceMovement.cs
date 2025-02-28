@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using Managers;
 using UnityEngine;
 using Movement.Config;
 using Unity.Assertions;
@@ -32,7 +33,6 @@ namespace Movement
             _inputManager = InputManager.Instance;
             _rb = GetComponent<Rigidbody>();
             _animator = GetComponentInChildren<Animator>();
-            print(_animator);
 
             CurrentBoostAmount = config.MaxBoostAmount;
 
@@ -48,6 +48,22 @@ namespace Movement
         {
             HandleBoosting();
             HandleMovement();
+            // HandleFOV();
+        }
+
+        private void HandleFOV()
+        {
+            var controller = CameraController.Instance;
+            var cam = controller.ActiveCamera;
+
+            if (!cam) return;
+
+            var fov = cam.Lens.FieldOfView;
+            // fov depending on boost
+
+            fov = Mathf.Lerp(fov, _inputManager.GetBoost() ? 120f : 60f, Time.fixedDeltaTime);
+
+            cam.Lens.FieldOfView = fov;
         }
 
         private void HandleBoosting()
@@ -132,6 +148,17 @@ namespace Movement
                 _rb.AddRelativeForce(right * (_horizontalGlide * Time.fixedDeltaTime));
                 _horizontalGlide *= config.LeftRightGlideReduction;
             }
+
+            MaybeSlowdown();
+        }
+
+        private void MaybeSlowdown()
+        {
+            if (!Physics.Raycast(transform.position, transform.forward, config.SlowdownDistance, LayerMask.GetMask
+                ("PlanetSurface", "Water"))) return;
+
+            _rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, Vector3.one * 15f, Time.fixedDeltaTime);
+
         }
     }
 }

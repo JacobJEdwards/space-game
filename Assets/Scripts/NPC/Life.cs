@@ -5,6 +5,7 @@ using DG.Tweening;
 using Interfaces;
 using UnityEngine;
 using UnityEngine.Pool;
+using UnityEngine.Serialization;
 
 namespace NPC
 {
@@ -17,8 +18,9 @@ namespace NPC
 
         public Transform? planet;
         public bool isGrounded;
+        private LayerMask _planetLayers;
 
-        private Vector3 _surfaceNormal;
+        public Vector3 surfaceNormal;
 
         [Header("Gravity")]
         [SerializeField] private float gravityMultiplier = 1f;
@@ -29,12 +31,13 @@ namespace NPC
             _rb = GetComponent<Rigidbody>();
             _health = GetComponent<Health>();
             _health.onDeath.AddListener(OnDie);
+            _planetLayers = LayerMask.GetMask("PlanetSurface", "Water");
         }
 
         private void FixedUpdate()
         {
-            ApplyGravity();
             UpdateGroundedState();
+            ApplyGravity();
         }
 
         public void SetPool(IObjectPool<Life> pool)
@@ -51,12 +54,11 @@ namespace NPC
         {
             if (!planet) return;
 
-            var direction = -(transform.position - planet.position).normalized;
+            var direction = (planet.position - transform.position).normalized;
 
-            var origin = transform.position + _surfaceNormal * 0.1f;
-            if (Physics.Raycast(origin, direction, out var hit, 5f))
+            if (Physics.Raycast(transform.position + transform.up, direction, out var hit, 8f, _planetLayers))
             {
-                _surfaceNormal = hit.normal;
+                surfaceNormal = hit.normal;
                 if (isGrounded) return;
                 isGrounded = true;
             } else
@@ -72,8 +74,9 @@ namespace NPC
             var gravityDir = -(transform.position - planet.position).normalized;
             _rb.AddForce(gravityDir * (Physics.gravity.magnitude * gravityMultiplier), ForceMode.Acceleration);
 
-            var targetRotation = Quaternion.FromToRotation(transform.up, _surfaceNormal) * transform.rotation;
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * uprightSpeed);
+            var targetRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(transform.forward, surfaceNormal),
+                surfaceNormal);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, uprightSpeed * Time.fixedDeltaTime);
         }
 
     }

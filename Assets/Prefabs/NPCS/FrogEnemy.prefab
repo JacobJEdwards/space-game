@@ -104,6 +104,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3cecc8f2ecd43eaa344763d9fcabeb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  planet: {fileID: 0}
+  isGrounded: 0
+  surfaceNormal: {x: 0, y: 0, z: 0}
+  gravityMultiplier: 1
+  uprightSpeed: 2
 --- !u!114 &4204050442313362111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -116,15 +121,62 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04a324f9a9a7d4dfd866860f451e1705, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  planet: {fileID: 0}
-  target: {fileID: 0}
+  player: {fileID: 0}
   animancer: {fileID: 7816778624554801017}
-  idleAnimation: {fileID: 9061338213343248790, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
-  walkAnimation: {fileID: -5599002979973759676, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
-  interactAnimation: {fileID: -3663672522963054737, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
-  deathAnimation: {fileID: 4447012609936615250, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
-  floatingAnimation: {fileID: -8174297497461417188, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
-  fleeAnimation: {fileID: 1395189703230314720, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
+  idleAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 9061338213343248790, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
+    _NormalizedStartTime: NaN
+  walkAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -5599002979973759676, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
+    _NormalizedStartTime: NaN
+  interactAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -4592842328519117816, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
+    _NormalizedStartTime: NaN
+  deathAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 4447012609936615250, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
+    _NormalizedStartTime: NaN
+  floatingAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 140615187318258251, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
+    _NormalizedStartTime: NaN
+  fleeAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 1395189703230314720, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
+    _NormalizedStartTime: NaN
   speed: 5
   rotationSpeed: 10
   followDistance: 10
@@ -172,6 +224,9 @@ MonoBehaviour:
   fleeClips: []
   stateCooldown: 1
   currentState: 0
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &1536443253599170851
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -184,6 +239,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3cecc8f2ecd43eaa344763d9fcabeb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  planet: {fileID: 0}
+  isGrounded: 0
+  surfaceNormal: {x: 0, y: 0, z: 0}
+  gravityMultiplier: 1
+  uprightSpeed: 2
 --- !u!114 &5556964507288234178
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -201,6 +261,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   onDeath:
+    m_PersistentCalls:
+      m_Calls: []
+  onDamage:
     m_PersistentCalls:
       m_Calls: []
 --- !u!136 &4374158076514527107

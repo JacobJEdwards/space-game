@@ -6,9 +6,9 @@ using UnityEngine.Pool;
 namespace Objects
 {
     [RequireComponent(typeof(Health), typeof(DropOnDeath))]
-    public class Tree : MonoBehaviour, IPoolable<Tree>
+    public class TreeObject : MonoBehaviour, IPoolable<TreeObject>
     {
-        private IObjectPool<Tree>? _treePool;
+        private IObjectPool<TreeObject>? _treePool;
         private Health _health = null!;
 
         private void Start()
@@ -17,7 +17,7 @@ namespace Objects
             _health.onDeath.AddListener(OnDie);
         }
 
-        public void SetPool(IObjectPool<Tree> pool)
+        public void SetPool(IObjectPool<TreeObject> pool)
         {
             _treePool = pool;
         }

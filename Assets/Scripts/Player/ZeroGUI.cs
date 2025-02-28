@@ -12,11 +12,12 @@ namespace Player
     {
         [Header("ZeroG Settings")] [SerializeField]
         private Oxygen oxygen = null!;
-
-        [SerializeField] private OxygenConfig playerOxygenConfig = null!;
+        [SerializeField]
+        private Health health = null!;
 
         [Header("UI Settings")] [SerializeField]
         private MicroBar oxygenUI = null!;
+        [SerializeField] private MicroBar healthUI = null!;
 
         private UiManager _uiManager = null!;
 
@@ -25,12 +26,13 @@ namespace Player
         private void Start()
         {
             Assert.IsNotNull(oxygen, "Oxygen is not assigned");
-            Assert.IsNotNull(playerOxygenConfig, "Oxygen config is not assigned");
+            Assert.IsNotNull(health, "health is not assigned");
             Assert.IsNotNull(oxygenUI, "Oxygen UI is not assigned");
 
             _uiManager = UiManager.Instance;
 
-            oxygenUI.Initialize(playerOxygenConfig.MaxOxygen);
+            oxygenUI.Initialize(oxygen.MaxOxygen);
+            healthUI.Initialize(health.MaxHealth);
             _uiManager.RegisterPanel(this);
             _uiManager.TransitionToState(UIState.ZeroG);
         }
@@ -38,6 +40,7 @@ namespace Player
         private void Update()
         {
             oxygenUI.UpdateBar(oxygen.CurrentOxygen);
+            healthUI.UpdateBar(health.CurrentHealth);
         }
 
         public UIState AssociatedState => UIState.ZeroG;

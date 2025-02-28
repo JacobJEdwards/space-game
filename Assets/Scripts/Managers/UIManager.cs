@@ -119,6 +119,7 @@ namespace Managers
         public void ToggleInventory()
         {
             TransitionToState(_currentState == UIState.Inventory ? _previousState : UIState.Inventory);
+
             if (_currentState == UIState.Inventory)
             {
                 Time.timeScale = 0;

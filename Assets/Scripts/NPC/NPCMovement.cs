@@ -26,17 +26,16 @@ namespace NPC
     [RequireComponent(typeof(Rigidbody), typeof(Life))]
     public class NpcMovement : MonoBehaviour
     {
-        [FormerlySerializedAs("target")]
         [Header("References")]
         [SerializeField] public Transform player = null!;
         [SerializeField] private AnimancerComponent animancer = null!;
 
-        [SerializeField] private AnimationClip idleAnimation = null!;
-        [SerializeField] private AnimationClip walkAnimation = null!;
-        [SerializeField] private AnimationClip interactAnimation = null!;
-        [SerializeField] private AnimationClip deathAnimation = null!;
-        [SerializeField] private AnimationClip floatingAnimation = null!;
-        [SerializeField] private AnimationClip fleeAnimation = null!;
+        [SerializeField] private ClipTransition idleAnimation = null!;
+        [SerializeField] private ClipTransition walkAnimation = null!;
+        [SerializeField] private ClipTransition interactAnimation = null!;
+        [SerializeField] private ClipTransition deathAnimation = null!;
+        [SerializeField] private ClipTransition floatingAnimation = null!;
+        [SerializeField] private ClipTransition fleeAnimation = null!;
 
         [Header("Movement Settings")]
         [SerializeField] private float speed = 5f;
@@ -98,6 +97,7 @@ namespace NPC
         private Vector3 _fleeTarget;
         private float _stateTimer;
         private float _originalSpeed;
+        private float _wanderTimer;
         private Life _life = null!;
 
         [SerializeField] private NpcState currentState = NpcState.Idle;
@@ -131,12 +131,11 @@ namespace NPC
 
             _health.onHealthChanged.AddListener(OnHealthChanged);
             _health.onDeath.AddListener(OnDeath);
-            ChangeState(NpcState.Idle);
+            ChangeState(NpcState.Idle, true);
         }
 
         private void OnHealthChanged(float healthValue)
         {
-            // Start fleeing if health drops below threshold and not already fleeing
             if (healthValue / _health.MaxHealth < healthFleeThreshold && currentState != NpcState.Flee)
             {
                 ChangeState(NpcState.Flee);
@@ -145,30 +144,29 @@ namespace NPC
 
         private void OnDeath()
         {
-            StopAllCoroutines();
-
             _rb.isKinematic = true;
             currentState = NpcState.Death;
             animancer.Play(deathAnimation);
 
             Invoke(nameof(DestroyAfterAnimation), 1.5f);
-
         }
 
         private void DestroyAfterAnimation()
         {
+            ChangeState(NpcState.Idle, true);
+            _rb.isKinematic = false;
             gameObject.SetActive(false);
         }
 
-        private void ChangeState(NpcState newState)
+        private void ChangeState(NpcState newState, bool force = false)
         {
-            if (currentState == NpcState.Death) return;
+            if (currentState == NpcState.Death && !force) return;
+            if (currentState == newState && !force) return;
 
             if (Time.time - _stateTimer < stateCooldown) return;
 
             _stateTimer = Time.time;
 
-            // Exit current state
             StopAllCoroutines();
 
             switch (currentState)
@@ -193,7 +191,6 @@ namespace NPC
                     throw new ArgumentOutOfRangeException();
             }
 
-            // Enter new state
             currentState = newState;
             _stateTimer = 0f;
 
@@ -222,6 +219,8 @@ namespace NPC
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            UpdateAnimator();
         }
 
         #region State Implementations
@@ -247,24 +246,22 @@ namespace NPC
                     AudioManager.Instance.PlaySound(interactAudioSource, Utils.RandomElement(interactClips));
                 }
 
-                // Decide what to do next
                 if (Random.value < 0.7f)
                 {
                     ChangeState(NpcState.Wander);
                     yield break;
                 }
-                    // Check if there are nearby NPCs to interact with
-                    var results = new Collider[10];
-                    var size = Physics.OverlapSphereNonAlloc(transform.position, interactionRadius, results, npcLayer);
+                var results = new Collider[10];
+                var size = Physics.OverlapSphereNonAlloc(transform.position, interactionRadius, results, npcLayer);
 
-                    for (var i = 0; i < size; i++)
-                    {
-                        var npc = results[i];
-                        if (npc.transform == transform) continue;
+                for (var i = 0; i < size; i++)
+                {
+                    var npc = results[i];
+                    if (npc.transform == transform) continue;
 
-                        ChangeState(NpcState.Interact);
-                        yield break;
-                    }
+                    ChangeState(NpcState.Interact);
+                    yield break;
+                }
 
                 yield return new WaitForSeconds(Random.Range(minIdleTime, maxIdleTime));
             }
@@ -280,15 +277,23 @@ namespace NPC
                 _wanderTarget = transform.position + FindSafeDirection((_wanderTarget - transform.position).normalized) * wanderRadius;
             }
 
+            _wanderTimer = 0f;
             StartCoroutine(WanderState());
         }
 
         private IEnumerator WanderState()
         {
+
             while (Vector3.Distance(transform.position, _wanderTarget) > stopDistance)
             {
-                if (player && Vector3.Distance(transform.position, player.position) < followDistance
-                            && Vector3.Distance(transform.position, player.position) > minLookDistance)
+                if (_wanderTimer > 8f)
+                {
+                    _wanderTimer = 0f;
+                    ChangeState(NpcState.Idle);
+                    yield break;
+                }
+
+                if (player && Vector3.Distance(transform.position, player.position) < followDistance)
                 {
                     ChangeState(NpcState.Follow);
                     yield break;
@@ -299,6 +304,8 @@ namespace NPC
                     ChangeState(NpcState.ObservePlayer);
                     yield break;
                 }
+
+                _wanderTimer += Time.deltaTime;
 
                 yield return null;
             }
@@ -598,7 +605,6 @@ namespace NPC
             }
 
             HandleMovement(moveDirection);
-            UpdateAnimator();
         }
 
         private Vector3 CalculateMovementDirection(Vector3 destination)
@@ -609,6 +615,8 @@ namespace NPC
 
         private void UpdateGroundedState()
         {
+            _surfaceNormal = _life.surfaceNormal;
+
             switch (_isGrounded)
             {
                 case false when _life.isGrounded:

@@ -1,3 +1,7 @@
+:root {
+    -unity-font-definition: url("Resources/Fonts/Exo2-Medium.ttf");
+}
+
 .container {
     flex-grow: 1;
     width: auto;
@@ -57,7 +61,7 @@
 }
 
 .equipmentImage {
-    width: 50%;
+    width: 60%;
     height: 60%;
     background-color: rgba(48, 48, 48, 0.5);
     border-radius: 5px;

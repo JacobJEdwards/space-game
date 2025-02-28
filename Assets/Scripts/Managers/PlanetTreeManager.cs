@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 
 namespace Managers
 {
-    public class PlanetTreeManager : PlanetObjectManager<Objects.Tree>
+    public class PlanetTreeManager : PlanetObjectManager<Objects.TreeObject>
     {
         public override void GenerateObjectPositions()
         {
@@ -38,9 +38,9 @@ namespace Managers
         }
 
 
-        protected override void Spawn(Objects.Tree tree)
+        protected override void Spawn(Objects.TreeObject treeObject)
         {
-            tree.transform.localScale = Vector3.one * Random.Range(2f, 10f);
+            treeObject.transform.localScale = Vector3.one * Random.Range(2f, 10f);
         }
     }
 }

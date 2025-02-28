@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.11.22)  23 FEB 2025 15:19
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.11.22)  28 FEB 2025 13:34
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1553,7 +1553,7 @@ See the natbib package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.94 ...mand\NAT@force@numbers{}\NAT@force@numbers
+l.97 ...mand\NAT@force@numbers{}\NAT@force@numbers
                                                   
 ? 
 )
@@ -1840,7 +1840,12 @@ LaTeX Font Info:    Font shape `T1/phv/b/n' will be
 (Font)              scaled to size 12.9599pt on input line 45.
 
 
-[5] (./game-features.tex
+[5]
+
+Package natbib Warning: Citation `unity:assetstore' on page 6 undefined on inpu
+t line 74.
+
+(./game-features.tex
 Overfull \hbox (18.02667pt too wide) in paragraph at lines 10--16
 \T1/ptm/m/n/12 InputSystem([]) to get the player's in-put and ap-ply it to the 
 player's Rigid-body component([])
@@ -1849,80 +1854,80 @@ player's Rigid-body component([])
 
 
 [6]
-<images/player.png, id=107, 1208.515pt x 728.7225pt>
+<images/player.png, id=104, 1208.515pt x 728.7225pt>
 File: images/player.png Graphic file (type png)
 <use images/player.png>
 Package pdftex.def Info: images/player.png  used on input line 28.
 (pdftex.def)             Requested size: 209.12686pt x 126.09393pt.
-<images/ship.png, id=109, 1208.515pt x 681.54625pt>
+<images/ship.png, id=106, 1208.515pt x 681.54625pt>
 File: images/ship.png Graphic file (type png)
 <use images/ship.png>
 Package pdftex.def Info: images/ship.png  used on input line 46.
 (pdftex.def)             Requested size: 209.12686pt x 117.93083pt.
 
 
-[7 <./images/player.png> <./images/ship.png>]
-<images/weapon.png, id=118, 1208.515pt x 681.54625pt>
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[7 <./images/player.png>]
+<images/weapon.png, id=117, 1208.515pt x 681.54625pt>
 File: images/weapon.png Graphic file (type png)
 <use images/weapon.png>
 Package pdftex.def Info: images/weapon.png  used on input line 69.
 (pdftex.def)             Requested size: 209.12686pt x 117.93083pt.
-<images/inventory.png, id=119, 1208.515pt x 681.54625pt>
+
+
+[8 <./images/ship.png> <./images/weapon.png>]
+<images/inventory.png, id=125, 1208.515pt x 681.54625pt>
 File: images/inventory.png Graphic file (type png)
 <use images/inventory.png>
 Package pdftex.def Info: images/inventory.png  used on input line 84.
 (pdftex.def)             Requested size: 209.12686pt x 117.93083pt.
 
 
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-
-[8 <./images/weapon.png>]
-<images/planet.png, id=126, 1208.515pt x 681.54625pt>
+[9 <./images/inventory.png>]
+<images/planet.png, id=131, 1208.515pt x 681.54625pt>
 File: images/planet.png Graphic file (type png)
 <use images/planet.png>
 Package pdftex.def Info: images/planet.png  used on input line 111.
 (pdftex.def)             Requested size: 209.12686pt x 117.93083pt.
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-Package natbib Warning: Author undefined for citation`Mixamo:home' 
-(natbib)                on page 9 on input line 122.
-
-
-
-[9 <./images/inventory.png>]
-<images/life.png, id=135, 1078.0275pt x 617.30624pt>
+<images/life.png, id=134, 1078.0275pt x 617.30624pt>
 File: images/life.png Graphic file (type png)
 <use images/life.png>
 Package pdftex.def Info: images/life.png  used on input line 137.
 (pdftex.def)             Requested size: 209.12686pt x 119.74785pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
 )
 
-[10 <./images/planet.png> <./images/life.png>]
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 8
-3.
+[10 <./images/planet.png>]
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 9
+2.
 
 (/usr/local/texlive/2024/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 )
 LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
-(Font)              scaled to size 10.79993pt on input line 96.
+(Font)              scaled to size 10.79993pt on input line 105.
  (./report.bbl
+
+[11 <./images/life.png>]
 Underfull \hbox (badness 3068) in paragraph at lines 29--32
 []\T1/ptm/m/n/12 Technologies, U.  Line ren-derer.  []$\T1/phv/m/sl/12 https : 
 / / docs . unity3d . com / Manual / class -[]
  []
 
+)
+
+Package natbib Warning: There were undefined citations.
 
 
-[11])
 
 [12]
-runsystem(latexminted cleantemp  --timestamp 20250223151933Z E98D2F001DA5678B39
+runsystem(latexminted cleantemp  --timestamp 20250228133407Z E98D2F001DA5678B39
 482EFBDF5770DC)...executed safely (allowed).
 
  (./report.aux)
@@ -1940,7 +1945,7 @@ Package rerunfilecheck Info: File `report.out' has not changed.
 Here is how much of TeX's memory you used:
  40771 strings out of 473362
  912884 string characters out of 5720983
- 1483588 words of memory out of 5000000
+ 1482588 words of memory out of 5000000
  63217 multiletter control sequences out of 15000+600000
  598703 words of font info for 80 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1952,7 +1957,7 @@ exlive/2024/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb></usr/local/texlive
 f-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2024/texmf-dist/fon
 ts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/u
 rw/times/utmri8a.pfb>
-Output written on report.pdf (12 pages, 10320444 bytes).
+Output written on report.pdf (12 pages, 10319910 bytes).
 PDF statistics:
  275 PDF objects out of 1000 (max. 8388607)
  232 compressed objects within 3 object streams

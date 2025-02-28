@@ -10,7 +10,7 @@ namespace Managers
     {
         public static CameraController Instance { get; private set; } = null!;
         private readonly List<CinemachineCamera> _cameras = new();
-        private CinemachineCamera? ActiveCamera { get; set; }
+        public CinemachineCamera? ActiveCamera { get; private set; }
 
         private void Awake()
         {

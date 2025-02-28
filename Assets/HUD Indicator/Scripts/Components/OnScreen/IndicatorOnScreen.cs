@@ -9,10 +9,10 @@ namespace HUDIndicator {
 		public IndicatorIconStyle style;
 
 		protected override void CreateIndicatorCanvas(IndicatorRenderer renderer) {
-			IndicatorCanvasOnScreen indicatorCanvasOnScreen = new IndicatorCanvasOnScreen();
-			indicatorCanvasOnScreen.Create(this, renderer);
+			var indicatorCanvasOnScreen = new IndicatorCanvasOnScreen();
+			indicatorCanvasOnScreen.Create(this, renderer, uiCamera);
 
-			indicatorsCanvas.Add(renderer, indicatorCanvasOnScreen);
+			IndicatorsCanvas.Add(renderer, indicatorCanvasOnScreen);
 		}
 	}
 

@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using Animancer;
 using Managers;
 using Unity.Assertions;
 using Unity.Cinemachine;
@@ -22,7 +23,11 @@ namespace Movement
         [SerializeField] private CinemachineCamera playerCamera = null!;
         [SerializeField] private Transform head = null!;
         [SerializeField] private HeadBobbing headBobbing = null!;
+
         [SerializeField] private Animator animator = null!;
+        [SerializeField] private AnimationClip runAnimation = null!;
+        [SerializeField] private AnimationClip walkAnimation = null!;
+        [SerializeField] private AnimationClip jumpAnimation = null!;
 
         [SerializeField] private AudioSource movementClipSource = null!;
 
@@ -197,12 +202,12 @@ namespace Movement
                 if (forward != 0 || strafe != 0)
                 {
                     if (Utils.IsNotPlaying(Walk, animator))
-                        animator.CrossFade(Walk, 0.1f);
+                        animator.Play(Walk);
                     var clip = _isSprinting ? Utils.RandomElement(footstepClipsRun) : Utils.RandomElement(footstepClipsWalk);
                     AudioManager.Instance.PlaySound(movementClipSource, clip);
                 }
                 else if (Utils.IsNotPlaying(Idle, animator))
-                    animator.CrossFade(Idle, 0.1f);
+                    animator.Play(Idle);
             }
 
             _jetpackFuel = Mathf.Min(_jetpackFuel + movementSettings.jetpackFuelConsumptionRate * Time.deltaTime,

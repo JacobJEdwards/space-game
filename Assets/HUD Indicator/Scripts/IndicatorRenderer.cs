@@ -16,7 +16,7 @@ namespace HUDIndicator {
         void Awake() {
             rectTransform = GetComponent<RectTransform>();
 
-            if (camera == null) {
+            if (!camera) {
                 camera = Camera.main;
 			}
         }
@@ -39,13 +39,13 @@ namespace HUDIndicator {
 
         private void OnDrawGizmosSelected() {
             rectTransform = GetComponent<RectTransform>();
-            Rect rect = SetMarginToRect(rectTransform.rect, margin);
+            var rect = SetMarginToRect(rectTransform.rect, margin);
 
-            Texture2D tex = new Texture2D(1, 1);
+            var tex = new Texture2D(1, 1);
             tex.SetPixel(0, 0, canvasColor);
             tex.Apply();
 
-            Vector3 pos = rectTransform.TransformPoint(new Vector3(rect.x, rect.y, 0));
+            var pos = rectTransform.TransformPoint(new Vector3(rect.x, rect.y, 0));
             Graphics.DrawTexture(new Rect(pos.x, pos.y, rect.width * rectTransform.lossyScale.x, rect.height * rectTransform.lossyScale.y), tex);
 
             DestroyImmediate(tex);

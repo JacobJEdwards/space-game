@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace HUDIndicator {
 
@@ -12,10 +13,10 @@ namespace HUDIndicator {
 		public IndicatorArrowStyle arrowStyle;
 
 		protected override void CreateIndicatorCanvas(IndicatorRenderer renderer) {
-			IndicatorCanvasOffScreen indicatorCanvasOffScreen = new IndicatorCanvasOffScreen();
-			indicatorCanvasOffScreen.Create(this, renderer);
+			var indicatorCanvasOffScreen = new IndicatorCanvasOffScreen();
+			indicatorCanvasOffScreen.Create(this, renderer, uiCamera);
 
-			indicatorsCanvas.Add(renderer, indicatorCanvasOffScreen);
+			IndicatorsCanvas.Add(renderer, indicatorCanvasOffScreen);
 		}
 	}
 }

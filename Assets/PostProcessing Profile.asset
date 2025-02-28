@@ -55,7 +55,7 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 2
+    value: 5
   threshold:
     overrideState: 1
     value: 1.1
@@ -96,21 +96,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d65e486e4de6e5448a8fbb43dc8756a0, type: 3}
   m_Name: Grain
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   enabled:
     overrideState: 1
     value: 1
   colored:
-    overrideState: 0
+    overrideState: 1
     value: 1
   intensity:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: 0.15
   size:
-    overrideState: 0
+    overrideState: 1
     value: 1
   lumContrib:
-    overrideState: 0
+    overrideState: 1
     value: 0.8
 --- !u!114 &11400000
 MonoBehaviour:
@@ -157,7 +157,7 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 1
+    value: 1.26
   color:
     overrideState: 1
     value: {r: 0, g: 0, b: 0, a: 1}
@@ -178,7 +178,7 @@ MonoBehaviour:
     value: 1
   zBias:
     overrideState: 1
-    value: 0.0001
+    value: 0.00019
   directLightingStrength:
     overrideState: 0
     value: 0
@@ -210,7 +210,7 @@ MonoBehaviour:
     defaultState: 1
   intensity:
     overrideState: 1
-    value: 0.1
+    value: 0.174
   fastMode:
     overrideState: 0
     value: 0
@@ -232,13 +232,13 @@ MonoBehaviour:
     value: 1
   focusDistance:
     overrideState: 1
-    value: 20
+    value: 50
   aperture:
     overrideState: 1
-    value: 4
+    value: 22.6
   focalLength:
     overrideState: 1
-    value: 100
+    value: 117
   kernelSize:
     overrideState: 1
     value: 1
@@ -288,7 +288,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40b924e2dad56384a8df2a1e111bb675, type: 3}
   m_Name: Vignette
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   enabled:
     overrideState: 1
     value: 1
@@ -303,7 +303,7 @@ MonoBehaviour:
     value: {x: 0.5, y: 0.5}
   intensity:
     overrideState: 1
-    value: 0.082786106
+    value: 0.10698204
   smoothness:
     overrideState: 1
     value: 0.2
@@ -338,7 +338,7 @@ MonoBehaviour:
     value: 1
   shutterAngle:
     overrideState: 1
-    value: 120
+    value: 163
   sampleCount:
     overrideState: 1
     value: 8

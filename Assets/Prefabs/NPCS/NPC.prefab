@@ -35,7 +35,7 @@ Transform:
   m_GameObject: {fileID: 7670075372788274160}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.42, z: 1661.7}
+  m_LocalPosition: {x: 0, y: 0, z: 1661.7}
   m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -54,15 +54,62 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04a324f9a9a7d4dfd866860f451e1705, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  planet: {fileID: 0}
-  target: {fileID: 0}
+  player: {fileID: 0}
   animancer: {fileID: 2673454400303495625}
-  idleAnimation: {fileID: -203655887218126122, guid: 93d6d9dec58ab4b62988cbc7eff925f8, type: 3}
-  walkAnimation: {fileID: -4791504522942941401, guid: 5d1b1586d4b404d52b36a4b293c8b80a, type: 3}
-  interactAnimation: {fileID: 4023202712368722038, guid: 42b66d0e956ae48d4aa8e9695972e33d, type: 3}
-  deathAnimation: {fileID: -203655887218126122, guid: c702ccea8c86049fdb3e759e9b477462, type: 3}
-  floatingAnimation: {fileID: -203655887218126122, guid: 2c783aff1804044d585e62ef9e84133c, type: 3}
-  fleeAnimation: {fileID: -203655887218126122, guid: 85c46a182737e43ed959af4261a36bce, type: 3}
+  idleAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -4791504522942941401, guid: 93d6d9dec58ab4b62988cbc7eff925f8, type: 3}
+    _NormalizedStartTime: NaN
+  walkAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -4791504522942941401, guid: 5d1b1586d4b404d52b36a4b293c8b80a, type: 3}
+    _NormalizedStartTime: NaN
+  interactAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -203655887218126122, guid: c702ccea8c86049fdb3e759e9b477462, type: 3}
+    _NormalizedStartTime: NaN
+  deathAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -203655887218126122, guid: c702ccea8c86049fdb3e759e9b477462, type: 3}
+    _NormalizedStartTime: NaN
+  floatingAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -203655887218126122, guid: 2c783aff1804044d585e62ef9e84133c, type: 3}
+    _NormalizedStartTime: NaN
+  fleeAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -203655887218126122, guid: 85c46a182737e43ed959af4261a36bce, type: 3}
+    _NormalizedStartTime: NaN
   speed: 2
   rotationSpeed: 2
   followDistance: 15
@@ -112,6 +159,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 79180f511d89441b9aa23ccae1992fe0, type: 3}
   stateCooldown: 1
   currentState: 0
+  references:
+    version: 2
+    RefIds: []
 --- !u!54 &7885794070665261163
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -203,6 +253,9 @@ MonoBehaviour:
   onDeath:
     m_PersistentCalls:
       m_Calls: []
+  onDamage:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &7866805020946256775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,6 +268,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3cecc8f2ecd43eaa344763d9fcabeb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  planet: {fileID: 0}
+  isGrounded: 0
+  surfaceNormal: {x: 0, y: 0, z: 0}
+  gravityMultiplier: 1
+  uprightSpeed: 2
 --- !u!82 &7185229718528929148
 AudioSource:
   m_ObjectHideFlags: 0
@@ -498,7 +556,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Model
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5866666021909216657, guid: 150b771c021f45d48873c0d8caddd485, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

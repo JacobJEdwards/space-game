@@ -6,13 +6,15 @@ namespace HUDIndicator {
 
     public abstract class IndicatorCanvas {
         protected Indicator indicator { private set; get; }
+        protected Camera UICamera { private set; get; }
         protected IndicatorRenderer renderer { private set; get; }
         protected GameObject gameObject;
         protected bool active;
 
-        public virtual void Create(Indicator indicator, IndicatorRenderer renderer) {
+        public virtual void Create(Indicator indicator, IndicatorRenderer renderer, Camera UICamera) {
             this.indicator = indicator;
             this.renderer = renderer;
+            this.UICamera = UICamera;
 
             active = true;
 		}
@@ -20,13 +22,13 @@ namespace HUDIndicator {
         public abstract void Update();
 
         public virtual void OnEnable() {
-            if(gameObject != null) {
+            if(gameObject) {
                 gameObject.SetActive(true);
 			}
             active = true;
         }
         public virtual void OnDisable(){
-            if(gameObject != null) {
+            if(gameObject) {
                 gameObject.SetActive(false);
             }
             active = false;

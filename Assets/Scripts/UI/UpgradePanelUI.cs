@@ -184,7 +184,7 @@ namespace UI
                     upgradeData = shipUpgrade.upgradeData;
                     title.text = shipUpgrade.shipInfo.shipName ?? "Unknown Ship";
                     description.text = $"Speed: +{shipUpgrade.speedBonus}, Health: +{shipUpgrade.healthBonus}, Shield: +{shipUpgrade.shieldBonus}";
-                    icon.style.backgroundImage = new StyleBackground(shipUpgrade.shipInfo.shipSprite);
+                    icon.style.backgroundImage = new StyleBackground(ModelPreviewManager.Instance.ToTexture2D(shipUpgrade.shipInfo.shipObject));
                     canUpgrade = upgradeManager.CanUpgradeShip(shipUpgrade);
                     button.clicked += () => { upgradeManager.UpgradeShip(shipUpgrade); HideShipUpgradePanel(); };
                     break;
@@ -193,7 +193,7 @@ namespace UI
                     title.text = weaponUpgrade.weaponInfo.weaponName ?? "Unknown Weapon";
                     var text = GetWeaponText(weaponUpgrade);
                     description.text = text;
-                    icon.style.backgroundImage = new StyleBackground(weaponUpgrade.weaponInfo.weaponSprite);
+                    icon.style.backgroundImage = new StyleBackground(ModelPreviewManager.Instance.ToTexture2D(weaponUpgrade.weaponInfo.weaponObject));
                     canUpgrade = upgradeManager.CanUpgradeWeapon(weaponUpgrade);
                     button.clicked += () => { upgradeManager.UpgradeWeapon(weaponUpgrade); HideWeaponUpgradePanel(); };
                     break;

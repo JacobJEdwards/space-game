@@ -32,7 +32,7 @@ namespace PlanetarySystem.Planet
 
         [SerializeField] public Rock[] rockPrefabs = Array.Empty<Rock>();
         [SerializeField] public Life[] lifePrefabs = Array.Empty<Life>();
-        [SerializeField] public Objects.Tree[] treePrefabs = Array.Empty<Objects.Tree>();
+        [SerializeField] public Objects.TreeObject[] treePrefabs = Array.Empty<Objects.TreeObject>();
 
         [DontSerialize] private MeshFilter[] _meshFilters = Array.Empty<MeshFilter>();
 
@@ -101,20 +101,54 @@ namespace PlanetarySystem.Planet
 
         public void GeneratePlanet()
         {
-            Initialize();
-            GenerateMesh();
-            GenerateColours();
-            GenerateAtmosphere();
-            if (hasWater) GenerateWater();
-            GenerateRocks();
-            GenerateTrees();
-            GenerateLife();
-
-            foreach (var meshFilter in _meshFilters)
+            if (biome == Biome.Ocean)
             {
-                var col = meshFilter.gameObject.AddComponent<MeshCollider>();
-                col.sharedMesh = meshFilter.sharedMesh;
+                GenerateWater();
+                GenerateAtmosphere();
             }
+            else
+            {
+
+                Initialize();
+                GenerateMesh();
+                GenerateColours();
+                GenerateAtmosphere();
+                CombineMeshes();
+                if (hasWater) GenerateWater();
+                GenerateRocks();
+                GenerateTrees();
+                GenerateLife();
+
+                // foreach (var meshFilter in _meshFilters)
+                // {
+                //     var col = meshFilter.gameObject.AddComponent<MeshCollider>();
+                //     col.sharedMesh = meshFilter.sharedMesh;
+                // }
+            }
+        }
+
+        private void CombineMeshes()
+        {
+            var combines = new CombineInstance[_meshFilters.Length];
+
+            for (var i = 0; i < _meshFilters.Length; i++)
+            {
+                combines[i].mesh = _meshFilters[i].sharedMesh;
+                combines[i].transform = _meshFilters[i].transform.localToWorldMatrix;
+                Destroy(_meshFilters[i]);
+            }
+
+            var mesh = new Mesh();
+            mesh.CombineMeshes(combines, true, false);
+            var meshFilter = gameObject.AddComponent<MeshFilter>();
+            meshFilter.sharedMesh = mesh;
+            meshFilter.sharedMesh.name = "PlanetMesh";
+
+            var meshRenderer = gameObject.AddComponent<MeshRenderer>();
+            meshRenderer.sharedMaterial = colourSettings.planetMaterial;
+
+            var col = gameObject.AddComponent<MeshCollider>();
+            col.sharedMesh = meshFilter.sharedMesh;
         }
 
 

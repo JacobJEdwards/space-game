@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,14 +17,17 @@ namespace HUDIndicator {
         private RectTransform arrowRectTransform;
         private IndicatorArrowStyle arrowStyle;
 
-        public override void Create(Indicator indicator, IndicatorRenderer renderer) {
-            base.Create(indicator, renderer);
+        public override void Create(Indicator indicator, IndicatorRenderer renderer, Camera UICamera) {
+            base.Create(indicator, renderer, UICamera);
 
             indicatorOffScreen = indicator as IndicatorOffScreen;
 
             // Get indicator & arrow style
-            style = indicatorOffScreen.style;
-            arrowStyle = indicatorOffScreen.arrowStyle;
+            if (indicatorOffScreen)
+            {
+                style = indicatorOffScreen.style;
+                arrowStyle = indicatorOffScreen.arrowStyle;
+            }
 
             // Create game object
             gameObject = new GameObject($"IndicatorOffScreen:{indicator.gameObject.name}");
@@ -96,8 +97,9 @@ namespace HUDIndicator {
         }
 
         private void UpdatePosition() {
-            Rect rendererRect = renderer.GetRect();
-            Vector3 pos = renderer.GetRectTransform().InverseTransformPoint(renderer.camera.WorldToScreenPoint(indicator.gameObject.transform.position));
+            var rendererRect = renderer.GetRect();
+            var pos = renderer.GetRectTransform().InverseTransformPoint(renderer.camera.WorldToScreenPoint(indicator
+                .gameObject.transform.position));
 
             rendererRect.x += style.width / 2f;
             rendererRect.y += style.height / 2f;
@@ -116,20 +118,20 @@ namespace HUDIndicator {
                     pos *= -1;
                 }
 
-                float a = pos.x / rendererRect.width;
-                float b = pos.y / rendererRect.height;
+                var a = pos.x / rendererRect.width;
+                var b = pos.y / rendererRect.height;
 
                 // The indicator lies on left or right corner
                 if(Mathf.Abs(a) > Mathf.Abs(b)) {
 
                     // Right corner
                     if(a > 0) {
-                        float y = rendererRect.width / 2f * pos.y / pos.x;
+                        var y = rendererRect.width / 2f * pos.y / pos.x;
                         pos = new Vector2(rendererRect.width / 2f, y);
                     }
                     // Left corner
                     else {
-                        float y = -rendererRect.width / 2f * pos.y / pos.x;
+                        var y = -rendererRect.width / 2f * pos.y / pos.x;
                         pos = new Vector2(-rendererRect.width / 2f, y);
                     }
                 }
@@ -137,7 +139,7 @@ namespace HUDIndicator {
                 else {
                     // Top corner
                     if(b > 0) {
-                        float x = rendererRect.height / 2f * pos.x / pos.y;
+                        var x = rendererRect.height / 2f * pos.x / pos.y;
                         pos = new Vector2(x, rendererRect.height / 2f);
                     }
                     // Bottom corner
@@ -148,7 +150,7 @@ namespace HUDIndicator {
                 }
 
                 // Update arrow rotation
-                Vector2 dir = new Vector2(pos.x, pos.y);
+                var dir = new Vector2(pos.x, pos.y);
                 arrowRectTransform.rotation = Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.down, dir));
 
                 rectTransform.position = renderer.GetRectTransform().TransformPoint(new Vector3(pos.x, pos.y, 0));
@@ -157,7 +159,7 @@ namespace HUDIndicator {
         }
 
 		public override void Destroy() {
-			GameObject.Destroy(gameObject);
+			Object.Destroy(gameObject);
 		}
 	}
 }

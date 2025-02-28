@@ -1,12 +1,14 @@
 #nullable enable
 
 using System;
+using HUDIndicator;
 using Managers;
 using Movement;
 using Player;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Serialization;
 
 namespace Spaceship
 {
@@ -23,6 +25,13 @@ namespace Spaceship
     {
         [SerializeField] private CameraSettings cameraSettings = null!;
         [SerializeField] private LandingSettings landingSettings = null!;
+        [SerializeField] private Indicator[] indicators = null!;
+        [FormerlySerializedAs("_landingParticles")] [SerializeField] private ParticleSystem landingParticles = null!;
+
+        [FormerlySerializedAs("_damageParticles")] [SerializeField] private ParticleSystem damageParticles = null!;
+        [SerializeField] private Transform[] damagePoints = null!;
+        private int _numDamageParticles;
+
         private CameraController _cameraController = null!;
         private UiManager _uiManager = null!;
         private PlayerController? _currentPlayer;
@@ -34,6 +43,7 @@ namespace Spaceship
 
         private Rigidbody _rb = null!;
         private SpaceMovement _spaceMovement = null!;
+        private Health _health = null!;
 
         public bool IsOccupied => _currentPlayer;
         public ShipState CurrentState { get; private set; } = ShipState.SpaceIdle;
@@ -51,6 +61,28 @@ namespace Spaceship
 
             var inputManager = InputManager.Instance;
             inputManager.SetOnLandingPressed(HandleLandingOrTakeoff);
+
+            _health.onHealthChanged.AddListener(OnHealthChanged);
+        }
+
+        private void OnHealthChanged(float health)
+        {
+            var thresholds = new[] {0.25f, 0.5f, 0.75f};
+
+            for (var i = 0; i < thresholds.Length; i++)
+            {
+                var threshold = thresholds[i];
+                if (health < _health.MaxHealth * threshold)
+                {
+                    var particles = Instantiate(damageParticles, transform.position, Quaternion.identity);
+                    particles.transform.parent = transform;
+                    particles.transform.localPosition = damagePoints[i].localPosition;
+                    particles.transform.localRotation = damagePoints[i].localRotation;
+                    particles.Play();
+                    _numDamageParticles++;
+                    break;
+                }
+            }
         }
 
         private void FixedUpdate()
@@ -78,6 +110,7 @@ namespace Spaceship
         {
             _rb = GetComponent<Rigidbody>();
             _spaceMovement = GetComponent<SpaceMovement>();
+            _health = GetComponent<Health>();
 
 
             Assert.IsNotNull(_rb, "Rigidbody is not set!");
@@ -311,19 +344,66 @@ namespace Spaceship
             _currentPlayer = player;
             _cameraController.SetActiveCamera(cameraSettings.thirdPersonCamera);
 
-            if (CurrentState == ShipState.SpaceIdle) CurrentState = ShipState.Flying;
+            foreach (var indicator in indicators)
+            {
+                indicator.enabled = false;
+            }
+
+            if (CurrentState == ShipState.SpaceIdle)
+            {
+                SetCurrentState(ShipState.Flying);
+            }
         }
 
         public void PlayerExitShip()
         {
             if (!_currentPlayer) return;
 
+            foreach (var indicator in indicators)
+            {
+                indicator.enabled = true;
+            }
+
             _currentPlayer.ExitShip();
             _currentPlayer = null;
             _uiManager.ClearHint();
             _uiManager.TransitionToState(UIState.ZeroG);
 
-            if (CurrentState == ShipState.Flying) CurrentState = ShipState.SpaceIdle;
+            if (CurrentState == ShipState.Flying)
+            {
+                SetCurrentState(ShipState.SpaceIdle);
+            }
+        }
+
+        private void SetCurrentState(ShipState state)
+        {
+            if (state == CurrentState) return;
+
+            switch (state)
+            {
+                case ShipState.Flying:
+                {
+                    SetKinematic(false);
+                    _spaceMovement.enabled = true;
+                }
+                    break;
+                case ShipState.Landed:
+                case ShipState.SpaceIdle:
+                {
+                    SetKinematic(true);
+                    _spaceMovement.enabled = false;
+                }
+                    break;
+                case ShipState.Landing:
+                {
+                    _spaceMovement.enabled = false;
+                }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
+            }
+
+            CurrentState = state;
         }
 
         public void OnInteract()
@@ -363,9 +443,8 @@ namespace Spaceship
 
         private void InitiateTakeoff()
         {
-            CurrentState = ShipState.Flying;
+            SetCurrentState(ShipState.Flying);
             SetKinematic(false);
-            _spaceMovement.enabled = true;
             _uiManager.SetInfo("Ship Launched", 5);
         }
 
@@ -374,7 +453,7 @@ namespace Spaceship
             if (!_nearestLandingZone) return;
 
             _hasValidLandingPoint = false;
-            CurrentState = ShipState.Landing;
+            SetCurrentState(ShipState.Landing);
 
             Invoke(nameof(MaybeFailLanding), 5);
         }
@@ -385,16 +464,13 @@ namespace Spaceship
 
             _hasValidLandingPoint = false;
             _uiManager.SetInfo("Landing Failed", 5);
-            _spaceMovement.enabled = true;
-
-            CurrentState = ShipState.Flying;
+            SetCurrentState(ShipState.Flying);
         }
 
         private void CompleteLanding()
         {
-            CurrentState = ShipState.Landed;
+            SetCurrentState(ShipState.Landed);
             SetKinematic(true);
-            _spaceMovement.enabled = false;
             _uiManager.SetInfo("Ship Landed", 5);
         }
 

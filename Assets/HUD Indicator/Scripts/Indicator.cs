@@ -10,12 +10,13 @@ namespace HUDIndicator {
 
         public bool visible = true;
         [SerializeField] private List<IndicatorRenderer> renderers = new List<IndicatorRenderer>();
+        [SerializeField] public Camera uiCamera;
         
-        protected Dictionary<IndicatorRenderer, IndicatorCanvas> indicatorsCanvas = new Dictionary<IndicatorRenderer, IndicatorCanvas>();
+        protected readonly Dictionary<IndicatorRenderer, IndicatorCanvas> IndicatorsCanvas = new();
 
 		private void Start() {
             if (renderers.Count == 0) {
-                IndicatorRenderer[] renderersInScene = GameObject.FindObjectsOfType<IndicatorRenderer>(true);
+                var renderersInScene = FindObjectsByType<IndicatorRenderer>(FindObjectsSortMode.None);
 
                 if (renderersInScene.Length > 0) {
                     renderers = renderersInScene.ToList();
@@ -25,8 +26,8 @@ namespace HUDIndicator {
                 }
 			}
             
-            foreach(IndicatorRenderer renderer in renderers) {
-                CreateIndicatorCanvas(renderer);
+            foreach (var r in renderers) {
+                CreateIndicatorCanvas(r);
             }
         }
 
@@ -45,25 +46,25 @@ namespace HUDIndicator {
         }
 
 		private void Update() {
-            foreach(KeyValuePair<IndicatorRenderer, IndicatorCanvas> element in indicatorsCanvas) {
+            foreach(var element in IndicatorsCanvas) {
                 element.Value.Update();
             }
         }
 
         private void OnEnable() {
-            foreach(KeyValuePair<IndicatorRenderer, IndicatorCanvas> element in indicatorsCanvas) {
+            foreach(var element in IndicatorsCanvas) {
                 element.Value.OnEnable();
             }
         }
 
         private void OnDisable() {
-            foreach(KeyValuePair<IndicatorRenderer, IndicatorCanvas> element in indicatorsCanvas) {
+            foreach(var element in IndicatorsCanvas) {
                 element.Value.OnDisable();
             }
         }
 
 		private void OnDestroy() {
-            foreach(KeyValuePair<IndicatorRenderer, IndicatorCanvas> element in indicatorsCanvas) {
+            foreach(KeyValuePair<IndicatorRenderer, IndicatorCanvas> element in IndicatorsCanvas) {
                 DestroyIndicatorCanvas(element.Key);
             }
 		}
@@ -71,8 +72,8 @@ namespace HUDIndicator {
         protected abstract void CreateIndicatorCanvas(IndicatorRenderer renderer);
 
         private void DestroyIndicatorCanvas(IndicatorRenderer renderer) {
-            if(indicatorsCanvas.ContainsKey(renderer)) {
-                indicatorsCanvas[renderer].Destroy();
+            if(IndicatorsCanvas.TryGetValue(renderer, out var canvas)) {
+                canvas.Destroy();
 			}
 		}
     }

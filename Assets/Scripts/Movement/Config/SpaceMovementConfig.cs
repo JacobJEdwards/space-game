@@ -44,6 +44,8 @@ public class SpaceMovementConfig : MovementConfig
 
     [SerializeField] private float maxSpeed = 100f;
 
+    [SerializeField] private float slowdownDistance = 100f;
+
     public float RollTorque => rollTorque;
     public float PitchTorque => pitchTorque;
     public float YawTorque => yawTorque;
@@ -57,6 +59,7 @@ public class SpaceMovementConfig : MovementConfig
     public float BoostDepreciationRate => boostDepreciationRate;
     public float BoostRechargeRate => boostRechargeRate;
     public float BoostMultiplier => boostMultiplier;
+    public float SlowdownDistance => slowdownDistance;
     public float RotationSpeed => rotationSpeed;
     public float MaxSpeed => maxSpeed;
 

@@ -14,8 +14,8 @@ namespace HUDIndicator {
         private RectTransform rectTransform;
         private IndicatorIconStyle style;
 
-		public override void Create(Indicator indicator, IndicatorRenderer renderer) {
-			base.Create(indicator, renderer);
+		public override void Create(Indicator indicator, IndicatorRenderer renderer, Camera UICamera) {
+			base.Create(indicator, renderer, UICamera);
 
             indicatorOnScreen = indicator as IndicatorOnScreen;
 
@@ -59,8 +59,8 @@ namespace HUDIndicator {
         }
 
         private void UpdatePosition() {
-            Rect rendererRect = renderer.GetRect();
-            Vector3 pos = renderer.GetRectTransform().InverseTransformPoint(renderer.camera.WorldToScreenPoint(indicator.gameObject.transform.position));
+            var rendererRect = renderer.GetRect();
+            var pos = renderer.GetRectTransform().InverseTransformPoint(renderer.camera.WorldToScreenPoint(indicator.gameObject.transform.position));
 
             rendererRect.x += style.width / 2f;
             rendererRect.y += style.height/ 2f;
@@ -70,8 +70,8 @@ namespace HUDIndicator {
             // On-screen (Show)
             if (pos.z >= 0 && pos.x >= rendererRect.x && pos.x <= rendererRect.x + rendererRect.width && pos.y >= rendererRect.y && pos.y <= rendererRect.y + rendererRect.height) {
                 gameObject.SetActive(true);
-                
-                rectTransform.position = renderer.GetRectTransform().TransformPoint(new Vector3(pos.x, pos.y, 0));            
+
+                rectTransform.position = renderer.GetRectTransform().TransformPoint(new Vector3(pos.x, pos.y, 0));
             }
             // Off-screen (Hide)
             else {

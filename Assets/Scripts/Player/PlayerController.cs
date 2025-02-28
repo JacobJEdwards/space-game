@@ -1,6 +1,8 @@
 #nullable enable
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using Managers;
 using Movement;
 using Spaceship;
@@ -32,6 +34,7 @@ namespace Player
 
         [Header("Movement Settings")] [SerializeField]
         private MovementSettings movementSettings = null!;
+        [SerializeField] private Transform head = null!;
 
         public ShipController? shipToEnter;
 
@@ -189,8 +192,13 @@ namespace Player
 
         public void ExitShip()
         {
+            if (!shipToEnter) return;
+
             transform.parent = null;
             gameObject.SetActive(true);
+            var position = shipToEnter.transform.position + shipToEnter.transform.forward * 2;
+
+            transform.position = position;
 
             _cameraController.SetActiveCamera(playerCamera);
 
@@ -230,6 +238,18 @@ namespace Player
             _planetaryMovement.planetTransform = null;
             _planetaryMovement.enabled = false;
             _rb.constraints = RigidbodyConstraints.None;
+            StartCoroutine(RealignHead());
+        }
+
+        private IEnumerator RealignHead()
+        {
+            while (head.localRotation != Quaternion.identity)
+            {
+                head.localRotation = Quaternion.Lerp(head.localRotation, Quaternion.identity, Time.deltaTime * 5);
+                yield return null;
+            }
+
+            head.localRotation = Quaternion.identity;
         }
 
         private void EnablePlanetaryMovement()

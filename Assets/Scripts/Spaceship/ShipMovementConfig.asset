@@ -29,3 +29,4 @@ MonoBehaviour:
   useCameraDirection: 0
   rotationSpeed: 10
   maxSpeed: 100
+  slowdownDistance: 200

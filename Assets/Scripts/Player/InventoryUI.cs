@@ -92,17 +92,24 @@ namespace Player
 
         private void UpdateEquipmentDisplay()
         {
-            if (currentShip != null)
+            var modelView = ModelPreviewManager.Instance;
+
+            if (currentWeapon != null && currentWeapon.weaponObject)
             {
-                _shipIcon.style.backgroundImage = new StyleBackground(currentShip.shipSprite);
-                _shipName.text = currentShip.shipName;
+                _weaponName.text = currentWeapon.weaponName;
+                _weaponIcon.style.backgroundImage =
+                    new StyleBackground(modelView.ToTexture2D(currentWeapon.weaponObject));
             }
 
-            if (currentWeapon != null)
+            if (currentShip != null && currentShip.shipObject)
             {
-                _weaponIcon.style.backgroundImage = new StyleBackground(currentWeapon.weaponSprite);
-                _weaponName.text = currentWeapon.weaponName;
+                    _shipName.text = currentShip.shipName;
+                    _shipIcon.style.backgroundImage =
+                        new StyleBackground(modelView.ToTexture2D(currentShip.shipObject));
             }
+
+
+
         }
 
         public void SetCurrentShip(ShipInfo ship)
@@ -204,14 +211,14 @@ namespace Player
         [Serializable]
         public class ShipInfo
         {
-            public Sprite? shipSprite;
+            public GameObject? shipObject;
             public string? shipName;
         }
 
         [Serializable]
         public class WeaponInfo
         {
-            public Sprite? weaponSprite;
+            public GameObject? weaponObject;
             public string? weaponName;
         }
     }
