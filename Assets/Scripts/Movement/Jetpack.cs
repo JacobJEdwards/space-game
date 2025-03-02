@@ -58,7 +58,7 @@ namespace Movement
 
         public UpgradeType GetRepairType()
         {
-            return UpgradeType.Jetpack;
+            return UpgradeType.Player;
         }
 
         public bool IsRepaired()
@@ -78,7 +78,7 @@ namespace Movement
 
         public UpgradeType GetUpgradeType()
         {
-            return UpgradeType.Jetpack;
+            return UpgradeType.Player;
         }
 
         private float FuelConsumptionRate()

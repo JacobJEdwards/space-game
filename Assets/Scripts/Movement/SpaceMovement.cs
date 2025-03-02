@@ -1,23 +1,25 @@
 #nullable enable
 
 using System;
+using Interfaces;
 using Managers;
-using UnityEngine;
 using Movement.Config;
+using Player;
 using Unity.Assertions;
+using UnityEngine;
 
 namespace Movement
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class SpaceMovement : MonoBehaviour
+    public class SpaceMovement : MonoBehaviour, IUpgradeable
     {
         [SerializeField] private SpaceMovementConfig config = null!;
-        private InputManager _inputManager = null!;
 
         private Animator? _animator;
 
         private float _glide;
         private float _horizontalGlide;
+        private InputManager _inputManager = null!;
 
         private Rigidbody _rb = null!;
 
@@ -49,6 +51,22 @@ namespace Movement
             HandleBoosting();
             HandleMovement();
             // HandleFOV();
+        }
+
+        // TODO
+        public bool CanApplyUpgrade(BaseUpgrade upgrade)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ApplyUpgrade(BaseUpgrade upgrade)
+        {
+            throw new NotImplementedException();
+        }
+
+        public UpgradeType GetUpgradeType()
+        {
+            throw new NotImplementedException();
         }
 
         private void HandleFOV()
@@ -85,13 +103,9 @@ namespace Movement
             var up = Vector3.up;
 
             if (forward == Vector3.zero && right == Vector3.zero && up == Vector3.zero)
-            {
                 _animator?.Play("Floating");
-            }
             else
-            {
                 _animator?.Play("Idle");
-            }
 
             // Roll
             _rb.AddRelativeTorque(Vector3.back * (_inputManager.GetRoll() * config.RollTorque * Time.fixedDeltaTime));
@@ -155,10 +169,9 @@ namespace Movement
         private void MaybeSlowdown()
         {
             if (!Physics.Raycast(transform.position, transform.forward, config.SlowdownDistance, LayerMask.GetMask
-                ("PlanetSurface", "Water"))) return;
+                    ("PlanetSurface", "Water"))) return;
 
             _rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, Vector3.one * 15f, Time.fixedDeltaTime);
-
         }
     }
 }

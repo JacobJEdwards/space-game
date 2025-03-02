@@ -76,6 +76,7 @@ namespace Player
 
         private void OnEnable()
         {
+            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
             if (playerCamera) _cameraController?.Register(playerCamera);
 
             _cameraController?.SetActiveCamera(playerCamera);
@@ -88,17 +89,38 @@ namespace Player
 
         public bool CanApplyUpgrade(BaseUpgrade upgrade)
         {
-            return upgrade is PlayerUpgrade;
+            return upgrade is PlayerUpgrade or JetpackUpgrade;
         }
 
         public void ApplyUpgrade(BaseUpgrade upgrade)
         {
-            if (upgrade is PlayerUpgrade playerUpgrade) ApplyPlayerUpgrade(playerUpgrade);
+            switch (upgrade)
+            {
+                case JetpackUpgrade jetpackUpgrade:
+                    ApplyJetpackUpgrade(jetpackUpgrade);
+                    break;
+                case PlayerWalkingMovementUpgrade walkingMovementUpgrade:
+                    ApplyWalkingMovementUpgrade(walkingMovementUpgrade);
+                    break;
+                case PlayerUpgrade playerUpgrade:
+                    ApplyPlayerUpgrade(playerUpgrade);
+                    break;
+            }
         }
 
         public UpgradeType GetUpgradeType()
         {
             return UpgradeType.Player;
+        }
+
+        private void ApplyWalkingMovementUpgrade(PlayerWalkingMovementUpgrade walkingMovementUpgrade)
+        {
+            _planetaryMovement.ApplyUpgrade(walkingMovementUpgrade);
+        }
+
+        private void ApplyJetpackUpgrade(JetpackUpgrade jetpackUpgrade)
+        {
+            _planetaryMovement.ApplyUpgrade(jetpackUpgrade);
         }
 
         private static void HideLockMouse(bool on)

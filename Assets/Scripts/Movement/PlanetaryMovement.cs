@@ -1,7 +1,11 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Interfaces;
 using Managers;
+using Player;
 using Unity.Assertions;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -9,7 +13,7 @@ using UnityEngine;
 namespace Movement
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class PlanetaryMovement : MonoBehaviour
+    public class PlanetaryMovement : MonoBehaviour, IUpgradeable
     {
         private static readonly int Walk = Animator.StringToHash("Walk");
         private static readonly int Idle = Animator.StringToHash("Idle");
@@ -34,6 +38,8 @@ namespace Movement
         [SerializeField] private AudioClip landClip = null!;
 
         public Transform? planetTransform;
+
+        private readonly List<PlayerWalkingMovementUpgrade> _playerUpgrades = new();
 
         private float _currentRotationX;
         private InputManager _inputManager = null!;
@@ -102,6 +108,47 @@ namespace Movement
 
             Gizmos.color = Color.blue;
             Gizmos.DrawRay(transform.position, _surfaceNormal * 2f);
+        }
+
+        public bool CanApplyUpgrade(BaseUpgrade upgrade)
+        {
+            return upgrade is PlayerUpgrade or JetpackUpgrade;
+        }
+
+        public void ApplyUpgrade(BaseUpgrade upgrade)
+        {
+            switch (upgrade)
+            {
+                case JetpackUpgrade jetpackUpgrade:
+                    ApplyJetpackUpgrade(jetpackUpgrade);
+                    break;
+                case PlayerWalkingMovementUpgrade playerUpgrade:
+                    ApplyPlayerUpgrade(playerUpgrade);
+                    break;
+            }
+        }
+
+        public UpgradeType GetUpgradeType()
+        {
+            return UpgradeType.Player;
+        }
+
+        // TODO:
+        // probably should cache
+        private float JumpForce()
+        {
+            return _playerUpgrades.Aggregate(movementSettings.jumpForce,
+                (current, upgrade) => current * upgrade.jumpHeightBonus);
+        }
+
+        private void ApplyPlayerUpgrade(PlayerWalkingMovementUpgrade playerUpgrade)
+        {
+            _playerUpgrades.Add(playerUpgrade);
+        }
+
+        public void ApplyJetpackUpgrade(JetpackUpgrade jetpackUpgrade)
+        {
+            jetpack.ApplyUpgrade(jetpackUpgrade);
         }
 
         private void CheckComponents()
@@ -176,7 +223,7 @@ namespace Movement
             var slopeAngle = Vector3.Angle(_surfaceNormal, transform.up);
             if (!(slopeAngle <= movementSettings.maxSlopeAngle)) return;
 
-            var currentSpeed = _isSprinting ? movementSettings.runSpeed : movementSettings.walkSpeed;
+            var currentSpeed = _isSprinting ? WalkSpeed() : RunSpeed();
             _rb.AddForce(moveDirection * currentSpeed, ForceMode.Acceleration);
 
             if (forward != 0 || strafe != 0)
@@ -192,6 +239,18 @@ namespace Movement
             {
                 animator.Play(Idle);
             }
+        }
+
+        private float WalkSpeed()
+        {
+            return _playerUpgrades.Aggregate(movementSettings.walkSpeed,
+                (current, upgrade) => current * upgrade.speedBonus);
+        }
+
+        private float RunSpeed()
+        {
+            return _playerUpgrades.Aggregate(movementSettings.runSpeed,
+                (current, upgrade) => current * upgrade.sprintSpeedBonus);
         }
 
         private void HandleJetpack()
@@ -224,7 +283,7 @@ namespace Movement
         {
             Assert.IsTrue(_isGrounded, "Player is not grounded");
 
-            _rb.AddForce(_surfaceNormal * movementSettings.jumpForce, ForceMode.Impulse);
+            _rb.AddForce(_surfaceNormal * JumpForce(), ForceMode.Impulse);
         }
 
         private void OnJumpPressed()

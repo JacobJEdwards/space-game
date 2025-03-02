@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp:Player:UpgradeConfig
   playerUpgrades: []
   shipUpgrades:
-  - {fileID: 11400000, guid: ad1c40c3af4044b7aa65f5bb688ba4ef, type: 2}
+  - {fileID: 11400000, guid: 0772974d7b19942e3b21a93cf916e7a1, type: 2}
   weaponUpgrades:
-  - {fileID: 11400000, guid: d6e667079055649bf89eaf8a4a47ba71, type: 2}
-  jetpackUpgrades: []
+  - {fileID: 11400000, guid: 828e761d001c3423ca91d745b1e1e6fe, type: 2}
+  jetpackUpgrades:
+  - {fileID: 11400000, guid: e955584e4ca514b9997a2f85fe3c3548, type: 2}
   shipRepairs: []
   playerRepairs: []
   weaponRepairs: []

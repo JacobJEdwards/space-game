@@ -57,7 +57,7 @@ namespace Managers
         {
             foreach (var upgrade in upgradeConfig.playerUpgrades) _availableUpgrades[UpgradeType.Player].Add(upgrade);
 
-            foreach (var upgrade in upgradeConfig.jetpackUpgrades) _availableUpgrades[UpgradeType.Jetpack].Add(upgrade);
+            foreach (var upgrade in upgradeConfig.jetpackUpgrades) _availableUpgrades[UpgradeType.Player].Add(upgrade);
 
             foreach (var upgrade in upgradeConfig.shipUpgrades) _availableUpgrades[UpgradeType.Ship].Add(upgrade);
 
@@ -65,7 +65,7 @@ namespace Managers
 
             foreach (var repair in upgradeConfig.playerRepairs) _availableRepairs[UpgradeType.Player].Add(repair);
 
-            foreach (var repair in upgradeConfig.jetpackRepairs) _availableRepairs[UpgradeType.Jetpack].Add(repair);
+            foreach (var repair in upgradeConfig.jetpackRepairs) _availableRepairs[UpgradeType.Player].Add(repair);
 
             foreach (var repair in upgradeConfig.shipRepairs) _availableRepairs[UpgradeType.Ship].Add(repair);
 
@@ -173,7 +173,6 @@ namespace Managers
         {
             return upgradeType switch
             {
-                UpgradeType.Jetpack => target.GetComponent<Jetpack>(),
                 UpgradeType.Player => target.GetComponent<PlayerController>(),
                 UpgradeType.Ship => target.GetComponent<ShipController>(),
                 UpgradeType.Weapon => target.GetComponent<Shooting>(),
@@ -185,11 +184,10 @@ namespace Managers
         {
             switch (upgradeType)
             {
-                case UpgradeType.Jetpack:
-                    return target.GetComponent<Jetpack>();
                 case UpgradeType.Player:
+                    return target.GetComponent<Jetpack>();
                 case UpgradeType.Ship:
-                //return target.GetComponent<ShipController>();
+                // return target.GetComponent<Hyperdrive>();
                 case UpgradeType.Weapon:
                 //return target.GetComponent<Gun>();
                 default:
@@ -224,6 +222,7 @@ namespace Managers
 
         public List<BaseUpgrade> GetAvailableUpgradesForType(UpgradeType type)
         {
+            print(type);
             return _availableUpgrades[type];
         }
 
