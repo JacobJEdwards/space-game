@@ -1,0 +1,8 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{public}\PYG{+w}{ }\PYG{k}{enum}\PYG{+w}{ }\PYG{n}{PlayerState}
+\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{n}{ZeroG}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n}{Spaceship}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n}{Planet}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

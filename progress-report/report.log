@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.11.22)  28 FEB 2025 13:34
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.11.22)  2 MAR 2025 17:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1553,7 +1553,7 @@ See the natbib package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.97 ...mand\NAT@force@numbers{}\NAT@force@numbers
+l.107 ...and\NAT@force@numbers{}\NAT@force@numbers
                                                   
 ? 
 )
@@ -1840,12 +1840,7 @@ LaTeX Font Info:    Font shape `T1/phv/b/n' will be
 (Font)              scaled to size 12.9599pt on input line 45.
 
 
-[5]
-
-Package natbib Warning: Citation `unity:assetstore' on page 6 undefined on inpu
-t line 74.
-
-(./game-features.tex
+[5] (./game-features.tex
 Overfull \hbox (18.02667pt too wide) in paragraph at lines 10--16
 \T1/ptm/m/n/12 InputSystem([]) to get the player's in-put and ap-ply it to the 
 player's Rigid-body component([])
@@ -1854,15 +1849,15 @@ player's Rigid-body component([])
 
 
 [6]
-<images/player.png, id=104, 1208.515pt x 728.7225pt>
+<images/player.png, id=126, 1208.515pt x 728.7225pt>
 File: images/player.png Graphic file (type png)
 <use images/player.png>
-Package pdftex.def Info: images/player.png  used on input line 28.
+Package pdftex.def Info: images/player.png  used on input line 29.
 (pdftex.def)             Requested size: 209.12686pt x 126.09393pt.
-<images/ship.png, id=106, 1208.515pt x 681.54625pt>
+<images/ship.png, id=128, 1208.515pt x 681.54625pt>
 File: images/ship.png Graphic file (type png)
 <use images/ship.png>
-Package pdftex.def Info: images/ship.png  used on input line 46.
+Package pdftex.def Info: images/ship.png  used on input line 47.
 (pdftex.def)             Requested size: 209.12686pt x 117.93083pt.
 
 
@@ -1871,31 +1866,31 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 
 [7 <./images/player.png>]
-<images/weapon.png, id=117, 1208.515pt x 681.54625pt>
+<images/weapon.png, id=139, 1208.515pt x 681.54625pt>
 File: images/weapon.png Graphic file (type png)
 <use images/weapon.png>
-Package pdftex.def Info: images/weapon.png  used on input line 69.
+Package pdftex.def Info: images/weapon.png  used on input line 70.
 (pdftex.def)             Requested size: 209.12686pt x 117.93083pt.
 
 
 [8 <./images/ship.png> <./images/weapon.png>]
-<images/inventory.png, id=125, 1208.515pt x 681.54625pt>
+<images/inventory.png, id=147, 1208.515pt x 681.54625pt>
 File: images/inventory.png Graphic file (type png)
 <use images/inventory.png>
-Package pdftex.def Info: images/inventory.png  used on input line 84.
+Package pdftex.def Info: images/inventory.png  used on input line 85.
 (pdftex.def)             Requested size: 209.12686pt x 117.93083pt.
 
 
 [9 <./images/inventory.png>]
-<images/planet.png, id=131, 1208.515pt x 681.54625pt>
+<images/planet.png, id=153, 1208.515pt x 681.54625pt>
 File: images/planet.png Graphic file (type png)
 <use images/planet.png>
-Package pdftex.def Info: images/planet.png  used on input line 111.
+Package pdftex.def Info: images/planet.png  used on input line 114.
 (pdftex.def)             Requested size: 209.12686pt x 117.93083pt.
-<images/life.png, id=134, 1078.0275pt x 617.30624pt>
+<images/life.png, id=156, 1078.0275pt x 617.30624pt>
 File: images/life.png Graphic file (type png)
 <use images/life.png>
-Package pdftex.def Info: images/life.png  used on input line 137.
+Package pdftex.def Info: images/life.png  used on input line 140.
 (pdftex.def)             Requested size: 209.12686pt x 119.74785pt.
 
 
@@ -1921,46 +1916,123 @@ Underfull \hbox (badness 3068) in paragraph at lines 29--32
  []
 
 )
+\pydata@fh@_E98D2F001DA5678B39482EFBDF5770DC.data.minted=\write8
+\openout8 = `_E98D2F001DA5678B39482EFBDF5770DC.data.minted'.
 
-Package natbib Warning: There were undefined citations.
+runsystem(latexminted config  --timestamp 20250302170713Z E98D2F001DA5678B39482
+EFBDF5770DC)...executed safely (allowed).
+
+ (./_E98D2F001DA5678B39482EFBDF5770DC.config.minted)
+runsystem(latexminted cleanconfig  --timestamp 20250302170713Z E98D2F001DA5678B
+39482EFBDF5770DC)...executed safely (allowed).
 
 
+(./_minted/default.style.minted)
+(./_minted/88737D556212B6F86FB9BE12368E4F79.highlight.minted
 
-[12]
-runsystem(latexminted cleantemp  --timestamp 20250228133407Z E98D2F001DA5678B39
+[12])
+\openout8 = `_E98D2F001DA5678B39482EFBDF5770DC.data.minted'.
+
+runsystem(latexminted highlight  --timestamp 20250302170713Z E98D2F001DA5678B39
 482EFBDF5770DC)...executed safely (allowed).
+
+ (./_minted/320987E5A34F777D84EBF5F6ACCEB57C.highlight.minted)
+
+[13]
+<images/ship2.png, id=197, 715.67375pt x 504.88625pt>
+File: images/ship2.png Graphic file (type png)
+<use images/ship2.png>
+Package pdftex.def Info: images/ship2.png  used on input line 178.
+(pdftex.def)             Requested size: 292.77632pt x 206.54245pt.
+<images/asteroids.png, id=198, 719.68875pt x 503.8825pt>
+File: images/asteroids.png Graphic file (type png)
+<use images/asteroids.png>
+Package pdftex.def Info: images/asteroids.png  used on input line 185.
+(pdftex.def)             Requested size: 292.77632pt x 204.98624pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<images/planet2.png, id=199, 718.685pt x 404.51125pt>
+File: images/planet2.png Graphic file (type png)
+<use images/planet2.png>
+Package pdftex.def Info: images/planet2.png  used on input line 192.
+(pdftex.def)             Requested size: 292.77632pt x 164.78903pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<images/alien.png, id=200, 722.7pt x 407.5225pt>
+File: images/alien.png Graphic file (type png)
+<use images/alien.png>
+Package pdftex.def Info: images/alien.png  used on input line 199.
+(pdftex.def)             Requested size: 292.77632pt x 165.09544pt.
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<images/inventory2.png, id=201, 720.6925pt x 407.5225pt>
+File: images/inventory2.png Graphic file (type png)
+<use images/inventory2.png>
+Package pdftex.def Info: images/inventory2.png  used on input line 206.
+(pdftex.def)             Requested size: 292.77632pt x 165.54938pt.
+<images/equipment.png, id=202, 721.69624pt x 404.51125pt>
+File: images/equipment.png Graphic file (type png)
+<use images/equipment.png>
+Package pdftex.def Info: images/equipment.png  used on input line 213.
+(pdftex.def)             Requested size: 292.77632pt x 164.09773pt.
+<images/ship3.png, id=203, 720.6925pt x 405.515pt>
+File: images/ship3.png Graphic file (type png)
+<use images/ship3.png>
+Package pdftex.def Info: images/ship3.png  used on input line 220.
+(pdftex.def)             Requested size: 292.77632pt x 164.73387pt.
+<images/menu.png, id=204, 720.6925pt x 404.51125pt>
+File: images/menu.png Graphic file (type png)
+<use images/menu.png>
+Package pdftex.def Info: images/menu.png  used on input line 228.
+(pdftex.def)             Requested size: 292.77632pt x 164.32611pt.
+
+
+[14 <./images/ship2.png>]
+
+[15 <./images/asteroids.png> <./images/planet2.png>]
+
+[16 <./images/alien.png> <./images/inventory2.png>]
+
+[17 <./images/equipment.png> <./images/ship3.png>]
+
+[18 <./images/menu.png>]
+\openout8 = `_E98D2F001DA5678B39482EFBDF5770DC.data.minted'.
+
+runsystem(latexminted clean  --timestamp 20250302170713Z E98D2F001DA5678B39482E
+FBDF5770DC)...executed safely (allowed).
 
  (./report.aux)
  ***********
 LaTeX2e <2024-11-01>
 L3 programming layer <2024-11-02>
  ***********
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package rerunfilecheck Info: File `report.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 40771 strings out of 473362
- 912884 string characters out of 5720983
- 1482588 words of memory out of 5000000
- 63217 multiletter control sequences out of 15000+600000
- 598703 words of font info for 80 fonts, out of 8000000 for 9000
+ 41125 strings out of 473362
+ 920534 string characters out of 5720983
+ 1483588 words of memory out of 5000000
+ 63538 multiletter control sequences out of 15000+600000
+ 596521 words of font info for 80 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 122i,17n,121p,10957b,1112s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2024/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/
-local/texlive/2024/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/t
-exlive/2024/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb></usr/local/texlive
-/2024/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2024/texm
-f-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2024/texmf-dist/fon
-ts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/u
-rw/times/utmri8a.pfb>
-Output written on report.pdf (12 pages, 10319910 bytes).
+ 122i,17n,121p,10957b,1350s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2024/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb></usr/
+local/texlive/2024/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/te
+xlive/2024/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/2
+024/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb></usr/local/texlive/2024/te
+xmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2024/texmf-dist/f
+onts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1
+/urw/times/utmr8a.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/urw/times
+/utmri8a.pfb>
+Output written on report.pdf (18 pages, 15397317 bytes).
 PDF statistics:
- 275 PDF objects out of 1000 (max. 8388607)
- 232 compressed objects within 3 object streams
- 51 named destinations out of 1000 (max. 500000)
- 203 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 353 PDF objects out of 1000 (max. 8388607)
+ 286 compressed objects within 3 object streams
+ 68 named destinations out of 1000 (max. 500000)
+ 259 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -1,0 +1,15 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Physics}\PYG{p}{.}\PYG{n}{Raycast}\PYG{p}{(}\PYG{n}{ray}\PYG{p}{,}\PYG{+w}{ }\PYG{k}{out}\PYG{+w}{ }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{hit}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{interactionRange}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{interactionLayer}\PYG{p}{)}\PYG{p}{)}
+\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{interactable}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{hit}\PYG{p}{.}\PYG{n}{collider}\PYG{p}{.}\PYG{n}{GetComponent}\PYG{o}{\PYGZlt{}}\PYG{n}{IInteractable}\PYG{o}{\PYGZgt{}}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{interactable}\PYG{+w}{ }\PYG{o}{!=}\PYG{+w}{ }\PYG{k}{null}\PYG{p}{)}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{o}{!}\PYG{n}{interactable}\PYG{p}{.}\PYG{n}{CanInteract}\PYG{p}{(}\PYG{n}{gameObject}\PYG{p}{)}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{return}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{n}{\PYGZus{}currentTarget}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{interactable}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{n}{\PYGZus{}uiManager}\PYG{p}{.}\PYG{n}{SetHint}\PYG{p}{(}\PYG{n}{interactable}\PYG{p}{.}\PYG{n}{GetInteractionPrompt}\PYG{p}{(}\PYG{n}{gameObject}\PYG{p}{)}\PYG{p}{)}\PYG{p}{;}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Interfaces;
 using Managers;
 using Movement;
 using Spaceship;
@@ -23,23 +24,25 @@ namespace Player
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(Health), typeof(Oxygen))]
     [RequireComponent(typeof(SpaceMovement), typeof(PlanetaryMovement))]
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour, IUpgradeable
     {
         [Header("Camera Settings")] [SerializeField]
         private CinemachineCamera playerCamera = null!;
 
-        private CameraController _cameraController = null!;
-        private InteractionManager _interactionManager = null!;
-        private UiManager _uiManager = null!;
-
         [Header("Movement Settings")] [SerializeField]
         private MovementSettings movementSettings = null!;
+
         [SerializeField] private Transform head = null!;
 
         public ShipController? shipToEnter;
 
         public UnityEvent onEnterShip = new();
         public UnityEvent onExitShip = new();
+
+        private readonly List<PlayerUpgrade> _playerUpgrades = new();
+
+        private CameraController _cameraController = null!;
+        private InteractionManager _interactionManager = null!;
 
         private PlanetaryMovement _planetaryMovement = null!;
         private Health _playerHealth = null!;
@@ -49,6 +52,7 @@ namespace Player
         private Rigidbody _rb = null!;
 
         private SpaceMovement _spaceMovement = null!;
+        private UiManager _uiManager = null!;
 
         private void Start()
         {
@@ -82,6 +86,21 @@ namespace Player
             if (playerCamera) _cameraController.Unregister(playerCamera);
         }
 
+        public bool CanApplyUpgrade(BaseUpgrade upgrade)
+        {
+            return upgrade is PlayerUpgrade;
+        }
+
+        public void ApplyUpgrade(BaseUpgrade upgrade)
+        {
+            if (upgrade is PlayerUpgrade playerUpgrade) ApplyPlayerUpgrade(playerUpgrade);
+        }
+
+        public UpgradeType GetUpgradeType()
+        {
+            return UpgradeType.Player;
+        }
+
         private static void HideLockMouse(bool on)
         {
             if (on)
@@ -110,7 +129,20 @@ namespace Player
             _spaceMovement = GetComponentInChildren<SpaceMovement>();
             _planetaryMovement = GetComponentInChildren<PlanetaryMovement>();
 
+            _playerHealth.onDeath.AddListener(OnDeath);
+
             if (_planetaryMovement) _planetaryMovement.enabled = false;
+        }
+
+        // TODO : THIS BREAKS< PROBLEMS WITH INSTSNCES OF OBJEcts du e to RESetTING
+        private void OnDeath()
+        {
+            _playerHealth.Reset();
+            _playerOxygen.Reset();
+
+            _uiManager.TransitionToState(UIState.Death);
+            HideLockMouse(false);
+            gameObject.SetActive(false);
         }
 
         private void ValidateComponents()
@@ -134,8 +166,6 @@ namespace Player
         private void UpdateOxygenAndHealth()
         {
             if (_playerState == PlayerState.InZeroG) _playerOxygen.TakeDamage(1f * Time.fixedDeltaTime);
-
-            if (_playerOxygen.CurrentOxygen <= 0) _playerHealth.TakeDamage(1);
         }
 
         private void UpdateMovementState()
@@ -159,7 +189,8 @@ namespace Player
         {
             var colliders = new Collider[1];
 
-            if (Physics.OverlapSphereNonAlloc(transform.position, 50, colliders, movementSettings.groundLayer) != 0) return;
+            if (Physics.OverlapSphereNonAlloc(transform.position, 50, colliders, movementSettings.groundLayer) !=
+                0) return;
 
             _playerState = PlayerState.InZeroG;
             UpdateMovementComponents();
@@ -169,7 +200,8 @@ namespace Player
         {
             var colliders = new Collider[1];
 
-            if (Physics.OverlapSphereNonAlloc(transform.position, 50, colliders, movementSettings.groundLayer) == 0) return;
+            if (Physics.OverlapSphereNonAlloc(transform.position, 50, colliders, movementSettings.groundLayer) ==
+                0) return;
 
             _playerState = PlayerState.InGravity;
             UpdateMovementComponents();
@@ -263,6 +295,11 @@ namespace Player
         {
             _spaceMovement.enabled = false;
             _planetaryMovement.enabled = false;
+        }
+
+        private void ApplyPlayerUpgrade(PlayerUpgrade playerUpgrade)
+        {
+            _playerUpgrades.Add(playerUpgrade);
         }
 
         [Serializable]

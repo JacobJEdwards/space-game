@@ -1,144 +1,45 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using CollectableResources;
 using Interfaces;
 using Managers;
 using UI;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.UIElements;
+using UnityEngine.UI;
 
 namespace Player
 {
-    public class InventoryUI : MonoBehaviour, IUIPanel
+    public class InventoryUI : MonoBehaviour
     {
         [SerializeField] private Inventory inventory = null!;
-        private UiManager _uiManager = null!;
+        [SerializeField] private Text selectedResourceLabel = null!;
+        [SerializeField] private Image selectedResourceIcon = null!;
+        [SerializeField] private Text selectedResourceInfo = null!;
 
-        [SerializeField] public ShipInfo? currentShip;
-        [SerializeField] public WeaponInfo? currentWeapon;
+        private InventorySlot[] _inventorySlots = null!;
 
-        [SerializeField] private int slotsCount = 6;
-        private readonly List<InventorySlot> _inventorySlots = new();
         private InventorySlot? _draggedSlot;
-        private VisualElement _ghostIcon = null!;
-
-        private bool _isDragging;
-
-        private VisualElement _root = null!;
-
-        private VisualElement _shipIcon = null!;
-        private Label _shipName = null!;
-        private VisualElement _slotsContainer = null!;
-        private VisualElement _weaponIcon = null!;
-        private Label _weaponName = null!;
+        private ResourceObject? _selectedResource;
 
         private void Awake()
         {
             Assert.IsNotNull(inventory, "Inventory is not assigned");
-
-            _root = GetComponentInChildren<UIDocument>().rootVisualElement;
-            Assert.IsNotNull(_root, "Root is not found");
-
-            _slotsContainer = _root.Q<VisualElement>("SlotContainer");
-            Assert.IsNotNull(_slotsContainer, "Slots container is not found");
-
-            _ghostIcon = _root.Q<VisualElement>("GhostIcon");
-            Assert.IsNotNull(_ghostIcon, "Ghost icon is not found");
-
-            _shipIcon = _root.Q<VisualElement>("ShipImage");
-            Assert.IsNotNull(_shipIcon, "Ship icon is not found");
-
-            _shipName = _root.Q<Label>("ShipName");
-            Assert.IsNotNull(_shipName, "Ship name is not found");
-
-            _weaponIcon = _root.Q<VisualElement>("WeaponImage");
-            Assert.IsNotNull(_weaponIcon, "Weapon icon is not found");
-
-            _weaponName = _root.Q<Label>("WeaponName");
-            Assert.IsNotNull(_weaponName, "Weapon name is not found");
-
+            inventory.onInventoryChanged.AddListener(UpdateInventory);
             InitSlots();
-            UpdateEquipmentDisplay();
-        }
-
-        private void Start()
-        {
-            _uiManager = UiManager.Instance;
-
-            _uiManager.RegisterPanel(this);
-            inventory.OnInventoryChanged += _ => UpdateInventory();
-        }
-
-        private void OnEnable()
-        {
-            _root.RegisterCallback<PointerMoveEvent>(OnPointerMove);
-            _root.RegisterCallback<PointerUpEvent>(OnPointerUp);
-        }
-
-        public UIState AssociatedState => UIState.Inventory;
-
-        public void Hide()
-        {
-            _root.style.display = DisplayStyle.None;
-        }
-
-        public void Show()
-        {
-            _root.style.display = DisplayStyle.Flex;
-        }
-
-        private void UpdateEquipmentDisplay()
-        {
-            var modelView = ModelPreviewManager.Instance;
-
-            if (currentWeapon != null && currentWeapon.weaponObject)
-            {
-                _weaponName.text = currentWeapon.weaponName;
-                _weaponIcon.style.backgroundImage =
-                    new StyleBackground(modelView.ToTexture2D(currentWeapon.weaponObject));
-            }
-
-            if (currentShip != null && currentShip.shipObject)
-            {
-                    _shipName.text = currentShip.shipName;
-                    _shipIcon.style.backgroundImage =
-                        new StyleBackground(modelView.ToTexture2D(currentShip.shipObject));
-            }
-
-
-
-        }
-
-        public void SetCurrentShip(ShipInfo ship)
-        {
-            currentShip = ship;
-            UpdateEquipmentDisplay();
-        }
-
-        public void SetCurrentWeapon(WeaponInfo weapon)
-        {
-            currentWeapon = weapon;
-            UpdateEquipmentDisplay();
         }
 
         private void InitSlots()
         {
-            for (var i = 0; i < slotsCount; i++)
-            {
-                var slot = new InventorySlot(this);
-                _inventorySlots.Add(slot);
-                _slotsContainer.Add(slot);
-            }
-
+            _inventorySlots = GetComponentsInChildren<InventorySlot>(true);
             UpdateInventory();
         }
 
         private void UpdateInventory()
         {
-            foreach (var slot in _inventorySlots) slot.ClearSlot();
+            foreach (var slot in _inventorySlots) {slot.ClearSlot();}
 
             foreach (var resource in inventory.resources)
             {
@@ -147,66 +48,69 @@ namespace Player
             }
         }
 
-        public void StartDrag(Vector2 position, InventorySlot slot)
+        public void SetSelectedResource(ResourceObject resource)
         {
-            _isDragging = true;
+            _selectedResource = resource;
+
+            selectedResourceIcon.enabled = true;
+            selectedResourceIcon.sprite = resource.resourceSprite;
+            selectedResourceLabel.text = resource.resourceName;
+            selectedResourceInfo.text = resource.resourceDescription;
+            selectedResourceIcon.gameObject.SetActive(true);
+        }
+
+        public void ClearSelectedResource()
+        {
+            _selectedResource = null;
+            selectedResourceIcon.enabled = false;
+            selectedResourceIcon.sprite = null;
+            selectedResourceLabel.text = string.Empty;
+            selectedResourceInfo.text = string.Empty;
+            selectedResourceIcon.gameObject.SetActive(false);
+        }
+
+        public void SetDraggedSlot(InventorySlot slot)
+        {
             _draggedSlot = slot;
-
-            _ghostIcon.style.backgroundImage = new StyleBackground(slot.GetResource()?.resourceSprite);
-            _ghostIcon.style.display = DisplayStyle.Flex;
-            _ghostIcon.style.left = position.x - _ghostIcon.layout.width / 2;
-            _ghostIcon.style.top = position.y - _ghostIcon.layout.height / 2;
-            _ghostIcon.style.visibility = Visibility.Visible;
         }
 
-        private void OnPointerMove(PointerMoveEvent evt)
+        public void ClearDraggedSlot()
         {
-            if (!_isDragging) return;
-            _ghostIcon.style.left = evt.localPosition.x - _ghostIcon.layout.width / 2;
-            _ghostIcon.style.top = evt.localPosition.y - _ghostIcon.layout.height / 2;
+            _draggedSlot = null;
         }
 
-        private void OnPointerUp(PointerUpEvent evt)
+        public InventorySlot? GetDraggedSlot()
         {
-            if (!_isDragging || _draggedSlot == null) return;
+            return _draggedSlot;
+        }
 
-            var slots = _inventorySlots.Where(x => x.worldBound.Overlaps(_ghostIcon.worldBound));
-            var targetSlot = slots.OrderBy(x => Vector2.Distance(x.worldBound.center, _ghostIcon.worldBound.center))
-                .FirstOrDefault();
+        public static void SwapItems(InventorySlot fromSlot, InventorySlot toSlot)
+        {
+            var fromResource = fromSlot.GetResource();
+            var toResource = toSlot.GetResource();
 
-            if (targetSlot != null && targetSlot != _draggedSlot)
+            fromSlot.ClearSlot();
+            toSlot.ClearSlot();
+
+            if (fromResource)
             {
-                var draggedResource = _draggedSlot.GetResource();
-                var targetResource = targetSlot.GetResource();
-
-                if (!draggedResource) return;
-
-                if (targetResource)
-                {
-                    if (targetResource.resourceName == draggedResource.resourceName)
-                    {
-                        targetResource.resourceAmount += draggedResource.resourceAmount;
-                        _draggedSlot.ClearSlot();
-                    }
-                    else
-                    {
-                        _draggedSlot.SetResource(targetResource);
-                        targetSlot.SetResource(draggedResource);
-                    }
-                }
-                else
-                {
-                    targetSlot.SetResource(draggedResource);
-                    _draggedSlot.ClearSlot();
-                }
+                toSlot.SetResource(fromResource);
+            }
+            else
+            {
+                toSlot.ClearSlot();
             }
 
-
-            _isDragging = false;
-            _ghostIcon.style.visibility = Visibility.Hidden;
-            _draggedSlot = null;
-            UpdateInventory();
+            if (toResource)
+            {
+                fromSlot.SetResource(toResource);
+            }
+            else
+            {
+                fromSlot.ClearSlot();
+            }
         }
+
 
         [Serializable]
         public class ShipInfo

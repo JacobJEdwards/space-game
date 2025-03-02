@@ -1,5 +1,7 @@
 #nullable enable
 
+using System.Collections.Generic;
+using Interfaces;
 using Movement;
 using Unity.Assertions;
 using UnityEngine;
@@ -7,7 +9,7 @@ using Weapons;
 
 namespace Player
 {
-    public class Shooting : MonoBehaviour
+    public class Shooting : MonoBehaviour, IUpgradeable
     {
         [SerializeField] private float laserMaxCharge = 10f;
         [SerializeField] private float laserHeatRate = 1f;
@@ -21,6 +23,7 @@ namespace Player
         private bool _overheated;
 
         private bool _targetInRange;
+        private readonly List<WeaponUpgrade> _upgrades = new();
 
         public float LaserMaxCharge => laserMaxCharge;
         public float LaserCharge { get; private set; }
@@ -42,6 +45,21 @@ namespace Player
         {
             HandleLaserFiring();
             CoolLasers();
+        }
+
+        public bool CanApplyUpgrade(BaseUpgrade upgrade)
+        {
+            return upgrade is WeaponUpgrade;
+        }
+
+        public void ApplyUpgrade(BaseUpgrade upgrade)
+        {
+            if (upgrade is WeaponUpgrade weaponUpgrade) ApplyWeaponUpgrade(weaponUpgrade);
+        }
+
+        public UpgradeType GetUpgradeType()
+        {
+            return UpgradeType.Weapon;
         }
 
         private void HandleLaserFiring()
@@ -99,6 +117,11 @@ namespace Player
         public void OnFireRelease()
         {
             _firing = false;
+        }
+
+        private void ApplyWeaponUpgrade(WeaponUpgrade weaponUpgrade)
+        {
+            _upgrades.Add(weaponUpgrade);
         }
     }
 }

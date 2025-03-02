@@ -23,6 +23,7 @@ public class Health : MonoBehaviour, IDamageable
     public void Reset()
     {
         CurrentHealth = config.MaxHealth;
+        onHealthChanged.Invoke(CurrentHealth);
     }
 
     private void Start()

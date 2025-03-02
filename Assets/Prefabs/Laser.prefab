@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 182401435319266024}
   - component: {fileID: 2932729187367367364}
   - component: {fileID: 56244466117643380}
+  - component: {fileID: 3268385125304312299}
   m_Layer: 0
   m_Name: Laser
   m_TagString: Untagged
@@ -5219,3 +5220,17 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &3268385125304312299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6863774778516644015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f0b112dca2146849035ee1b1b17fd3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  particlePrefab: {fileID: 5444105318733727396, guid: cf82839c411151342a7b2337bda9fb34, type: 3}
+  poolSize: 20

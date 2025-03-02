@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5add9d2f2a546058df19b75841a2473, type: 3}
   m_Name: PlayerOxygenConfig
   m_EditorClassIdentifier: 
-  maxOxygen: 100
+  maxOxygen: 30
   oxygenRegenRate: 5

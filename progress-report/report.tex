@@ -55,7 +55,7 @@
     the gameplay experience.
 
     This game takes inspiration from No Man's Sky in terms of the exploration and variety of planets, as well as the
-    focus on upgrading and customising equipment, but has a more fixed and focused story and a lower poly art style.
+    focus on upgrading and customising equipment, but has a more fixed and focused story and a simpler art style.
 
     \subsection{Elite Dangerous}\label{subsec:ed}
 
@@ -70,12 +70,12 @@
     \section{Design}\label{sec:design}
 
     The game is designed to be a 3D space shooter, with a focus on exploration and combat and a low poly art style.
-
     The majority of the assets are taken from the Unity Asset Store\citep{unity:assetstore}, and either adapted to fit
     the game's style, for example through changing the colours or generating animations, or used as is.
 
     I wanted a low poly art style, as I feel it is easier to create assets in this style, and it fits the space theme
-    well, as well as being more performant than a more realistic style.
+    well.
+    Additionally, it is often more performant than a more realistic style.
 
     Initially, I wanted to allow travelling to different star systems, but have since decided to focus on a single solar
     system, after discussions about the scope of the project.
@@ -88,7 +88,7 @@
 
     The following features are planned to be implemented in the future:
 
-    \begin{itemize}
+    \begin{itemize}[noitemsep]
         \item Quests and Story
         \item Procedurally generated planets and asteroids
         \item More advanced life AI, such as fleeing and interacting with the environment
@@ -100,7 +100,7 @@
     \section{Conclusion and Links}\label{sec:conclusion}
 
     In conclusion, the game is currently in a playable state, with the core mechanics implemented.
-    The next steps are the implement the planned features, with a focus on the story and quests.
+    The next steps are to implement the planned features, with a focus on the story and quests.
 
     The game can be found on GitHub at \url{https://www.github.com/jacobjedwards/space-game}.
     The demo video can be found at \url{}.
@@ -110,7 +110,125 @@
 
     \appendix
 
+    \section{Code}\label{sec:code}
+
+    As mentioned, the game is developed using Unity Engine and C\#.
+    The following are some key patterns and code snippets used in the game.
+
+    \subsection{Interface Use}\label{subsec:interface}
+
+    Interfaces are relied upon heavily in the game in order to simplify and modularise the code.
+    Two key example of where interfaces are used are the \texttt{IInteractable} interface and the
+    \texttt{IDamageable} interface.
+
+    The \texttt{IInteractable} interface is used to allow the player to interact with objects in the game world, and
+    allows for a design pattern where the player can interact with any object that implements the interface, without
+    worrying about the specifics of the object.
+    The idea is that a ray is shot from the camera through the \textit{Interactable} layer, and if it collides with
+    an object instead of trying to find a concrete component, the code can just check if the object implements the
+    \texttt{IInteractable} interface.
+
+    \begin{minted}{csharp}
+if (Physics.Raycast(ray, out var hit, interactionRange, interactionLayer))
+{
+    var interactable = hit.collider.GetComponent<IInteractable>();
+
+    if (interactable != null)
+    {
+        if (!interactable.CanInteract(gameObject)) return;
+
+        _currentTarget = interactable;
+
+        _uiManager.SetHint(interactable.GetInteractionPrompt(gameObject));
+    }
+}
+    \end{minted}
+
+    A similar system is used for damageable objects, where the player's weapons can damage any object that implements
+    the \texttt{IDamageable} interface.
+
+    \subsection{State Machine}\label{subsec:state-machine}
+
+    Both the AI and the current player state are managed using a rudimentary state machine.
+    For example, the player can be in one of three states - Zero G movement, Spaceship movement or Planetary movement.
+
+    \begin{minted}{csharp}
+public enum PlayerState
+{
+    ZeroG,
+    Spaceship,
+    Planet
+}
+    \end{minted}
+
+    The transition between these states dictates the player's movement and interaction capabilities, and the current
+    state dictates what happens on update.
+
+    \newpage
+
     \section{Screen Captures}\label{sec:screen-captures}
 
-    \section{Code}\label{sec:code}
+    It should be noted that some of these images are from later in development than what is described in the report,
+    and as such some assets and interfaces may have changed.
+    Additionally, post processing effects have been added to the game, such as bloom and ambient occlusion, which are
+    shown in these images.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/ship2}
+        \caption{The player's ship}
+        \label{fig:ship2}
+    \end{figure}
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/asteroids}
+        \caption{Low poly asteroids}
+        \label{fig:asteroids}
+    \end{figure}
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/planet2}
+        \caption{The player on a planet}
+        \label{fig:planet2}
+    \end{figure}
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/alien}
+        \caption{The planetary life}
+        \label{fig:planet3}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/inventory2}
+        \caption{The player's inventory}
+        \label{fig:inventory2}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/equipment}
+        \caption{The player's Equipment}
+        \label{fig:equipment}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/ship3}
+        \caption{The player's ship}
+        \label{fig:shipinventory}
+    \end{figure}
+
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/menu}
+        \caption{The main menu}
+        \label{fig:menu}
+    \end{figure}
+
+
 \end{document}

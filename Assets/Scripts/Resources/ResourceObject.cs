@@ -10,5 +10,6 @@ namespace CollectableResources
         public string resourceName = "New Resource";
         public int resourceAmount;
         public Sprite? resourceSprite;
+        public string resourceDescription = "Todo";
     }
 }

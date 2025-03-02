@@ -11,19 +11,24 @@ namespace Player
     public class Inventory : MonoBehaviour
     {
         public List<ResourceObject> resources = new();
-        public event UnityAction<Inventory> OnInventoryChanged = delegate { };
+        public UnityEvent onInventoryChanged = new();
 
         public void AddResource(ResourceObject resource)
         {
-            foreach (var t in resources.Where(t => t.resourceName == resource.resourceName))
+            onInventoryChanged.Invoke();
+
+            if (resources.Exists(t => t.resourceName == resource.resourceName))
             {
-                t.resourceAmount += resource.resourceAmount;
-                OnInventoryChanged.Invoke(this);
+                var res = resources.Find(t => t.resourceName == resource.resourceName);
+
+                res.resourceAmount += resource.resourceAmount;
+                onInventoryChanged.Invoke();
                 return;
             }
 
             resources.Add(resource);
-            OnInventoryChanged.Invoke(this);
+
+            onInventoryChanged.Invoke();
         }
 
         public void RemoveResource(ResourceObject resource)
@@ -35,7 +40,7 @@ namespace Player
                 return;
             }
 
-            OnInventoryChanged.Invoke(this);
+            onInventoryChanged.Invoke();
         }
 
         public void RemoveResource(string resourceName, int amount)
@@ -46,11 +51,11 @@ namespace Player
                 if (t.resourceAmount <= 0)
                     resources.Remove(t);
 
-                OnInventoryChanged.Invoke(this);
+                onInventoryChanged.Invoke();
                 return;
             }
 
-            OnInventoryChanged.Invoke(this);
+            onInventoryChanged.Invoke();
         }
 
         public ResourceObject? GetResource(string resourceName)
@@ -63,10 +68,15 @@ namespace Player
             return resources.Any(t => t.resourceName == resourceName);
         }
 
+        public bool HasResource(string resourceName, int amount)
+        {
+            return resources.Any(t => t.resourceName == resourceName && t.resourceAmount >= amount);
+        }
+
         public void ClearInventory()
         {
             resources.Clear();
-            OnInventoryChanged.Invoke(this);
+            onInventoryChanged.Invoke();
         }
     }
 }

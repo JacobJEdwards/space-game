@@ -16,6 +16,8 @@
 \contentsline {section}{\numberline {5}Future Work}{11}{section.5}%
 \contentsline {section}{\numberline {6}Conclusion and Links}{11}{section.6}%
 \contentsline {section}{References}{11}{section*.10}%
-\contentsline {section}{\numberline {A}Screen Captures}{12}{appendix.A}%
-\contentsline {section}{\numberline {B}Code}{12}{appendix.B}%
+\contentsline {section}{\numberline {A}Code}{12}{appendix.A}%
+\contentsline {subsection}{\numberline {A.1}Interface Use}{12}{subsection.A.1}%
+\contentsline {subsection}{\numberline {A.2}State Machine}{13}{subsection.A.2}%
+\contentsline {section}{\numberline {B}Screen Captures}{14}{appendix.B}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

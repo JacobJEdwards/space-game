@@ -1,14 +1,15 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using HUDIndicator;
+using Interfaces;
 using Managers;
 using Movement;
 using Player;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.Serialization;
 
 namespace Spaceship
 {
@@ -21,29 +22,33 @@ namespace Spaceship
     }
 
     [RequireComponent(typeof(Rigidbody), typeof(SpaceMovement))]
-    public class ShipController : MonoBehaviour
+    public class ShipController : MonoBehaviour, IUpgradeable
     {
         [SerializeField] private CameraSettings cameraSettings = null!;
         [SerializeField] private LandingSettings landingSettings = null!;
         [SerializeField] private Indicator[] indicators = null!;
-        [FormerlySerializedAs("_landingParticles")] [SerializeField] private ParticleSystem landingParticles = null!;
 
-        [FormerlySerializedAs("_damageParticles")] [SerializeField] private ParticleSystem damageParticles = null!;
+        [SerializeField] private ParticleSystem landingParticles = null!;
+
+        [SerializeField] private ParticleSystem damageParticles = null!;
+
         [SerializeField] private Transform[] damagePoints = null!;
-        private int _numDamageParticles;
+
+        private readonly List<ShipUpgrade> _upgrades = new();
 
         private CameraController _cameraController = null!;
-        private UiManager _uiManager = null!;
         private PlayerController? _currentPlayer;
         private bool _hasValidLandingPoint;
+        private Health _health = null!;
         private Vector3 _landingNormal;
 
         private Vector3 _landingPoint;
         private Collider? _nearestLandingZone;
+        private int _numDamageParticles;
 
         private Rigidbody _rb = null!;
         private SpaceMovement _spaceMovement = null!;
-        private Health _health = null!;
+        private UiManager _uiManager = null!;
 
         public bool IsOccupied => _currentPlayer;
         public ShipState CurrentState { get; private set; } = ShipState.SpaceIdle;
@@ -63,26 +68,6 @@ namespace Spaceship
             inputManager.SetOnLandingPressed(HandleLandingOrTakeoff);
 
             _health.onHealthChanged.AddListener(OnHealthChanged);
-        }
-
-        private void OnHealthChanged(float health)
-        {
-            var thresholds = new[] {0.25f, 0.5f, 0.75f};
-
-            for (var i = 0; i < thresholds.Length; i++)
-            {
-                var threshold = thresholds[i];
-                if (health < _health.MaxHealth * threshold)
-                {
-                    var particles = Instantiate(damageParticles, transform.position, Quaternion.identity);
-                    particles.transform.parent = transform;
-                    particles.transform.localPosition = damagePoints[i].localPosition;
-                    particles.transform.localRotation = damagePoints[i].localRotation;
-                    particles.Play();
-                    _numDamageParticles++;
-                    break;
-                }
-            }
         }
 
         private void FixedUpdate()
@@ -106,6 +91,40 @@ namespace Spaceship
             DrawShipStateGizmos();
         }
 
+        public bool CanApplyUpgrade(BaseUpgrade upgrade)
+        {
+            return upgrade is ShipUpgrade;
+        }
+
+        public void ApplyUpgrade(BaseUpgrade upgrade)
+        {
+            if (upgrade is ShipUpgrade shipUpgrade) _upgrades.Add(shipUpgrade);
+        }
+
+        public UpgradeType GetUpgradeType()
+        {
+            return UpgradeType.Ship;
+        }
+
+        private void OnHealthChanged(float health)
+        {
+            var thresholds = new[] { 0.25f, 0.5f, 0.75f };
+
+            for (var i = _numDamageParticles; i < thresholds.Length; i++)
+            {
+                var threshold = thresholds[i];
+                if (!(health < _health.MaxHealth * threshold)) continue;
+
+                var particles = Instantiate(damageParticles, transform.position, Quaternion.identity);
+                particles.transform.parent = transform;
+                particles.transform.localPosition = damagePoints[i].localPosition;
+                particles.transform.localRotation = damagePoints[i].localRotation;
+                particles.Play();
+                _numDamageParticles++;
+                break;
+            }
+        }
+
         private void InitializeComponents()
         {
             _rb = GetComponent<Rigidbody>();
@@ -118,7 +137,6 @@ namespace Spaceship
             Assert.IsNotNull(cameraSettings.thirdPersonCamera, "Third person camera is not set!");
             Assert.IsNotNull(cameraSettings.firstPersonCamera, "First person camera is not set!");
             Assert.IsNotNull(landingSettings, "Landing settings are not set!");
-
         }
 
         private void UpdateShipState()
@@ -275,9 +293,8 @@ namespace Spaceship
             var closestPoint = _nearestLandingZone.ClosestPoint(transform.position);
             var distance = Vector3.Distance(transform.position, closestPoint);
 
-            _uiManager.SetHint(distance < landingSettings.landingThreshold
-                ? "Press L to land"
-                : "");
+            if (distance < landingSettings.landingThreshold)
+                _uiManager.SetHint("Press L to land");
         }
 
         private void FindLandingPoint()
@@ -344,35 +361,23 @@ namespace Spaceship
             _currentPlayer = player;
             _cameraController.SetActiveCamera(cameraSettings.thirdPersonCamera);
 
-            foreach (var indicator in indicators)
-            {
-                indicator.enabled = false;
-            }
+            foreach (var indicator in indicators) indicator.enabled = false;
 
-            if (CurrentState == ShipState.SpaceIdle)
-            {
-                SetCurrentState(ShipState.Flying);
-            }
+            if (CurrentState == ShipState.SpaceIdle) SetCurrentState(ShipState.Flying);
         }
 
         public void PlayerExitShip()
         {
             if (!_currentPlayer) return;
 
-            foreach (var indicator in indicators)
-            {
-                indicator.enabled = true;
-            }
+            foreach (var indicator in indicators) indicator.enabled = true;
 
             _currentPlayer.ExitShip();
             _currentPlayer = null;
             _uiManager.ClearHint();
             _uiManager.TransitionToState(UIState.ZeroG);
 
-            if (CurrentState == ShipState.Flying)
-            {
-                SetCurrentState(ShipState.SpaceIdle);
-            }
+            if (CurrentState == ShipState.Flying) SetCurrentState(ShipState.SpaceIdle);
         }
 
         private void SetCurrentState(ShipState state)

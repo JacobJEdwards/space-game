@@ -1,17 +1,13 @@
 #nullable enable
 
 using System;
-using Animancer;
 using Managers;
 using Unity.Assertions;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Movement
 {
-    // TODO: sometimes cant get up, guess surface normal gets messed up
-
     [RequireComponent(typeof(Rigidbody))]
     public class PlanetaryMovement : MonoBehaviour
     {
@@ -19,10 +15,10 @@ namespace Movement
         private static readonly int Idle = Animator.StringToHash("Idle");
 
         [SerializeField] private MovementSettings movementSettings = null!;
-        private InputManager _inputManager = null!;
         [SerializeField] private CinemachineCamera playerCamera = null!;
         [SerializeField] private Transform head = null!;
         [SerializeField] private HeadBobbing headBobbing = null!;
+        [SerializeField] private Jetpack jetpack = null!;
 
         [SerializeField] private Animator animator = null!;
         [SerializeField] private AnimationClip runAnimation = null!;
@@ -30,7 +26,6 @@ namespace Movement
         [SerializeField] private AnimationClip jumpAnimation = null!;
 
         [SerializeField] private AudioSource movementClipSource = null!;
-
         [SerializeField] private AudioClip[] footstepClipsWalk = null!;
         [SerializeField] private AudioClip[] footstepClipsRun = null!;
 
@@ -38,13 +33,12 @@ namespace Movement
         [SerializeField] private AudioClip jetpackClip = null!;
         [SerializeField] private AudioClip landClip = null!;
 
-        private float _currentRotationX;
-        private bool _isGrounded;
-        private bool _isJetpacking;
-        private bool _isSprinting;
-        private float _jetpackFuel;
-
         public Transform? planetTransform;
+
+        private float _currentRotationX;
+        private InputManager _inputManager = null!;
+        private bool _isGrounded;
+        private bool _isSprinting;
 
         private Rigidbody _rb = null!;
 
@@ -61,8 +55,6 @@ namespace Movement
             Assert.IsNotNull(animator, "Animator is missing");
 
             _rb = GetComponent<Rigidbody>();
-
-            _jetpackFuel = movementSettings.jetpackFuel;
 
             CheckComponents();
 
@@ -93,14 +85,12 @@ namespace Movement
 
         private void OnEnable()
         {
-            if (headBobbing)
-                headBobbing.enabled = true;
+            headBobbing.enabled = true;
         }
 
         private void OnDisable()
         {
-            if (headBobbing)
-                headBobbing.enabled = false;
+            headBobbing.enabled = false;
         }
 
         private void OnDrawGizmos()
@@ -124,8 +114,6 @@ namespace Movement
 
         private void HandleCameraRotation()
         {
-            if (!head || !_inputManager) return;
-
             var pitchYaw = _inputManager.GetPitchYaw();
 
             _currentRotationX -= pitchYaw.y * movementSettings.mouseSensitivity;
@@ -157,10 +145,7 @@ namespace Movement
                     20, movementSettings.groundLayer))
             {
                 var isGrounded = hit.distance <= movementSettings.groundCheckDistance + 0.1f;
-                if (isGrounded && !_isGrounded)
-                {
-                    AudioManager.Instance.PlaySound(movementClipSource, landClip);
-                }
+                if (isGrounded && !_isGrounded) AudioManager.Instance.PlaySound(movementClipSource, landClip);
                 _isGrounded = isGrounded;
                 _surfaceNormal = hit.normal;
             }
@@ -175,14 +160,9 @@ namespace Movement
 
         private void HandleMovement()
         {
-            if (_isJetpacking)
-            {
+            if (jetpack.isJetpacking)
                 HandleJetpack();
-            }
-            else if (_isGrounded && planetTransform)
-            {
-                HandleGroundMovement();
-            }
+            else if (_isGrounded && planetTransform) HandleGroundMovement();
         }
 
         private void HandleGroundMovement()
@@ -194,40 +174,29 @@ namespace Movement
             moveDirection = Vector3.ProjectOnPlane(moveDirection, _surfaceNormal).normalized;
 
             var slopeAngle = Vector3.Angle(_surfaceNormal, transform.up);
-            if (slopeAngle <= movementSettings.maxSlopeAngle)
+            if (!(slopeAngle <= movementSettings.maxSlopeAngle)) return;
+
+            var currentSpeed = _isSprinting ? movementSettings.runSpeed : movementSettings.walkSpeed;
+            _rb.AddForce(moveDirection * currentSpeed, ForceMode.Acceleration);
+
+            if (forward != 0 || strafe != 0)
             {
-                var currentSpeed = _isSprinting ? movementSettings.runSpeed : movementSettings.walkSpeed;
-                _rb.AddForce(moveDirection * currentSpeed, ForceMode.Acceleration);
-
-                if (forward != 0 || strafe != 0)
-                {
-                    if (Utils.IsNotPlaying(Walk, animator))
-                        animator.Play(Walk);
-                    var clip = _isSprinting ? Utils.RandomElement(footstepClipsRun) : Utils.RandomElement(footstepClipsWalk);
-                    AudioManager.Instance.PlaySound(movementClipSource, clip);
-                }
-                else if (Utils.IsNotPlaying(Idle, animator))
-                    animator.Play(Idle);
+                if (Utils.IsNotPlaying(Walk, animator))
+                    animator.Play(Walk);
+                var clip = _isSprinting
+                    ? Utils.RandomElement(footstepClipsRun)
+                    : Utils.RandomElement(footstepClipsWalk);
+                AudioManager.Instance.PlaySound(movementClipSource, clip);
             }
-
-            _jetpackFuel = Mathf.Min(_jetpackFuel + movementSettings.jetpackFuelConsumptionRate * Time.deltaTime,
-                movementSettings.jetpackFuel);
+            else if (Utils.IsNotPlaying(Idle, animator))
+            {
+                animator.Play(Idle);
+            }
         }
 
         private void HandleJetpack()
         {
-            if (_jetpackFuel <= 0) _isJetpacking = false;
-
-            _rb.AddForce(transform.up * movementSettings.jetpackForce, ForceMode.Acceleration);
-            _jetpackFuel -= movementSettings.jetpackFuelConsumptionRate * Time.deltaTime;
-
-            var forward = _inputManager.GetForward();
-            var strafe = _inputManager.GetStrafe();
-
-            var moveDirection = transform.forward * forward + transform.right * strafe;
-
-            _rb.AddForce(moveDirection * movementSettings.walkSpeed, ForceMode.Acceleration);
-            AudioManager.Instance.PlaySound(movementClipSource, jetpackClip);
+            jetpack.Handle(_inputManager.GetForward(), _inputManager.GetStrafe());
         }
 
         private void ApplyGravity()
@@ -268,12 +237,14 @@ namespace Movement
 
         private void OnJetpackPressed()
         {
-            _isJetpacking = true;
+            if (!jetpack.CanJetpack()) return;
+
+            jetpack.isJetpacking = true;
         }
 
         private void OnJetpackReleased()
         {
-            _isJetpacking = false;
+            jetpack.isJetpacking = false;
         }
 
         private void OnSprintPressed()
@@ -288,15 +259,11 @@ namespace Movement
             public float walkSpeed = 2.0f;
             public float runSpeed = 6.0f;
             public float jumpForce = 8.0f;
-            public float jetpackForce = 2.0f;
             public float groundCheckDistance = 0.1f;
             public float gravityMultiplier = 2.0f;
             public LayerMask groundLayer;
             public float maxSlopeAngle = 45.0f;
-            public float jetpackFuel = 100.0f;
-            public float jetpackFuelConsumptionRate = 10.0f;
             public float mouseSensitivity = 2.0f;
-            public float maxVerticalAngle = 89.0f;
             public float maxVerticalCameraAngle = 80.0f;
         }
     }

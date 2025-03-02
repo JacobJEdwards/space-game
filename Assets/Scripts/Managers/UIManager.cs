@@ -15,7 +15,8 @@ namespace Managers
         Ship,
         Pause,
         Inventory,
-        None
+        Death,
+        None,
     }
 
 
@@ -32,15 +33,19 @@ namespace Managers
         private PlayerController? playerController;
 
         [Header("Hint Settings")] [SerializeField]
-        private Text? hint;
+        private Text hint = null!;
 
         [Header("Info Settings")] [SerializeField]
-        private Text? info;
+        private Text info = null!;
+
+        [Header("Warning Settings")] [SerializeField]
+        private Text warning = null!;
 
         private readonly Dictionary<UIState, IUIPanel> _uiPanels = new();
         private UIState _currentState = UIState.None;
 
         private UIState _previousState = UIState.None;
+
 
         private void Awake()
         {
@@ -66,10 +71,14 @@ namespace Managers
             if (_currentState == state) return;
 
             if (_uiPanels.TryGetValue(_currentState, out var panel))
+            {
                 panel.Hide();
+            }
 
             if (_uiPanels.TryGetValue(state, out var uiPanel))
+            {
                 uiPanel.Show();
+            }
 
             _previousState = _currentState;
             _currentState = state;
@@ -77,28 +86,36 @@ namespace Managers
 
         public void SetHint(string text)
         {
-            if (hint)
-                hint.text = text;
+            hint.text = text;
         }
 
         public void SetInfo(string text)
         {
-            if (info)
-                info.text = text;
+            info.text = text;
+        }
+
+        public void SetWarning(string text)
+        {
+            warning.text = text;
         }
 
         public void SetInfo(string text, float duration)
         {
-            if (!info) return;
-
+            CancelInvoke(nameof(ClearInfo));
             info.text = text;
             Invoke(nameof(ClearInfo), duration);
         }
 
+        public void SetWarning(string text, float duration)
+        {
+            CancelInvoke(nameof(ClearWarning));
+            warning.text = text;
+            Invoke(nameof(ClearWarning), duration);
+        }
+
         public void SetHint(string text, float duration)
         {
-            if (!hint) return;
-
+            CancelInvoke(nameof(ClearHint));
             hint.text = text;
             Invoke(nameof(ClearHint), duration);
         }
@@ -106,14 +123,17 @@ namespace Managers
 
         public void ClearHint()
         {
-            if (hint)
-                hint.text = string.Empty;
+            hint.text = string.Empty;
         }
 
         public void ClearInfo()
         {
-            if (info)
-                info.text = string.Empty;
+            info.text = string.Empty;
+        }
+
+        public void ClearWarning()
+        {
+            warning.text = string.Empty;
         }
 
         public void ToggleInventory()
@@ -125,12 +145,14 @@ namespace Managers
                 Time.timeScale = 0;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
+                playerController?.gameObject.SetActive(false);
             }
             else
             {
                 Time.timeScale = 1;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
+                playerController?.gameObject.SetActive(true);
             }
         }
     }

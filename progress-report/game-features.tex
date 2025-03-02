@@ -2,26 +2,27 @@ The following key game mechanics are implemented in the game:
 
 \subsection{Space Movement, Combat and Player Interaction}\label{subsec:movement}
 
-The gameplay features 3 major states - Zero G player movement, Spaceship entry, flying and shooting, and terrestrial
+The gameplay features 3 major states - Zero G player movement, Spaceship (entry, flying and shooting), and terrestrial
 movement.
 This subsection will cover the first two states, with the third being covered in the next subsection.
 
 \subsubsection{Zero G Player Movement and Spaceship Entry}\label{subsubsec:zerog}
-The player, when not in their ship is able to move in 3D world space, with the ability to move in any direction and
+The player, when not in their ship, is able to move in 3D world space, with the ability to move in any direction and
 rotate in any direction.
 This is done using Unity's InputSystem\citep{unity:inputsystem} to get the player's input and apply it to the player's
 Rigidbody component\citep{unity:rigidbody} using thrust and torque force, as well as gliding to simulate the lack of
 friction in space.
-The player also carries a gun, which can be fired using the left mouse button.
+The player also carries a gun, which can be shot using the left mouse button.
 
-From this state, the player can enter their ship by looking at it and pressing \textit{F}, which is the interact
-key in the game.
-A ray is shot from the player's camera to forwards, and if its hits an interactable object (such as the player's ship),
-the player is able to interact, where the interaction function for the ship causes the player to enter the ship and
-switch to the spaceship state, in which the player is now controlling the ship.
+From this state, the player can enter their ship by looking at it (when in range) and pressing \textit{F}, which is the
+interact key in the game.
+A ray is shot repeatedly from the player's camera to forwards, and if its hits an interactable object (such as the
+player's ship)the player is able to interact.
+The interaction event for the ship causes the player to enter the ship and
+switch to the spaceship state (the player controls the ship).
 
 The player also has oxygen and health, which are shown in the UI\@.
-Oxygen is consumed over time, and regenerates when the player is in the ship.
+Oxygen is consumed over time, and regenerates when the player is in the ship or within a planets atmosphere.
 
 \begin{figure}[h]
     \centering
@@ -53,14 +54,14 @@ switch back to the Zero G movement state.
 
 \subsection{Weapon Firing}\label{subsec:weapons}
 
-As mentioned, from both the player and the ship, the player is able to fire weapons.
+The player is able to fire their gun and the ship's weapons from their respective states.
 These weapons are raycast based, with the player's gun firing a ray from the camera, and the ship's weapons firing
 from the front of the ship, with line renderers\citep{unity:linerenderer} being used to simulate the laser beams.
 If a ray hits an object of a particular layer, the object is damaged, with the damage being calculated based on the
 weapon's damage value.
 If the objects health reaches 0, the object is destroyed, and can drop resources or other items.
 An example of destroyable objects are asteroids, which spawn in a constant rate around the player and are object
-pooled for performance reasons.
+pooled for performance reasons (meaning they are reused when destroyed).
 Further in development, these asteroids will be crucial for the player to mine resources to repair their ship and
 upgrade their equipment.
 
@@ -74,8 +75,8 @@ upgrade their equipment.
 \subsection{Resource Collection}\label{subsec:resources}
 Resources are instantiated when an object is destroyed, and the player is able to collect these resources by
 looking at them and pressing \textit{F} (the interact key).
-These resources get added to the player's inventory, which can be accessed by pressing \textit{I}, which
-currently shows the player's current resources and the amount of each, as well as sections for the player's
+These resources get added to the player's inventory, which can be accessed by pressing \textit{I}.
+The inventory currently shows the player's current resources and the amount of each, as well as sections for the player's
 ship and equipment, which will be used for upgrades in the future.
 Opening the inventory pauses the game.
 
@@ -91,19 +92,21 @@ Opening the inventory pauses the game.
 \subsubsection{Planetary Exploration}\label{subsubsec:planetary}
 
 From the ship, the player is able to land on planets or large asteroids, where they can exit the ship and explore
-the surface with gravity, requiring a change to the player's movement to simulate the gravity, with the addition of
+the surface with gravity.
+This requires a change to the player's movement to simulate the gravity, with the addition of
 a jump mechanic and more fluid pitch and yaw movement.
 A jetpack is also available allowing the player to fly within this gravity affected environment.
 
 As well as being able to land the ship on the planet, if the player is in Zero G movement and gets close enough
-to a planet, they will be affected by the gravity through a trigger from the planet's atmosphere, which will cause
-the player to be affected by the planet's gravity.
+to a planet, they will collide with a trigger from the planet's atmosphere, which will cause
+the player to be affected by the planet's gravity (and fall to the surface).
 
-As the gravity is custom, a custom movement system was implemented to allow for more control over the player's
-movement, which involves applying a force to the player's Rigidbody component based on the player's input, as well
-as a rotation force based on the surface normal of the planet, ensuring the player is always upright with respect
-to the planet's surface.
-Initially, this was only performed when the player ws grounded, but was changed to be applied whenever the
+In order to simulate the gravity, a custom movement system was implemented to allow for more control over the player's
+movement
+This involves applying a force to the player's Rigidbody component based on the player's input, as well
+as a rotation force based on the surface normal of the planet.
+This ensures the player is always upright with respect to the planet's surface.
+Initially, this was only performed when the player is grounded, but was changed to be applied whenever the
 player is within the planet's atmosphere, to allow for more fluid movement.
 
 \begin{figure}[h]
@@ -123,13 +126,13 @@ The animations are created using Mixamo\citep{Mixamo:home}, which provides a var
 
 \subsubsection{Basic Life AI}\label{subsubsec:life}
 
-A basic life AI was implemented to simulate life on the planets, with the life wandering around the planet's
-surface, and if the player is close enough following and staring at them.
-This was done to give an eerie feeling to the planets, as well as to give the player something to interact with
-on the planets.
+A basic life AI was implemented to simulate life on the planets.
+Aliens wander around the planet's surface, and will follow and stare at the player if they get close enough.
+This was done to give an eerie feeling to the planets, as well as to give the player something to interact with.
 This is implemented with a state machine approach, with the life AI having a wandering state and a following state,
-and various transitions between the states, such as the player being close enough to the life.
-The life is also damaged by the player's weapons, and can drop resources when killed.
+and various transitions between the states.
+An example of one such transition is if  the player being close enough to an alien, the alien will switch to the following state.
+The alien is also damaged by the player's weapons, and can drop resources when killed.
 Again, animations are provided for walking and idle states, similar to the player's character.
 
 \begin{figure}[h]
