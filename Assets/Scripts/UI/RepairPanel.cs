@@ -8,7 +8,7 @@ namespace UI
     public class RepairPanel : MonoBehaviour, IRepairPanel
     {
         [SerializeField] private GameObject target = null!;
-        [SerializeField] public UpgradeType upgradeType;
+        [SerializeField] public RepairType repairType;
 
         [SerializeField] private GameObject upgradeBlock = null!;
         private readonly List<RepairUI> _upgradesUI = new();
@@ -37,7 +37,7 @@ namespace UI
         {
             foreach (var upgradeUI in _upgradesUI) Destroy(upgradeUI.gameObject);
 
-            var upgrades = _upgradeManager.GetAvailableRepairsForType(upgradeType);
+            var upgrades = _upgradeManager.GetAvailableRepairsForType(repairType);
 
             foreach (var upgrade in upgrades)
             {

@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Collections.Generic;
+using System.Linq;
 using Interfaces;
 using Movement;
 using Unity.Assertions;
@@ -15,6 +16,8 @@ namespace Player
         [SerializeField] private float laserHeatRate = 1f;
         [SerializeField] private float laserCoolRate = 2f;
 
+        private readonly List<WeaponUpgrade> _upgrades = new();
+
         private bool _firing;
 
         private InputManager _inputManager = null!;
@@ -23,7 +26,6 @@ namespace Player
         private bool _overheated;
 
         private bool _targetInRange;
-        private readonly List<WeaponUpgrade> _upgrades = new();
 
         public float LaserMaxCharge => laserMaxCharge;
         public float LaserCharge { get; private set; }
@@ -62,6 +64,27 @@ namespace Player
             return UpgradeType.Weapon;
         }
 
+        private float MaxCharge()
+        {
+            return _upgrades.Aggregate(laserMaxCharge, (current, upgrade) => current * upgrade.maxChargeBonus);
+        }
+
+        private float HeatRate()
+        {
+            return _upgrades.Aggregate(laserHeatRate, (current, upgrade) => current * upgrade.heatRateBonus);
+        }
+
+        private float CoolRate()
+        {
+            return _upgrades.Aggregate(laserCoolRate, (current, upgrade) => current * upgrade.coolRateBonus);
+        }
+
+        // TODJ
+        public float Range()
+        {
+            return _upgrades.Aggregate(0f, (current, upgrade) => current * upgrade.rangeBonus);
+        }
+
         private void HandleLaserFiring()
         {
             if (_firing && !_overheated)
@@ -74,13 +97,13 @@ namespace Player
         {
             if (_firing) return;
 
-            var cooling = laserCoolRate * Time.deltaTime;
+            var cooling = CoolRate() * Time.deltaTime;
 
             LaserCharge += cooling;
 
-            if (LaserCharge >= laserMaxCharge) _overheated = false;
+            if (LaserCharge >= MaxCharge() * 0.5f) _overheated = false;
 
-            LaserCharge = Mathf.Clamp(LaserCharge, 0, laserMaxCharge);
+            LaserCharge = Mathf.Clamp(LaserCharge, 0, MaxCharge());
         }
 
         private void FireLasers()
@@ -94,7 +117,7 @@ namespace Player
         {
             if (!_firing || _overheated) return;
 
-            var heat = laserHeatRate * Time.deltaTime;
+            var heat = HeatRate() * Time.deltaTime;
             LaserCharge -= heat;
 
             if (LaserCharge > 0) return;
@@ -122,6 +145,8 @@ namespace Player
         private void ApplyWeaponUpgrade(WeaponUpgrade weaponUpgrade)
         {
             _upgrades.Add(weaponUpgrade);
+
+            foreach (var laser in _lasers) laser.ApplyUpgrade(weaponUpgrade.damageBonus, weaponUpgrade.rangeBonus);
         }
     }
 }

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: PlayerSpaceMovementUpgrade
+  m_EditorClassIdentifier: Assembly-CSharp:Player:PlayerSpaceMovementUpgrade
+  upgradeName: speed
+  upgradeDescription: 
+  upgradeIcon: {fileID: 0}
+  target: 2
+  nextUpgrade: {fileID: 0}
+  requirements: []
+  speedBonus: 1000
+  accelerationBonus: 1000
+  handlingBonus: 1000
+  maxChargeBonus: 1
+  boostBonus: 1
+  boostDeprecationRateBonus: 1
+  boostRechargeRateBonus: 1

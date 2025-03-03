@@ -18,9 +18,9 @@ namespace Managers
         [SerializeField] private Inventory inventory = null!;
 
         private readonly Dictionary<UpgradeType, List<BaseUpgrade>> _appliedUpgrades = new();
-        private readonly Dictionary<UpgradeType, List<BaseRepair>> _availableRepairs = new();
+        private readonly Dictionary<RepairType, List<BaseRepair>> _availableRepairs = new();
         private readonly Dictionary<UpgradeType, List<BaseUpgrade>> _availableUpgrades = new();
-        private readonly Dictionary<UpgradeType, List<BaseRepair>> _completedRepairs = new();
+        private readonly Dictionary<RepairType, List<BaseRepair>> _completedRepairs = new();
 
         public static UpgradeManager Instance { get; private set; } = null!;
 
@@ -45,8 +45,12 @@ namespace Managers
             {
                 _availableUpgrades[type] = new List<BaseUpgrade>();
                 _appliedUpgrades[type] = new List<BaseUpgrade>();
-                _completedRepairs[type] = new List<BaseRepair>();
+            }
+
+            foreach (RepairType type in Enum.GetValues(typeof(RepairType)))
+            {
                 _availableRepairs[type] = new List<BaseRepair>();
+                _completedRepairs[type] = new List<BaseRepair>();
             }
 
             LoadUpgradesFromConfig();
@@ -57,19 +61,16 @@ namespace Managers
         {
             foreach (var upgrade in upgradeConfig.playerUpgrades) _availableUpgrades[UpgradeType.Player].Add(upgrade);
 
-            foreach (var upgrade in upgradeConfig.jetpackUpgrades) _availableUpgrades[UpgradeType.Player].Add(upgrade);
-
             foreach (var upgrade in upgradeConfig.shipUpgrades) _availableUpgrades[UpgradeType.Ship].Add(upgrade);
 
             foreach (var upgrade in upgradeConfig.weaponUpgrades) _availableUpgrades[UpgradeType.Weapon].Add(upgrade);
 
-            foreach (var repair in upgradeConfig.playerRepairs) _availableRepairs[UpgradeType.Player].Add(repair);
+            // fix below doesnt make sense
+            foreach (var repair in upgradeConfig.playerRepairs) _availableRepairs[RepairType.Jetpack].Add(repair);
 
-            foreach (var repair in upgradeConfig.jetpackRepairs) _availableRepairs[UpgradeType.Player].Add(repair);
+            foreach (var repair in upgradeConfig.shipRepairs) _availableRepairs[RepairType.Thrusters].Add(repair);
 
-            foreach (var repair in upgradeConfig.shipRepairs) _availableRepairs[UpgradeType.Ship].Add(repair);
-
-            foreach (var repair in upgradeConfig.weaponRepairs) _availableRepairs[UpgradeType.Weapon].Add(repair);
+            foreach (var repair in upgradeConfig.weaponRepairs) _availableRepairs[RepairType.Impulse].Add(repair);
         }
 
         private void UpdateAvailableUpgrades()
@@ -117,9 +118,7 @@ namespace Managers
 
         public bool TryApplyUpgrade(BaseUpgrade upgrade, GameObject target)
         {
-            print(target);
             var upgradeable = GetUpgradeable(target, upgrade.target);
-            print(upgrade.target);
 
             if (!upgradeable.CanApplyUpgrade(upgrade)) return false;
 
@@ -180,16 +179,15 @@ namespace Managers
             };
         }
 
-        private static IRepairable GetRepairable(GameObject target, UpgradeType upgradeType)
+        private static IRepairable GetRepairable(GameObject target, RepairType upgradeType)
         {
             switch (upgradeType)
             {
-                case UpgradeType.Player:
+                case RepairType.Jetpack:
                     return target.GetComponent<Jetpack>();
-                case UpgradeType.Ship:
-                // return target.GetComponent<Hyperdrive>();
-                case UpgradeType.Weapon:
-                //return target.GetComponent<Gun>();
+                case RepairType.Impulse:
+                case RepairType.Thrusters:
+                    return target.GetComponent<Thrusters>();
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -226,7 +224,7 @@ namespace Managers
             return _availableUpgrades[type];
         }
 
-        public List<BaseRepair> GetAvailableRepairsForType(UpgradeType type)
+        public List<BaseRepair> GetAvailableRepairsForType(RepairType type)
         {
             return _availableRepairs[type];
         }

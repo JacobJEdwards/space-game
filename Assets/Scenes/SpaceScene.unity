@@ -734,6 +734,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 126489035}
   m_CullTransparentMesh: 1
+--- !u!198 &131886513 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 5642122042532169085, guid: 4dba2f0026cd34eada0e8b4feaed7364, type: 3}
+  m_PrefabInstance: {fileID: 4217591583667004300}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &139137937
 GameObject:
   m_ObjectHideFlags: 0
@@ -3051,7 +3056,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shipController: {fileID: 1735225079}
-  shipShooting: {fileID: 1735225090}
   playerController: {fileID: 8972346931773908633}
   hint: {fileID: 62872515}
   info: {fileID: 1908855902}
@@ -4365,6 +4369,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 1885050952}
   upgradeType: 0
+  repairType: 2
   upgradeBlock: {fileID: 6061594731766861441, guid: 46f2b96aee78f421995f0c593e11f975, type: 3}
   repairBlock: {fileID: 6061594731766861441, guid: 5ad04116ef7624e6faccdfce984bb5b0, type: 3}
 --- !u!114 &944609945
@@ -5874,7 +5879,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 1735225077}
-  upgradeType: 1
+  repairType: 1
   upgradeBlock: {fileID: 6061594731766861441, guid: 5ad04116ef7624e6faccdfce984bb5b0, type: 3}
 --- !u!1 &1464193429
 GameObject:
@@ -6598,6 +6603,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 1885050952}
   upgradeType: 2
+  repairType: 0
   upgradeBlock: {fileID: 6061594731766861441, guid: 46f2b96aee78f421995f0c593e11f975, type: 3}
   repairBlock: {fileID: 6061594731766861441, guid: 5ad04116ef7624e6faccdfce984bb5b0, type: 3}
 --- !u!114 &1589472121
@@ -7024,6 +7030,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: c86f1245c908146f7a0d111102b28b88, type: 2}
+  thrusters: {fileID: 0}
 --- !u!114 &1735225090 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5337849132089048212, guid: 32c397af090104e9aa2973c4fa8b2680, type: 3}
@@ -7084,6 +7091,18 @@ MonoBehaviour:
     color: {r: 1, g: 1, b: 1, a: 1}
     width: 32
     height: 32
+--- !u!114 &1735225096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1735225077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f949426db2424208b08155d781853ce0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1736987755
 GameObject:
   m_ObjectHideFlags: 0
@@ -9959,6 +9978,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1593227677840077275, guid: 32c397af090104e9aa2973c4fa8b2680, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1735225093}
+    - targetCorrespondingSourceObject: {fileID: 1593227677840077275, guid: 32c397af090104e9aa2973c4fa8b2680, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1735225096}
     - targetCorrespondingSourceObject: {fileID: 3437121300153364893, guid: 32c397af090104e9aa2973c4fa8b2680, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2015744286}
@@ -10143,6 +10165,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6106990409592999836, guid: 4dba2f0026cd34eada0e8b4feaed7364, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 8172418907747804661}
+    - target: {fileID: 6106990409592999836, guid: 4dba2f0026cd34eada0e8b4feaed7364, type: 3}
+      propertyPath: starsBackground
+      value: 
+      objectReference: {fileID: 131886513}
     - target: {fileID: 7287177160591467255, guid: 4dba2f0026cd34eada0e8b4feaed7364, type: 3}
       propertyPath: m_Name
       value: StarSystem

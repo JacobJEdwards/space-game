@@ -16,21 +16,17 @@ namespace Managers
         Pause,
         Inventory,
         Death,
-        None,
+        None
     }
 
 
     public class UiManager : MonoBehaviour
     {
-        public static UiManager Instance { get; private set; } = null!;
-
         [Header("Spaceship Settings")] [SerializeField]
-        private ShipController? shipController;
-
-        [SerializeField] private ShipShooting? shipShooting;
+        private ShipController shipController = null!;
 
         [Header("ZeroG Settings")] [SerializeField]
-        private PlayerController? playerController;
+        private PlayerController playerController = null!;
 
         [Header("Hint Settings")] [SerializeField]
         private Text hint = null!;
@@ -45,6 +41,7 @@ namespace Managers
         private UIState _currentState = UIState.None;
 
         private UIState _previousState = UIState.None;
+        public static UiManager Instance { get; private set; } = null!;
 
 
         private void Awake()
@@ -70,15 +67,9 @@ namespace Managers
         {
             if (_currentState == state) return;
 
-            if (_uiPanels.TryGetValue(_currentState, out var panel))
-            {
-                panel.Hide();
-            }
+            if (_uiPanels.TryGetValue(_currentState, out var panel)) panel.Hide();
 
-            if (_uiPanels.TryGetValue(state, out var uiPanel))
-            {
-                uiPanel.Show();
-            }
+            if (_uiPanels.TryGetValue(state, out var uiPanel)) uiPanel.Show();
 
             _previousState = _currentState;
             _currentState = state;
@@ -145,14 +136,21 @@ namespace Managers
                 Time.timeScale = 0;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-                playerController?.gameObject.SetActive(false);
+                if (_previousState == UIState.Ship)
+                    shipController.gameObject.SetActive(false);
+                else
+                    playerController.gameObject.SetActive(false);
             }
             else
             {
                 Time.timeScale = 1;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
-                playerController?.gameObject.SetActive(true);
+
+                if (_currentState == UIState.Ship)
+                    shipController.gameObject.SetActive(true);
+                else
+                    playerController.gameObject.SetActive(true);
             }
         }
     }

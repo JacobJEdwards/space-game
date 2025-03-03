@@ -9,7 +9,9 @@ public class OxygenConfig : ScriptableObject
     private float maxOxygen;
 
     [SerializeField] private float oxygenRegenRate;
+    [SerializeField] private float oxygenConsumptionRate = 1f;
 
     public float MaxOxygen => maxOxygen;
     public float OxygenRegenRate => oxygenRegenRate;
+    public float OxygenConsumptionRate => oxygenConsumptionRate;
 }

@@ -33,14 +33,14 @@ namespace Movement
             Assert.IsNotNull(jetpackClip, "JetpackClip is missing");
             Assert.IsNotNull(jetpackEmptyClip, "JetpackEmptyClip is missing");
 
-            _jetpackFuel = settings.jetpackFuel;
+            _jetpackFuel = FuelCapacity();
         }
 
         private void FixedUpdate()
         {
             if (!isJetpacking)
                 _jetpackFuel = Mathf.Min(_jetpackFuel + FuelRegenerationRate() * Time.deltaTime,
-                    settings.jetpackFuel);
+                    FuelCapacity());
         }
 
         public bool CanApplyRepair(BaseRepair repair)
@@ -53,12 +53,12 @@ namespace Movement
             if (repair is not JetpackRepair) return;
 
             _isRepaired = true;
-            _jetpackFuel = settings.jetpackFuel;
+            _jetpackFuel = FuelCapacity();
         }
 
-        public UpgradeType GetRepairType()
+        public RepairType GetRepairType()
         {
-            return UpgradeType.Player;
+            return RepairType.Jetpack;
         }
 
         public bool IsRepaired()
@@ -93,7 +93,7 @@ namespace Movement
                 (current, upgrade) => current * upgrade.jetpackFuelRegenerationBonus);
         }
 
-        public float FuelCapacity()
+        private float FuelCapacity()
         {
             return appliedUpgrades.Aggregate(settings.jetpackFuel,
                 (current, upgrade) => current * upgrade.jetpackFuelCapacityBonus);
@@ -117,7 +117,7 @@ namespace Movement
             _jetpackFuel = Mathf.Max(_jetpackFuel - FuelConsumptionRate() * Time.deltaTime, 0);
 
             var moveDirection = transform.forward * forward + transform.right * strafe;
-            _rb.AddForce(transform.up * settings.jetpackForce, ForceMode.Acceleration);
+            _rb.AddForce(transform.up * Force(), ForceMode.Acceleration);
             _rb.AddForce(moveDirection * Force() / 2f, ForceMode.Acceleration);
 
             AudioManager.Instance.PlaySound(jetpackAudioSource, jetpackClip);
@@ -125,7 +125,7 @@ namespace Movement
 
         public bool CanJetpack()
         {
-            return _jetpackFuel > 0;
+            return _isRepaired && _jetpackFuel > 0;
         }
 
         [CreateAssetMenu(fileName = "JetpackSettings", menuName = "JetpackSettings")]

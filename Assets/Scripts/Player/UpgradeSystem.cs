@@ -16,6 +16,13 @@ namespace Player
         Player
     }
 
+    public enum RepairType
+    {
+        Jetpack,
+        Thrusters,
+        Impulse
+    }
+
     public abstract class BaseUpgrade : ScriptableObject
     {
         public string upgradeName = null!;
@@ -31,21 +38,26 @@ namespace Player
         }
     }
 
+    public interface ISpaceMovementUpgrade
+    {
+        public float SpeedBonus { get; }
+        public float HandlingBonus { get; }
+        public float AccelerationBonus { get; }
+        public float BoostDeprecationRateBonus { get; }
+        public float BoostRechargeRateBonus { get; }
+        public float MaxChargeBonus { get; }
+        public float BoostBonus { get; }
+    }
+
 
     [CreateAssetMenu(fileName = "WeaponUpgrade", menuName = "Upgrades/WeaponUpgrade")]
     public class WeaponUpgrade : BaseUpgrade
     {
-    }
-
-    [CreateAssetMenu(fileName = "WeaponDamageUpgrade", menuName = "Upgrades/WeaponDamageUpgrade")]
-    public class WeaponDamageUpgrade : WeaponUpgrade
-    {
         public float damageBonus = 1f;
-    }
-
-    public class WeaponRangeUpgrade : WeaponUpgrade
-    {
         public float rangeBonus = 1f;
+        public float coolRateBonus = 1f;
+        public float heatRateBonus = 1f;
+        public float maxChargeBonus = 1f;
     }
 
     [CreateAssetMenu(fileName = "ShipUpgrade", menuName = "Upgrades/ShipUpgrade")]
@@ -57,8 +69,10 @@ namespace Player
     public class ShipLaserUpgrade : ShipUpgrade
     {
         public float damageBonus = 1f;
-        public float fireRateBonus = 1f;
         public float rangeBonus = 1f;
+        public float coolRateBonus = 1f;
+        public float heatRateBonus = 1f;
+        public float maxChargeBonus = 1f;
     }
 
     [CreateAssetMenu(fileName = "ShipShieldUpgrade", menuName = "Upgrades/ShipShieldUpgrade")]
@@ -69,11 +83,24 @@ namespace Player
     }
 
     [CreateAssetMenu(fileName = "ShipEngineUpgrade", menuName = "Upgrades/ShipEngineUpgrade")]
-    public class ShipEngineUpgrade : ShipUpgrade
+    public class ShipEngineUpgrade : ShipUpgrade, ISpaceMovementUpgrade
     {
         public float speedBonus = 1f;
         public float accelerationBonus = 1f;
         public float handlingBonus = 1f;
+
+        public float maxChargeBonus = 1f;
+        public float boostDeprecationRateBonus = 1f;
+        public float boostRechargeRateBonus = 1f;
+        public float boostBonus = 1f;
+
+        public float SpeedBonus => speedBonus;
+        public float HandlingBonus => handlingBonus;
+        public float AccelerationBonus => accelerationBonus;
+        public float BoostDeprecationRateBonus => boostDeprecationRateBonus;
+        public float BoostRechargeRateBonus => boostRechargeRateBonus;
+        public float MaxChargeBonus => maxChargeBonus;
+        public float BoostBonus => boostBonus;
     }
 
     [CreateAssetMenu(fileName = "ShipHullUpgrade", menuName = "Upgrades/ShipHullUpgrade")]
@@ -106,11 +133,24 @@ namespace Player
     }
 
     [CreateAssetMenu(fileName = "PlayerSpaceMovementUpgrade", menuName = "Upgrades/PlayerSpaceMovementUpgrade")]
-    public class PlayerSpaceMovementUpgrade : PlayerUpgrade
+    public class PlayerSpaceMovementUpgrade : PlayerUpgrade, ISpaceMovementUpgrade
     {
         public float speedBonus = 1f;
-        public float jumpHeightBonus = 1f;
-        public float sprintSpeedBonus = 1f;
+        public float accelerationBonus = 1f;
+        public float handlingBonus = 1f;
+
+        public float maxChargeBonus = 1f;
+        public float boostBonus = 1f;
+        public float boostDeprecationRateBonus = 1f;
+        public float boostRechargeRateBonus = 1f;
+        public float BoostBonus => boostBonus;
+
+        public float SpeedBonus => speedBonus;
+        public float HandlingBonus => handlingBonus;
+        public float AccelerationBonus => accelerationBonus;
+        public float BoostDeprecationRateBonus => boostDeprecationRateBonus;
+        public float BoostRechargeRateBonus => boostRechargeRateBonus;
+        public float MaxChargeBonus => maxChargeBonus;
     }
 
     [CreateAssetMenu(fileName = "PlayerHealthUpgrade", menuName = "Upgrades/PlayerHealthUpgrade")]
@@ -161,7 +201,7 @@ namespace Player
         public string upgradeName = null!;
         public string upgradeDescription = null!;
         public Sprite upgradeIcon = null!;
-        public UpgradeType target;
+        public RepairType target;
         public BaseRepair? nextRepair;
         public BaseUpgrade? nextUpgrade;
         public List<UpgradeRequirement> requirements = new();
@@ -172,10 +212,6 @@ namespace Player
         }
     }
 
-    [CreateAssetMenu(fileName = "JetpackRepair", menuName = "Repairs/JetpackRepair")]
-    public class JetpackRepair : BaseRepair
-    {
-    }
 
     [CreateAssetMenu(fileName = "WeaponRepair", menuName = "Repairs/WeaponRepair")]
     public class WeaponRepair : BaseRepair
@@ -187,8 +223,18 @@ namespace Player
     {
     }
 
+    [CreateAssetMenu(fileName = "ThrusterRepair", menuName = "Repairs/ThrusterRepair")]
+    public class ThrusterRepair : ShipRepair
+    {
+    }
+
     [CreateAssetMenu(fileName = "PlayerRepair", menuName = "Repairs/PlayerRepair")]
     public class PlayerRepair : BaseRepair
+    {
+    }
+
+    [CreateAssetMenu(fileName = "JetpackRepair", menuName = "Repairs/JetpackRepair")]
+    public class JetpackRepair : PlayerRepair
     {
     }
 
@@ -198,11 +244,9 @@ namespace Player
         public List<PlayerUpgrade> playerUpgrades = new();
         public List<ShipUpgrade> shipUpgrades = new();
         public List<WeaponUpgrade> weaponUpgrades = new();
-        public List<JetpackUpgrade> jetpackUpgrades = new();
 
         public List<ShipRepair> shipRepairs = new();
         public List<PlayerRepair> playerRepairs = new();
         public List<WeaponRepair> weaponRepairs = new();
-        public List<JetpackRepair> jetpackRepairs = new();
     }
 }

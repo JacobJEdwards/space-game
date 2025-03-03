@@ -20,6 +20,7 @@ namespace UI
         [SerializeField] private GameObject target = null!;
 
         [SerializeField] public UpgradeType upgradeType;
+        [SerializeField] public RepairType repairType;
 
         [SerializeField] private GameObject upgradeBlock = null!;
         [SerializeField] private GameObject repairBlock = null!;
@@ -74,7 +75,7 @@ namespace UI
 
             _repairsUI.Clear();
 
-            var repairs = _upgradeManager.GetAvailableRepairsForType(upgradeType);
+            var repairs = _upgradeManager.GetAvailableRepairsForType(repairType);
 
             foreach (var repair in repairs)
             {

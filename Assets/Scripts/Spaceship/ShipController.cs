@@ -47,6 +47,7 @@ namespace Spaceship
         private int _numDamageParticles;
 
         private Rigidbody _rb = null!;
+        private ShipShooting _shipShooting = null!;
         private SpaceMovement _spaceMovement = null!;
         private UiManager _uiManager = null!;
 
@@ -62,12 +63,15 @@ namespace Spaceship
         {
             _uiManager = UiManager.Instance;
             _cameraController = CameraController.Instance;
+            _shipShooting = GetComponent<ShipShooting>();
             landingSettings.landingLayers = LayerMask.GetMask("PlanetSurface", "Water");
 
             var inputManager = InputManager.Instance;
             inputManager.SetOnLandingPressed(HandleLandingOrTakeoff);
 
             _health.onHealthChanged.AddListener(OnHealthChanged);
+
+            SetCurrentState(ShipState.SpaceIdle, true);
         }
 
         private void FixedUpdate()
@@ -98,6 +102,16 @@ namespace Spaceship
 
         public void ApplyUpgrade(BaseUpgrade upgrade)
         {
+            switch (upgrade)
+            {
+                case ShipLaserUpgrade shipLaserUpgrade:
+                    _shipShooting.ApplyUpgrade(shipLaserUpgrade);
+                    break;
+                case ShipEngineUpgrade shipEngineUpgrade:
+                    _spaceMovement.ApplyUpgrade(shipEngineUpgrade);
+                    break;
+            }
+
             if (upgrade is ShipUpgrade shipUpgrade) _upgrades.Add(shipUpgrade);
         }
 
@@ -153,7 +167,6 @@ namespace Spaceship
                     HandleFlyingState();
                     break;
                 case ShipState.SpaceIdle:
-                    HandleSpaceIdleState();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -181,13 +194,7 @@ namespace Spaceship
 
         private void HandleFlyingState()
         {
-            SetKinematic(false);
             DetectLandingZones();
-        }
-
-        private void HandleSpaceIdleState()
-        {
-            SetKinematic(true);
         }
 
         private void SetKinematic(bool isKinematic)
@@ -380,9 +387,9 @@ namespace Spaceship
             if (CurrentState == ShipState.Flying) SetCurrentState(ShipState.SpaceIdle);
         }
 
-        private void SetCurrentState(ShipState state)
+        private void SetCurrentState(ShipState state, bool force = false)
         {
-            if (state == CurrentState) return;
+            if (state == CurrentState && !force) return;
 
             switch (state)
             {

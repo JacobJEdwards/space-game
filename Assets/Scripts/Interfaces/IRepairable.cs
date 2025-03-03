@@ -6,7 +6,7 @@ namespace Interfaces
     {
         public bool CanApplyRepair(BaseRepair repair);
         void ApplyRepair(BaseRepair repair);
-        UpgradeType GetRepairType();
+        RepairType GetRepairType();
         public bool IsRepaired();
     }
 }

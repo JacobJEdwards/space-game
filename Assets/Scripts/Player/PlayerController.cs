@@ -89,18 +89,27 @@ namespace Player
 
         public bool CanApplyUpgrade(BaseUpgrade upgrade)
         {
-            return upgrade is PlayerUpgrade or JetpackUpgrade;
+            return upgrade is PlayerUpgrade;
         }
 
         public void ApplyUpgrade(BaseUpgrade upgrade)
         {
             switch (upgrade)
             {
+                case PlayerOxygenUpgrade oxygenUpgrade:
+                    ApplyOxygenUpgrade(oxygenUpgrade);
+                    break;
+                case PlayerHealthUpgrade healthUpgrade:
+                    ApplyHealthUpgrade(healthUpgrade);
+                    break;
                 case JetpackUpgrade jetpackUpgrade:
                     ApplyJetpackUpgrade(jetpackUpgrade);
                     break;
                 case PlayerWalkingMovementUpgrade walkingMovementUpgrade:
                     ApplyWalkingMovementUpgrade(walkingMovementUpgrade);
+                    break;
+                case PlayerSpaceMovementUpgrade spaceMovementUpgrade:
+                    ApplySpaceMovementUpgrade(spaceMovementUpgrade);
                     break;
                 case PlayerUpgrade playerUpgrade:
                     ApplyPlayerUpgrade(playerUpgrade);
@@ -113,9 +122,24 @@ namespace Player
             return UpgradeType.Player;
         }
 
+        private void ApplyOxygenUpgrade(PlayerOxygenUpgrade oxygenUpgrade)
+        {
+            _playerOxygen.AddUpgrade(oxygenUpgrade);
+        }
+
+        private void ApplyHealthUpgrade(PlayerHealthUpgrade healthUpgrade)
+        {
+            _playerHealth.AddUpgrade(healthUpgrade);
+        }
+
         private void ApplyWalkingMovementUpgrade(PlayerWalkingMovementUpgrade walkingMovementUpgrade)
         {
             _planetaryMovement.ApplyUpgrade(walkingMovementUpgrade);
+        }
+
+        private void ApplySpaceMovementUpgrade(PlayerSpaceMovementUpgrade spaceMovementUpgrade)
+        {
+            _spaceMovement.ApplyUpgrade(spaceMovementUpgrade);
         }
 
         private void ApplyJetpackUpgrade(JetpackUpgrade jetpackUpgrade)

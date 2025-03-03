@@ -13,6 +13,10 @@ namespace Weapons
     {
         [SerializeField] private LaserSettings settings = new();
 
+        public float rangeBonus = 1f;
+
+        public float damageBonus = 1f;
+
         private float _clipTime;
 
         private LineRenderer _laser = null!;
@@ -68,18 +72,24 @@ namespace Weapons
 
         private bool IsInRange(out RaycastHit hit)
         {
-            return TargetInfo.IsTargetInRange(_mainCam, out hit, settings.range, settings.mask);
+            return TargetInfo.IsTargetInRange(_mainCam, out hit, settings.range * rangeBonus, settings.mask);
         }
 
         private void MaybeDamageTarget(RaycastHit hit)
         {
             if (hit.collider.transform.GetComponent<IDamageable>() is { } damageable)
-                damageable.TakeDamage(settings.damage * Time.deltaTime);
+                damageable.TakeDamage(settings.damage * damageBonus * Time.deltaTime);
         }
 
         private void SetPosition(Vector3 hitPos)
         {
             _laser.SetPosition(1, hitPos);
+        }
+
+        public void ApplyUpgrade(float bonus, float range)
+        {
+            damageBonus *= bonus;
+            rangeBonus *= range;
         }
 
         [Serializable]

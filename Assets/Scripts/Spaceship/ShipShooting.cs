@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Movement;
+using Player;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Weapons;
@@ -16,17 +17,17 @@ namespace Spaceship
         [SerializeField] private float laserHeatRate = 1f;
         [SerializeField] private float laserCoolRate = 2f;
 
+        private readonly List<ShipLaserUpgrade> _upgrades = new();
+
         private bool _firing;
         private InputManager _inputManager = null!;
 
-        private List<LaserFire> _lasers = new ();
+        private List<LaserFire> _lasers = new();
 
         private bool _overheated;
         private ShipController _shipController = null!;
 
-        private bool _targetInRange;
-
-        public float LaserMaxCharge => laserMaxCharge;
+        public float LaserMaxCharge => MaxCharge();
         public float LaserCharge { get; private set; }
 
         private void Start()
@@ -54,6 +55,28 @@ namespace Spaceship
             CoolLasers();
         }
 
+        private float CoolRate()
+        {
+            return _upgrades.Aggregate(laserCoolRate, (current, upgrade) => current * upgrade.coolRateBonus);
+        }
+
+        private float HeatRate()
+        {
+            return _upgrades.Aggregate(laserHeatRate, (current, upgrade) => current * upgrade.heatRateBonus);
+        }
+
+        private float MaxCharge()
+        {
+            return _upgrades.Aggregate(laserMaxCharge, (current, upgrade) => current * upgrade.maxChargeBonus);
+        }
+
+        public void ApplyUpgrade(ShipLaserUpgrade upgrade)
+        {
+            _upgrades.Add(upgrade);
+
+            foreach (var laser in _lasers) laser.ApplyUpgrade(upgrade.damageBonus, upgrade.rangeBonus);
+        }
+
         private void HandleLaserFiring()
         {
             if (_firing && !_overheated)
@@ -66,13 +89,13 @@ namespace Spaceship
         {
             if (_firing) return;
 
-            var cooling = laserCoolRate * Time.deltaTime;
+            var cooling = CoolRate() * Time.deltaTime;
 
             LaserCharge += cooling;
 
-            if (LaserCharge >= laserMaxCharge) _overheated = false;
+            if (LaserCharge >= MaxCharge() * 0.5f) _overheated = false;
 
-            LaserCharge = Mathf.Clamp(LaserCharge, 0, laserMaxCharge);
+            LaserCharge = Mathf.Clamp(LaserCharge, 0, MaxCharge());
         }
 
         private void FireLasers()
@@ -86,7 +109,7 @@ namespace Spaceship
         {
             if (!_firing || _overheated) return;
 
-            var heat = laserHeatRate * Time.deltaTime;
+            var heat = HeatRate() * Time.deltaTime;
             LaserCharge -= heat;
 
             if (LaserCharge > 0) return;

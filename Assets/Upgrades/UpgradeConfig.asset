@@ -12,14 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: UpgradeConfig
   m_EditorClassIdentifier: Assembly-CSharp:Player:UpgradeConfig
-  playerUpgrades: []
+  playerUpgrades:
+  - {fileID: 11400000, guid: 09f7e0ea9772f48febf600a80c585758, type: 2}
+  - {fileID: 11400000, guid: e955584e4ca514b9997a2f85fe3c3548, type: 2}
+  - {fileID: 11400000, guid: aa6defb337ec447008997b5322bd4a86, type: 2}
   shipUpgrades:
   - {fileID: 11400000, guid: 0772974d7b19942e3b21a93cf916e7a1, type: 2}
+  - {fileID: 11400000, guid: d850025e7c0724b02b230d1af7b9cb96, type: 2}
   weaponUpgrades:
-  - {fileID: 11400000, guid: 828e761d001c3423ca91d745b1e1e6fe, type: 2}
-  jetpackUpgrades:
-  - {fileID: 11400000, guid: e955584e4ca514b9997a2f85fe3c3548, type: 2}
-  shipRepairs: []
-  playerRepairs: []
+  - {fileID: 11400000, guid: d6e667079055649bf89eaf8a4a47ba71, type: 2}
+  shipRepairs:
+  - {fileID: 11400000, guid: 1d2e38281184b46d7aefdf3001448763, type: 2}
+  playerRepairs:
+  - {fileID: 11400000, guid: 9569f7710399040159f746d50d177049, type: 2}
   weaponRepairs: []
-  jetpackRepairs: []

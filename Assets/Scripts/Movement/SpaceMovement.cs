@@ -1,7 +1,8 @@
 #nullable enable
 
 using System;
-using Interfaces;
+using System.Collections.Generic;
+using System.Linq;
 using Managers;
 using Movement.Config;
 using Player;
@@ -11,9 +12,12 @@ using UnityEngine;
 namespace Movement
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class SpaceMovement : MonoBehaviour, IUpgradeable
+    public class SpaceMovement : MonoBehaviour
     {
         [SerializeField] private SpaceMovementConfig config = null!;
+        [SerializeField] private Thrusters? thrusters;
+
+        private readonly List<ISpaceMovementUpgrade> _upgrades = new();
 
         private Animator? _animator;
 
@@ -35,6 +39,7 @@ namespace Movement
             _inputManager = InputManager.Instance;
             _rb = GetComponent<Rigidbody>();
             _animator = GetComponentInChildren<Animator>();
+            thrusters ??= GetComponentInChildren<Thrusters>();
 
             CurrentBoostAmount = config.MaxBoostAmount;
 
@@ -53,20 +58,9 @@ namespace Movement
             // HandleFOV();
         }
 
-        // TODO
-        public bool CanApplyUpgrade(BaseUpgrade upgrade)
+        public void ApplyUpgrade(ISpaceMovementUpgrade upgrade)
         {
-            throw new NotImplementedException();
-        }
-
-        public void ApplyUpgrade(BaseUpgrade upgrade)
-        {
-            throw new NotImplementedException();
-        }
-
-        public UpgradeType GetUpgradeType()
-        {
-            throw new NotImplementedException();
+            _upgrades.Add(upgrade);
         }
 
         private void HandleFOV()
@@ -77,24 +71,62 @@ namespace Movement
             if (!cam) return;
 
             var fov = cam.Lens.FieldOfView;
-            // fov depending on boost
 
             fov = Mathf.Lerp(fov, _inputManager.GetBoost() ? 120f : 60f, Time.fixedDeltaTime);
 
             cam.Lens.FieldOfView = fov;
         }
 
+        private float BoostDepreciationRate()
+        {
+            return config.BoostDepreciationRate *
+                   _upgrades.Aggregate(1f, (cur, next) => cur * next.BoostDeprecationRateBonus);
+        }
+
+        private float MaxBoostAmount()
+        {
+            return config.MaxBoostAmount *
+                   _upgrades.Aggregate(1f, (cur, next) => cur * next.MaxChargeBonus);
+        }
+
+        private float BoostRechargeRate()
+        {
+            return config.BoostRechargeRate *
+                   _upgrades.Aggregate(1f, (cur, next) => cur * next.BoostRechargeRateBonus);
+        }
+
         private void HandleBoosting()
         {
             if (_inputManager.GetBoost() && CurrentBoostAmount > 0f)
             {
-                CurrentBoostAmount -= config.BoostDepreciationRate;
+                CurrentBoostAmount -= BoostDepreciationRate();
             }
             else
             {
-                if (CurrentBoostAmount < config.MaxBoostAmount) CurrentBoostAmount += config.BoostRechargeRate;
+                if (CurrentBoostAmount < MaxBoostAmount()) CurrentBoostAmount += BoostRechargeRate();
             }
         }
+
+        private float Handling()
+        {
+            return _upgrades.Aggregate(1f, (cur, next) => cur * next.HandlingBonus);
+        }
+
+        private float Speed()
+        {
+            return _upgrades.Aggregate(1f, (cur, next) => cur * next.SpeedBonus);
+        }
+
+        private float Acceleration()
+        {
+            return _upgrades.Aggregate(1f, (cur, next) => cur * next.AccelerationBonus);
+        }
+
+        private float Boost()
+        {
+            return config.BoostMultiplier * _upgrades.Aggregate(1f, (cur, next) => cur * next.BoostBonus);
+        }
+
 
         private void HandleMovement()
         {
@@ -107,27 +139,43 @@ namespace Movement
             else
                 _animator?.Play("Idle");
 
+            var roll = _inputManager.GetRoll();
+            var pitchYaw = _inputManager.GetPitchYaw();
+            var forwardInput = _inputManager.GetForward();
+            var upDown = _inputManager.GetUpDown();
+            var strafe = _inputManager.GetStrafe();
+
+            if (thrusters && !thrusters.IsRepaired() && (roll != 0 || pitchYaw != Vector2.zero || forwardInput != 0 ||
+                                                         upDown != 0 || strafe != 0))
+            {
+                UiManager.Instance.SetWarning("Thrusters are damaged!", 2f);
+                return;
+            }
+
             // Roll
-            _rb.AddRelativeTorque(Vector3.back * (_inputManager.GetRoll() * config.RollTorque * Time.fixedDeltaTime));
+            _rb.AddRelativeTorque(Vector3.back *
+                                  (_inputManager.GetRoll() * config.RollTorque * Handling() * Time.fixedDeltaTime));
 
             // Pitch/Yaw
             _rb.AddRelativeTorque(Vector3.right * (Math.Clamp(-_inputManager.GetPitchYaw().y, -1f, 1f) *
-                                                   config.PitchTorque * Time
+                                                   config.PitchTorque * Handling() * Time
                                                        .fixedDeltaTime));
 
             // Yaw
-            _rb.AddRelativeTorque(Vector3.up * (Math.Clamp(_inputManager.GetPitchYaw().x, -1f, 1f) * config.YawTorque *
-                                                Time
-                                                    .fixedDeltaTime));
+            _rb.AddRelativeTorque(Vector3.up * (Math.Clamp(_inputManager.GetPitchYaw().x, -1f, 1f) * config.YawTorque
+                * Handling() *
+                Time
+                    .fixedDeltaTime));
 
 
             // Thrust
             if (Mathf.Abs(_inputManager.GetForward()) > 0.1f)
             {
                 var currentThrust = config.Thrust;
-                if (_inputManager.GetBoost()) currentThrust *= config.BoostMultiplier;
+                if (_inputManager.GetBoost()) currentThrust *= Boost();
 
-                _rb.AddRelativeForce(forward * (_inputManager.GetForward() * currentThrust * Time.fixedDeltaTime));
+                _rb.AddRelativeForce(forward * (_inputManager.GetForward() * currentThrust * Acceleration() * Time
+                    .fixedDeltaTime));
 
                 _glide = currentThrust;
             }
@@ -140,8 +188,9 @@ namespace Movement
             // Up/Down
             if (Mathf.Abs(_inputManager.GetUpDown()) > 0.1f)
             {
-                _rb.AddRelativeForce(up * (_inputManager.GetUpDown() * config.UpThrust * Time.fixedDeltaTime));
-                _verticalGlide = _inputManager.GetUpDown() * config.UpThrust;
+                _rb.AddRelativeForce(up * (_inputManager.GetUpDown() * config.UpThrust * Acceleration() *
+                                           Time.fixedDeltaTime));
+                _verticalGlide = _inputManager.GetUpDown() * config.UpThrust * Acceleration();
             }
             else
             {
@@ -153,9 +202,10 @@ namespace Movement
             if (Mathf.Abs(_inputManager.GetStrafe()) > 0.1f)
             {
                 _rb.AddRelativeForce(right *
-                                     (_inputManager.GetStrafe() * config.StrafeThrust * Time.fixedDeltaTime));
+                                     (_inputManager.GetStrafe() * config.StrafeThrust * Handling() *
+                                      Time.fixedDeltaTime));
 
-                _horizontalGlide = _inputManager.GetStrafe() * config.StrafeThrust;
+                _horizontalGlide = _inputManager.GetStrafe() * config.StrafeThrust * Handling();
             }
             else
             {
@@ -171,7 +221,7 @@ namespace Movement
             if (!Physics.Raycast(transform.position, transform.forward, config.SlowdownDistance, LayerMask.GetMask
                     ("PlanetSurface", "Water"))) return;
 
-            _rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, Vector3.one * 15f, Time.fixedDeltaTime);
+            _rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, Vector3.one * 10f, Time.fixedDeltaTime);
         }
     }
 }

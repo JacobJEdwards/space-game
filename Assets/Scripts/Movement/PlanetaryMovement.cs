@@ -296,6 +296,12 @@ namespace Movement
 
         private void OnJetpackPressed()
         {
+            if (!jetpack.IsRepaired())
+            {
+                UiManager.Instance.SetWarning("Jetpack is not repaired!", 2f);
+                return;
+            }
+
             if (!jetpack.CanJetpack()) return;
 
             jetpack.isJetpacking = true;

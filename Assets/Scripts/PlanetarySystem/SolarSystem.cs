@@ -7,12 +7,12 @@ using Random = UnityEngine.Random;
 
 namespace PlanetarySystem
 {
+    [RequireComponent(typeof(Stars))]
     public class SolarSystem : MonoBehaviour
     {
         private static readonly int ColorA = Shader.PropertyToID("_ColorA");
         private static readonly int ColorB = Shader.PropertyToID("_ColorB");
 
-        [SerializeField] private ParticleSystem starsBackground = null!;
         [SerializeField] private Transform player = null!;
         [SerializeField] public GameObject sun = null!;
         [SerializeField] public Material skyMaterial = null!;
@@ -21,8 +21,9 @@ namespace PlanetarySystem
         [SerializeField] public PlanetGenerationSettings planetGenerationSettings = null!;
         [SerializeField] public List<Planet.Planet> planets = new();
 
-        [Header("Planet Generation")]
-        [SerializeField] public bool randomisePosition = true;
+        [Header("Planet Generation")] [SerializeField]
+        public bool randomisePosition = true;
+
         [SerializeField] public int planetAmount = 5;
         [SerializeField] public int seed = 12345;
         [SerializeField] public float minOrbitRadius = 800f;
@@ -32,7 +33,6 @@ namespace PlanetarySystem
 
         private void Awake()
         {
-            Assert.IsNotNull(starsBackground);
             Assert.IsNotNull(player);
             Assert.IsNotNull(sun);
             Assert.IsNotNull(skyMaterial);
@@ -49,14 +49,7 @@ namespace PlanetarySystem
 
         private void Start()
         {
-            starsBackground.Play();
-
             GeneratePlanetSystem();
-        }
-
-        private void LateUpdate()
-        {
-            starsBackground.transform.position = player.position;
         }
 
         private void GeneratePlanetSystem()
@@ -71,10 +64,7 @@ namespace PlanetarySystem
                 planetObj.name = $"Planet {i}";
                 var planet = planetObj.GetComponent<Planet.Planet>();
 
-                if (!planet)
-                {
-                    planet = planetObj.AddComponent<Planet.Planet>();
-                }
+                if (!planet) planet = planetObj.AddComponent<Planet.Planet>();
 
                 _planetGenerator.GeneratePlanet(planet);
 
