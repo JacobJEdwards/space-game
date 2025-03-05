@@ -1,5 +1,6 @@
 using Interfaces;
 using Player;
+using Player.Upgrades;
 using UnityEngine;
 
 namespace Movement

@@ -9,26 +9,17 @@ namespace Player
 {
     public class MenuUI : MonoBehaviour, IUIPanel
     {
-        public UIState AssociatedState => UIState.Inventory;
-
-        private UiManager _uiManager;
-
-        private enum View
-        {
-            Inventory,
-            Gear,
-            Starship
-        }
-
-        private InventoryUI _inventoryUI;
-        private GearUI _gearUI;
-        private StarshipUI _starshipUI;
-
         [SerializeField] private Button inventoryButton;
         [SerializeField] private Button gearButton;
         [SerializeField] private Button starshipButton;
 
         private View _currentView = View.Inventory;
+        private GearUI _gearUI;
+
+        private InventoryUI _inventoryUI;
+        private StarshipUI _starshipUI;
+
+        private UiManager _uiManager;
 
         private void Start()
         {
@@ -45,6 +36,8 @@ namespace Player
 
             MoveToView(View.Inventory);
         }
+
+        public UIState AssociatedState => UIState.Inventory;
 
         public void Hide()
         {
@@ -76,6 +69,13 @@ namespace Player
                 default:
                     throw new ArgumentOutOfRangeException(nameof(view), view, null);
             }
+        }
+
+        private enum View
+        {
+            Inventory,
+            Gear,
+            Starship
         }
     }
 }

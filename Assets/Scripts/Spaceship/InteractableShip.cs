@@ -30,19 +30,11 @@ namespace Spaceship
         {
             _player = _player ? _player : interactor.GetComponent<PlayerController>();
 
-            if (!_player)
-            {
-                return;
-            }
+            if (!_player) return;
             if (_shipController.IsOccupied)
-            {
-                _shipController.PlayerExitShip();
-            }
+                _player.ExitShip();
             else
-            {
                 _player.EnterShip(_shipController);
-                _shipController.PlayerEnteredShip(_player!);
-            }
         }
 
         public string GetInteractionPrompt(GameObject interactor)

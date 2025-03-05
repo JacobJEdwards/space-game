@@ -7,8 +7,11 @@ using CollectableResources;
 using Interfaces;
 using Movement;
 using Player;
+using Player.Upgrades;
 using Spaceship;
 using UnityEngine;
+using UnityEngine.Events;
+using Weapons;
 
 namespace Managers
 {
@@ -17,26 +20,87 @@ namespace Managers
         [SerializeField] private UpgradeConfig upgradeConfig = null!;
         [SerializeField] private Inventory inventory = null!;
 
-        private readonly Dictionary<UpgradeType, List<BaseUpgrade>> _appliedUpgrades = new();
+        [SerializeField] private GameObject playerController = null!;
+        [SerializeField] private GameObject shipController = null!;
+
+        public UnityEvent<BaseUpgrade> onUpgradeApplied = new();
+        public UnityEvent<BaseRepair> onRepairApplied = new();
         private readonly Dictionary<RepairType, List<BaseRepair>> _availableRepairs = new();
         private readonly Dictionary<UpgradeType, List<BaseUpgrade>> _availableUpgrades = new();
-        private readonly Dictionary<RepairType, List<BaseRepair>> _completedRepairs = new();
+
+        public readonly Dictionary<UpgradeType, List<BaseUpgrade>> AppliedUpgrades = new();
+        public readonly Dictionary<RepairType, List<BaseRepair>> CompletedRepairs = new();
 
         public static UpgradeManager Instance { get; private set; } = null!;
 
         private void Awake()
         {
             if (!Instance)
-            {
                 Instance = this;
-                DontDestroyOnLoad(gameObject);
-            }
             else
-            {
                 Destroy(gameObject);
-            }
 
             InitialiseUpgrades();
+        }
+
+        private GameObject GetTarget(BaseUpgrade upgrade)
+        {
+            return upgrade.target switch
+            {
+                UpgradeType.Player => playerController,
+                UpgradeType.Ship => shipController,
+                UpgradeType.Weapon => playerController,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        private GameObject GetTarget(BaseRepair repair)
+        {
+            return repair.target switch
+            {
+                RepairType.Jetpack => playerController,
+                RepairType.Thrusters => shipController,
+                RepairType.Impulse => shipController,
+                RepairType.Hyperdrive => shipController,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        public void ApplyUpgrade(BaseUpgrade upgrade)
+        {
+            ApplyUpgrade(upgrade, GetTarget(upgrade));
+        }
+
+        public void ApplyUpgrade(string n)
+        {
+            var upgrade = _availableUpgrades.Values.SelectMany(u => u).FirstOrDefault(u => u.upgradeName == n);
+
+            print(n);
+            print(upgrade);
+            if (!upgrade) return;
+
+            print("Applying upgrade: " + upgrade.upgradeName);
+
+            ApplyUpgrade(upgrade, GetTarget(upgrade));
+        }
+
+        public void ApplyRepair(string n)
+        {
+            var repair = _availableRepairs.Values.SelectMany(u => u).FirstOrDefault(u => u.upgradeName == n);
+
+            print(n);
+            print(repair);
+            if (!repair) return;
+
+            print("Applying repair: " + repair.upgradeName);
+
+            ApplyRepair(repair, GetTarget(repair));
+        }
+
+
+        public void ApplyRepair(BaseRepair repair)
+        {
+            ApplyRepair(repair, GetTarget(repair));
         }
 
         private void InitialiseUpgrades()
@@ -44,13 +108,13 @@ namespace Managers
             foreach (UpgradeType type in Enum.GetValues(typeof(UpgradeType)))
             {
                 _availableUpgrades[type] = new List<BaseUpgrade>();
-                _appliedUpgrades[type] = new List<BaseUpgrade>();
+                AppliedUpgrades[type] = new List<BaseUpgrade>();
             }
 
             foreach (RepairType type in Enum.GetValues(typeof(RepairType)))
             {
                 _availableRepairs[type] = new List<BaseRepair>();
-                _completedRepairs[type] = new List<BaseRepair>();
+                CompletedRepairs[type] = new List<BaseRepair>();
             }
 
             LoadUpgradesFromConfig();
@@ -59,6 +123,8 @@ namespace Managers
 
         private void LoadUpgradesFromConfig()
         {
+            if (!upgradeConfig) upgradeConfig = Resources.Load<UpgradeConfig>("Upgrades/UpgradeConfig");
+
             foreach (var upgrade in upgradeConfig.playerUpgrades) _availableUpgrades[UpgradeType.Player].Add(upgrade);
 
             foreach (var upgrade in upgradeConfig.shipUpgrades) _availableUpgrades[UpgradeType.Ship].Add(upgrade);
@@ -77,20 +143,20 @@ namespace Managers
         {
             foreach (var type in from type in _availableUpgrades.Keys
                      from upgradeItem in _availableUpgrades[type]
-                     where upgradeItem.CanBeApplied(this) && !_appliedUpgrades[type].Contains(upgradeItem)
+                     where upgradeItem.CanBeApplied(this) && !AppliedUpgrades[type].Contains(upgradeItem)
                      select type)
             {
             }
 
             foreach (var type in from type in _availableRepairs.Keys
                      from repairItem in _availableRepairs[type]
-                     where repairItem.CanBeApplied(this) && !_completedRepairs[type].Contains(repairItem)
+                     where repairItem.CanBeApplied(this) && !CompletedRepairs[type].Contains(repairItem)
                      select type)
             {
             }
         }
 
-        public void ApplyUpgrade(BaseUpgrade upgrade, GameObject target)
+        private void ApplyUpgrade(BaseUpgrade upgrade, GameObject target)
         {
             var upgradeable = GetUpgradeable(target, upgrade.target);
 
@@ -99,7 +165,7 @@ namespace Managers
             if (!upgrade.CanBeApplied(this)) return;
 
             upgradeable.ApplyUpgrade(upgrade);
-            _appliedUpgrades[upgrade.target].Add(upgrade);
+            AppliedUpgrades[upgrade.target].Add(upgrade);
             _availableUpgrades[upgrade.target].Remove(upgrade);
 
             if (upgrade.nextUpgrade) _availableUpgrades[upgrade.nextUpgrade.target].Add(upgrade.nextUpgrade);
@@ -112,6 +178,8 @@ namespace Managers
                 inventory.RemoveResource(
                     (requirement.requiredObject as ResourceObject)?.resourceName ??
                     throw new InvalidOperationException(), requirement.requiredAmount);
+
+            onUpgradeApplied.Invoke(upgrade);
 
             UpdateAvailableUpgrades();
         }
@@ -129,7 +197,7 @@ namespace Managers
             return true;
         }
 
-        public void ApplyRepair(BaseRepair repair, GameObject target)
+        private void ApplyRepair(BaseRepair repair, GameObject target)
         {
             var repairable = GetRepairable(target, repair.target);
 
@@ -138,10 +206,11 @@ namespace Managers
             if (!repair.CanBeApplied(this)) return;
 
             repairable.ApplyRepair(repair);
-            _completedRepairs[repair.target].Add(repair);
+            CompletedRepairs[repair.target].Add(repair);
             _availableRepairs[repair.target].Remove(repair);
 
             if (repair.nextRepair) _availableRepairs[repair.nextRepair.target].Add(repair.nextRepair);
+
             if (repair.nextUpgrade) _availableUpgrades[repair.nextUpgrade.target].Add(repair.nextUpgrade);
 
             var cost = repair.requirements.Where(req => req.type == UpgradeRequirement.RequirementType.Resource)
@@ -151,6 +220,8 @@ namespace Managers
                 inventory.RemoveResource(
                     (requirement.requiredObject as ResourceObject)?.resourceName ??
                     throw new InvalidOperationException(), requirement.requiredAmount);
+
+            onRepairApplied.Invoke(repair);
 
             UpdateAvailableUpgrades();
         }
@@ -181,26 +252,24 @@ namespace Managers
 
         private static IRepairable GetRepairable(GameObject target, RepairType upgradeType)
         {
-            switch (upgradeType)
+            return upgradeType switch
             {
-                case RepairType.Jetpack:
-                    return target.GetComponent<Jetpack>();
-                case RepairType.Impulse:
-                case RepairType.Thrusters:
-                    return target.GetComponent<Thrusters>();
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                RepairType.Jetpack => target.GetComponent<Jetpack>(),
+                RepairType.Thrusters => target.GetComponent<Thrusters>(),
+                RepairType.Hyperdrive => target.GetComponent<Hyperdrive>(),
+                RepairType.Impulse => target.GetComponent<Impulse>(),
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
 
         public bool IsUpgradeApplied(BaseUpgrade upgrade)
         {
-            return _appliedUpgrades[upgrade.target].Contains(upgrade);
+            return AppliedUpgrades[upgrade.target].Contains(upgrade);
         }
 
         public bool IsRepairCompleted(BaseRepair repair)
         {
-            return _completedRepairs[repair.target].Contains(repair);
+            return CompletedRepairs[repair.target].Contains(repair);
         }
 
         public bool IsUpgradeAvailable(BaseUpgrade upgrade)
@@ -231,12 +300,12 @@ namespace Managers
 
         public bool IsUpgradeUnlocked(BaseUpgrade? upgrade)
         {
-            return upgrade && _appliedUpgrades[upgrade.target].Any(u => u == upgrade);
+            return upgrade && AppliedUpgrades[upgrade.target].Any(u => u == upgrade);
         }
 
         public bool IsRepairComplete(BaseRepair? repair)
         {
-            return repair && _completedRepairs[repair.target].Any(r => r == repair);
+            return repair && CompletedRepairs[repair.target].Any(r => r == repair);
         }
     }
 }

@@ -8,21 +8,16 @@ namespace Managers
 {
     public class CameraController : MonoBehaviour
     {
-        public static CameraController Instance { get; private set; } = null!;
         private readonly List<CinemachineCamera> _cameras = new();
+        public static CameraController Instance { get; private set; } = null!;
         public CinemachineCamera? ActiveCamera { get; private set; }
 
         private void Awake()
         {
             if (!Instance)
-            {
                 Instance = this;
-                DontDestroyOnLoad(gameObject);
-            }
             else
-            {
                 Destroy(gameObject);
-            }
         }
 
         public bool IsActive(CinemachineCamera cam)

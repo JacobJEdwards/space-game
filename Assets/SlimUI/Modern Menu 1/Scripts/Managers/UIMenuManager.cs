@@ -1,271 +1,314 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using Managers;
 using Movement;
-using UnityEngine.UI;
 using TMPro;
+using UnityEditor;
+using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-namespace SlimUI.ModernMenu{
-	public class UIMenuManager : MonoBehaviour {
-		private Animator _cameraObject;
+namespace SlimUI.ModernMenu
+{
+    public class UIMenuManager : MonoBehaviour
+    {
+        public enum Theme
+        {
+            Custom1,
+            Custom2,
+            Custom3
+        }
 
-		// campaign button sub menu
-        [Header("MENUS")]
-        [Tooltip("The Menu for when the MAIN menu buttons")]
+        // campaign button sub menu
+        [Header("MENUS")] [Tooltip("The Menu for when the MAIN menu buttons")]
         public GameObject mainMenu;
-        [Tooltip("THe first list of buttons")]
-        public GameObject firstMenu;
+
+        [Tooltip("THe first list of buttons")] public GameObject firstMenu;
+
         [Tooltip("The Menu for when the PLAY button is clicked")]
         public GameObject playMenu;
+
         [Tooltip("The Menu for when the EXIT button is clicked")]
         public GameObject exitMenu;
 
-        public enum Theme {Custom1, Custom2, Custom3};
-        [Header("THEME SETTINGS")]
-        public Theme theme;
-        private int _themeIndex;
+        [Header("THEME SETTINGS")] public Theme theme;
+
         public ThemedUIData themeController;
 
-        [Header("PANELS")]
-        [Tooltip("The UI Panel parenting all sub menus")]
+        [Header("PANELS")] [Tooltip("The UI Panel parenting all sub menus")]
         public GameObject mainCanvas;
+
         [Tooltip("The UI Panel that holds the CONTROLS window tab")]
         public GameObject PanelControls;
+
         [Tooltip("The UI Panel that holds the VIDEO window tab")]
         public GameObject PanelVideo;
+
         [Tooltip("The UI Panel that holds the GAME window tab")]
         public GameObject PanelGame;
 
 
         // highlights in settings screen
-        [Header("SETTINGS SCREEN")]
-        [Tooltip("Highlight Image for when GAME Tab is selected in Settings")]
+        [Header("SETTINGS SCREEN")] [Tooltip("Highlight Image for when GAME Tab is selected in Settings")]
         public GameObject lineGame;
+
         [Tooltip("Highlight Image for when VIDEO Tab is selected in Settings")]
         public GameObject lineVideo;
+
         [Tooltip("Highlight Image for when CONTROLS Tab is selected in Settings")]
         public GameObject lineControls;
 
-        [Header("LOADING SCREEN")]
-		[Tooltip("If this is true, the loaded scene won't load until receiving user input")]
-		public bool waitForInput = true;
+        [Header("LOADING SCREEN")] [Tooltip("If this is true, the loaded scene won't load until receiving user input")]
+        public bool waitForInput = true;
+
         public GameObject loadingMenu;
-		[Tooltip("The loading bar Slider UI element in the Loading Screen")]
+
+        [Tooltip("The loading bar Slider UI element in the Loading Screen")]
         public Slider loadingBar;
+
         public TMP_Text loadPromptText;
 
-		[Header("SFX")]
-        [Tooltip("The GameObject holding the Audio Source component for the HOVER SOUND")]
+        [Header("SFX")] [Tooltip("The GameObject holding the Audio Source component for the HOVER SOUND")]
         public AudioSource hoverSound;
+
         [Tooltip("The GameObject holding the Audio Source component for the AUDIO SLIDER")]
         public AudioSource sliderSound;
-        [Tooltip("The GameObject holding the Audio Source component for the SWOOSH SOUND when switching to the Settings Screen")]
+
+        [Tooltip(
+            "The GameObject holding the Audio Source component for the SWOOSH SOUND when switching to the Settings Screen")]
         public AudioSource swooshSound;
 
         private bool _allowSceneActivation;
+        private Animator _cameraObject;
         private InputManager _inputManager;
+        private int _themeIndex;
 
-		private void Start(){
-			_inputManager = InputManager.Instance;
-			_inputManager.SetOnInteractPressed(
-				() =>
-				{
-					if (waitForInput)
-					{
-						_allowSceneActivation = true;
-					}
-				}
-				);
+        private void Start()
+        {
+            _inputManager = InputManager.Instance;
+            _inputManager.SetOnInteractPressed(
+                () =>
+                {
+                    if (waitForInput) _allowSceneActivation = true;
+                }
+            );
 
-			_cameraObject = transform.GetComponent<Animator>();
+            _cameraObject = transform.GetComponent<Animator>();
 
-			playMenu.SetActive(false);
-			exitMenu.SetActive(false);
-			firstMenu.SetActive(true);
-			mainMenu.SetActive(true);
+            playMenu.SetActive(false);
+            exitMenu.SetActive(false);
+            firstMenu.SetActive(true);
+            mainMenu.SetActive(true);
 
-			SetThemeColors();
-		}
+            SetThemeColors();
+        }
 
-		void SetThemeColors()
-		{
-			switch (theme)
-			{
-				case Theme.Custom1:
-					themeController.currentColor = themeController.custom1.graphic1;
-					themeController.textColor = themeController.custom1.text1;
-					_themeIndex = 0;
-					break;
-				case Theme.Custom2:
-					themeController.currentColor = themeController.custom2.graphic2;
-					themeController.textColor = themeController.custom2.text2;
-					_themeIndex = 1;
-					break;
-				case Theme.Custom3:
-					themeController.currentColor = themeController.custom3.graphic3;
-					themeController.textColor = themeController.custom3.text3;
-					_themeIndex = 2;
-					break;
-				default:
-					Debug.Log("Invalid theme selected.");
-					break;
-			}
-		}
+        public void LoadSavedScene()
+        {
+            SharedData.Instance.newGame = false;
+            LoadScene("SpaceScene");
+        }
 
-		public void PlayCampaign(){
-			exitMenu.SetActive(false);
-			playMenu.SetActive(true);
-		}
-		
-		public void PlayCampaignMobile(){
-			exitMenu.SetActive(false);
-			playMenu.SetActive(true);
-			mainMenu.SetActive(false);
-		}
+        private void SetThemeColors()
+        {
+            switch (theme)
+            {
+                case Theme.Custom1:
+                    themeController.currentColor = themeController.custom1.graphic1;
+                    themeController.textColor = themeController.custom1.text1;
+                    _themeIndex = 0;
+                    break;
+                case Theme.Custom2:
+                    themeController.currentColor = themeController.custom2.graphic2;
+                    themeController.textColor = themeController.custom2.text2;
+                    _themeIndex = 1;
+                    break;
+                case Theme.Custom3:
+                    themeController.currentColor = themeController.custom3.graphic3;
+                    themeController.textColor = themeController.custom3.text3;
+                    _themeIndex = 2;
+                    break;
+                default:
+                    Debug.Log("Invalid theme selected.");
+                    break;
+            }
+        }
 
-		public void ReturnMenu(){
-			playMenu.SetActive(false);
-			exitMenu.SetActive(false);
-			mainMenu.SetActive(true);
-		}
+        public void PlayCampaign()
+        {
+            exitMenu.SetActive(false);
+            playMenu.SetActive(true);
+        }
 
-		public void LoadScene(string scene){
-			if(scene != ""){
-				StartCoroutine(LoadAsynchronously(scene));
-			}
-		}
+        public void PlayCampaignMobile()
+        {
+            exitMenu.SetActive(false);
+            playMenu.SetActive(true);
+            mainMenu.SetActive(false);
+        }
 
-		private void  DisablePlayCampaign(){
-			playMenu.SetActive(false);
-		}
+        public void ReturnMenu()
+        {
+            playMenu.SetActive(false);
+            exitMenu.SetActive(false);
+            mainMenu.SetActive(true);
+        }
 
-		public void Position2(){
-			DisablePlayCampaign();
-			_cameraObject.SetFloat("Animate",1);
-		}
+        public void LoadScene(string scene)
+        {
+            if (scene != "") StartCoroutine(LoadAsynchronously(scene));
+        }
 
-		public void Position1(){
-			_cameraObject.SetFloat("Animate",0);
-		}
+        private void DisablePlayCampaign()
+        {
+            playMenu.SetActive(false);
+        }
 
-		void DisablePanels(){
-			PanelControls.SetActive(false);
-			PanelVideo.SetActive(false);
-			PanelGame.SetActive(false);
+        public void Position2()
+        {
+            DisablePlayCampaign();
+            _cameraObject.SetFloat("Animate", 1);
+        }
 
-			lineGame.SetActive(false);
-			lineControls.SetActive(false);
-			lineVideo.SetActive(false);
-		}
+        public void Position1()
+        {
+            _cameraObject.SetFloat("Animate", 0);
+        }
 
-		public void GamePanel(){
-			DisablePanels();
-			PanelGame.SetActive(true);
-			lineGame.SetActive(true);
-		}
+        private void DisablePanels()
+        {
+            PanelControls.SetActive(false);
+            PanelVideo.SetActive(false);
+            PanelGame.SetActive(false);
 
-		public void VideoPanel(){
-			DisablePanels();
-			PanelVideo.SetActive(true);
-			lineVideo.SetActive(true);
-		}
+            lineGame.SetActive(false);
+            lineControls.SetActive(false);
+            lineVideo.SetActive(false);
+        }
 
-		public void ControlsPanel(){
-			DisablePanels();
-			PanelControls.SetActive(true);
-			lineControls.SetActive(true);
-		}
+        public void GamePanel()
+        {
+            DisablePanels();
+            PanelGame.SetActive(true);
+            lineGame.SetActive(true);
+        }
 
-		public void KeyBindingsPanel(){
-			DisablePanels();
-			MovementPanel();
-		}
+        public void VideoPanel()
+        {
+            DisablePanels();
+            PanelVideo.SetActive(true);
+            lineVideo.SetActive(true);
+        }
 
-		public void MovementPanel(){
-			DisablePanels();
-		}
+        public void ControlsPanel()
+        {
+            DisablePanels();
+            PanelControls.SetActive(true);
+            lineControls.SetActive(true);
+        }
 
-		public void CombatPanel(){
-			DisablePanels();
-		}
+        public void KeyBindingsPanel()
+        {
+            DisablePanels();
+            MovementPanel();
+        }
 
-		public void GeneralPanel(){
-			DisablePanels();
-		}
+        public void MovementPanel()
+        {
+            DisablePanels();
+        }
 
-		public void PlayHover(){
-			hoverSound.Play();
-		}
+        public void CombatPanel()
+        {
+            DisablePanels();
+        }
 
-		public void PlaySFXHover(){
-			sliderSound.Play();
-		}
+        public void GeneralPanel()
+        {
+            DisablePanels();
+        }
 
-		public void PlaySwoosh(){
-			swooshSound.Play();
-		}
+        public void PlayHover()
+        {
+            hoverSound.Play();
+        }
 
-		// Are You Sure - Quit Panel Pop Up
-		public void AreYouSure(){
-			exitMenu.SetActive(true);
-			DisablePlayCampaign();
-		}
+        public void PlaySFXHover()
+        {
+            sliderSound.Play();
+        }
 
-		public void AreYouSureMobile(){
-			exitMenu.SetActive(true);
-			mainMenu.SetActive(false);
-			DisablePlayCampaign();
-		}
+        public void PlaySwoosh()
+        {
+            swooshSound.Play();
+        }
 
-		public void ExtrasMenu(){
-			playMenu.SetActive(false);
-			exitMenu.SetActive(false);
-		}
+        // Are You Sure - Quit Panel Pop Up
+        public void AreYouSure()
+        {
+            exitMenu.SetActive(true);
+            DisablePlayCampaign();
+        }
 
-		public void QuitGame(){
-			#if UNITY_EDITOR
-				UnityEditor.EditorApplication.isPlaying = false;
-			#else
+        public void AreYouSureMobile()
+        {
+            exitMenu.SetActive(true);
+            mainMenu.SetActive(false);
+            DisablePlayCampaign();
+        }
+
+        public void ExtrasMenu()
+        {
+            playMenu.SetActive(false);
+            exitMenu.SetActive(false);
+        }
+
+        public void QuitGame()
+        {
+#if UNITY_EDITOR
+            EditorApplication.isPlaying = false;
+#else
 				Application.Quit();
-			#endif
-		}
+#endif
+        }
 
-		// Load Bar synching animation
-		IEnumerator LoadAsynchronously(string sceneName){ // scene name is just the name of the current scene being loaded
-			var operation = SceneManager.LoadSceneAsync(sceneName);
-			if (operation == null){
-				Debug.Log("Scene not found");
-				yield break;
-			}
+        // Load Bar synching animation
+        private IEnumerator LoadAsynchronously(string sceneName)
+        {
+            // scene name is just the name of the current scene being loaded
+            var operation = SceneManager.LoadSceneAsync(sceneName);
+            if (operation == null)
+            {
+                Debug.Log("Scene not found");
+                yield break;
+            }
 
-			operation.allowSceneActivation = false;
-			mainCanvas.SetActive(false);
-			loadingMenu.SetActive(true);
+            operation.allowSceneActivation = false;
+            mainCanvas.SetActive(false);
+            loadingMenu.SetActive(true);
 
-			while (!operation.isDone){
-				var progress = Mathf.Clamp01(operation.progress / .95f);
-				loadingBar.value = progress;
+            while (!operation.isDone)
+            {
+                var progress = Mathf.Clamp01(operation.progress / .95f);
+                loadingBar.value = progress;
 
-				switch (operation.progress)
-				{
-					case >= 0.9f when waitForInput:
-					{
-						loadPromptText.text = "Press F to continue";
-						loadingBar.value = 1;
+                switch (operation.progress)
+                {
+                    case >= 0.9f when waitForInput:
+                    {
+                        loadPromptText.text = "Press F to continue";
+                        loadingBar.value = 1;
 
-						if (_allowSceneActivation){
-							operation.allowSceneActivation = true;
-						}
+                        if (_allowSceneActivation) operation.allowSceneActivation = true;
 
-						break;
-					}
-					case >= 0.9f when !waitForInput:
-						operation.allowSceneActivation = true;
-						break;
-				}
+                        break;
+                    }
+                    case >= 0.9f when !waitForInput:
+                        operation.allowSceneActivation = true;
+                        break;
+                }
 
-				yield return null;
-			}
-		}
-	}
+                yield return null;
+            }
+        }
+    }
 }

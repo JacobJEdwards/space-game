@@ -7,16 +7,14 @@ namespace Movement
 {
     public class InputManager : MonoBehaviour
     {
-        public static InputManager Instance { get; private set; } = null!;
-
         private PlayerControls _playerControls = null!;
+        public static InputManager Instance { get; private set; } = null!;
 
         private void Awake()
         {
             if (!Instance)
             {
                 Instance = this;
-                DontDestroyOnLoad(gameObject);
             }
             else
             {
@@ -35,7 +33,7 @@ namespace Movement
 
         public float GetUpDown()
         {
-            return _playerControls.SpaceControls.UpDown.ReadValue<float>() ;
+            return _playerControls.SpaceControls.UpDown.ReadValue<float>();
         }
 
         public float GetStrafe()
@@ -58,6 +56,9 @@ namespace Movement
             return _playerControls.SpaceControls.PitchYaw.ReadValue<Vector2>();
         }
 
+        // how can i do this without using unity action?
+        // answer:
+        // public void SetOnInteractPressed(Action action)
         public void SetOnInteractPressed(UnityAction action)
         {
             _playerControls.SpaceControls.Interact.performed += _ => action.Invoke();

@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Gold
   m_EditorClassIdentifier: 
   resourceName: Gold
-  resourceAmount: 1
+  resourceAmount: 4
   resourceSprite: {fileID: 5701253759128972283, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
+  resourceDescription: Todo

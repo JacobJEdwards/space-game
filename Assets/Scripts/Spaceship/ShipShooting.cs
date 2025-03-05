@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Movement;
-using Player;
+using Player.Upgrades;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Weapons;

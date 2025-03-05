@@ -3,9 +3,9 @@
 using System;
 using System.Collections.Generic;
 using Managers;
+using NPC;
 using Objects;
 using Unity.Serialization;
-using NPC;
 using UnityEngine;
 
 // TODO : SEED - RANDOM GEN
@@ -32,31 +32,28 @@ namespace PlanetarySystem.Planet
 
         [SerializeField] public Rock[] rockPrefabs = Array.Empty<Rock>();
         [SerializeField] public Life[] lifePrefabs = Array.Empty<Life>();
-        [SerializeField] public Objects.TreeObject[] treePrefabs = Array.Empty<Objects.TreeObject>();
-
-        [DontSerialize] private MeshFilter[] _meshFilters = Array.Empty<MeshFilter>();
-
-        [DontSerialize] private TerrainFace[] _terrainFaces = Array.Empty<TerrainFace>();
-
-        private GameObject _atmosphere = null!;
-        private GameObject _atmosphereObject = null!;
-
-        private readonly ColourGenerator _colourGenerator = new();
-        public readonly ShapeGenerator ShapeGenerator = new();
+        [SerializeField] public TreeObject[] treePrefabs = Array.Empty<TreeObject>();
 
         [SerializeField] private PlanetRockManager rockManager = null!;
         [SerializeField] private PlanetTreeManager treeManager = null!;
         [SerializeField] private PlanetLifeManager lifeManager = null!;
+
+        private readonly ColourGenerator _colourGenerator = new();
+        public readonly ShapeGenerator ShapeGenerator = new();
+
+        private GameObject _atmosphere = null!;
+        private GameObject _atmosphereObject = null!;
+
+        [DontSerialize] private MeshFilter[] _meshFilters = Array.Empty<MeshFilter>();
+
+        [DontSerialize] private TerrainFace[] _terrainFaces = Array.Empty<TerrainFace>();
 
         private void Initialize()
         {
             ShapeGenerator.UpdateSettings(shapeSettings);
             _colourGenerator.UpdateSettings(colourSettings);
 
-            if (_meshFilters.Length == 0)
-            {
-                _meshFilters = new MeshFilter[6];
-            }
+            if (_meshFilters.Length == 0) _meshFilters = new MeshFilter[6];
 
             _terrainFaces = new TerrainFace[6];
 
@@ -65,10 +62,7 @@ namespace PlanetarySystem.Planet
 
             for (var i = 0; i < 6; i++)
             {
-                if (_meshFilters[i])
-                {
-                    Destroy(_meshFilters[i].gameObject);
-                }
+                if (_meshFilters[i]) Destroy(_meshFilters[i].gameObject);
 
                 var meshObj = new GameObject($"mesh_{i}")
                 {
@@ -93,7 +87,6 @@ namespace PlanetarySystem.Planet
                 _terrainFaces[i] =
                     new TerrainFace(ShapeGenerator, _meshFilters[i].sharedMesh, resolution, directions[i]);
                 _meshFilters[i].gameObject.layer = (int)Layers.PlanetSurface;
-
             }
 
             gameObject.layer = (int)Layers.PlanetSurface;
@@ -108,7 +101,6 @@ namespace PlanetarySystem.Planet
             }
             else
             {
-
                 Initialize();
                 GenerateMesh();
                 GenerateColours();
@@ -193,10 +185,7 @@ namespace PlanetarySystem.Planet
 
             _atmosphere.layer = (int)Layers.Atmosphere;
 
-            if (_atmosphereObject)
-            {
-                Destroy(_atmosphereObject);
-            }
+            if (_atmosphereObject) Destroy(_atmosphereObject);
 
             _atmosphereObject = new GameObject("AtmosphereMesh")
             {
@@ -251,20 +240,18 @@ namespace PlanetarySystem.Planet
             }
 
             for (var v = 0; v < verticalSegments; v++)
+            for (var h = 0; h < horizontalSegments; h++)
             {
-                for (var h = 0; h < horizontalSegments; h++)
-                {
-                    var current = v * (horizontalSegments + 1) + h;
-                    var next = current + horizontalSegments + 1;
+                var current = v * (horizontalSegments + 1) + h;
+                var next = current + horizontalSegments + 1;
 
-                    triangles.Add(current);
-                    triangles.Add(next);
-                    triangles.Add(current + 1);
+                triangles.Add(current);
+                triangles.Add(next);
+                triangles.Add(current + 1);
 
-                    triangles.Add(current + 1);
-                    triangles.Add(next);
-                    triangles.Add(next + 1);
-                }
+                triangles.Add(current + 1);
+                triangles.Add(next);
+                triangles.Add(next + 1);
             }
 
             mesh.vertices = vertices.ToArray();
@@ -280,10 +267,7 @@ namespace PlanetarySystem.Planet
             if (lifePrefabs.Length == 0) return;
             if (!hasLife) return;
 
-            if (!lifeManager)
-            {
-                lifeManager = gameObject.AddComponent<PlanetLifeManager>();
-            }
+            if (!lifeManager) lifeManager = gameObject.AddComponent<PlanetLifeManager>();
 
             lifeManager.GenerateObjectPositions();
         }
@@ -293,10 +277,7 @@ namespace PlanetarySystem.Planet
             if (rockPrefabs.Length == 0) return;
             if (numRocks == 0) return;
 
-            if (!rockManager)
-            {
-                rockManager = gameObject.AddComponent<PlanetRockManager>();
-            }
+            if (!rockManager) rockManager = gameObject.AddComponent<PlanetRockManager>();
 
             rockManager.GenerateObjectPositions();
         }
@@ -306,10 +287,7 @@ namespace PlanetarySystem.Planet
             if (treePrefabs.Length == 0) return;
             if (numTrees == 0) return;
 
-            if (!treeManager)
-            {
-                treeManager = gameObject.AddComponent<PlanetTreeManager>();
-            }
+            if (!treeManager) treeManager = gameObject.AddComponent<PlanetTreeManager>();
 
             treeManager.GenerateObjectPositions();
         }

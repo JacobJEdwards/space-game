@@ -13,10 +13,13 @@ namespace Player
         public List<ResourceObject> resources = new();
         public UnityEvent onInventoryChanged = new();
 
+        private void Awake()
+        {
+            resources = new List<ResourceObject>();
+        }
+
         public void AddResource(ResourceObject resource)
         {
-            onInventoryChanged.Invoke();
-
             if (resources.Exists(t => t.resourceName == resource.resourceName))
             {
                 var res = resources.Find(t => t.resourceName == resource.resourceName);

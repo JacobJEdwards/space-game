@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Managers;
 using Player;
+using Player.Upgrades;
 using UnityEngine;
 
 namespace UI
@@ -34,6 +35,9 @@ namespace UI
         {
             _upgradeManager = UpgradeManager.Instance;
 
+            _upgradeManager.onUpgradeApplied.AddListener(InitUpgrades);
+            _upgradeManager.onRepairApplied.AddListener(InitRepairs);
+
             InitUpgrades();
             InitRepairs();
         }
@@ -52,6 +56,11 @@ namespace UI
             InitUpgrades();
         }
 
+        private void InitUpgrades(BaseUpgrade upgrade)
+        {
+            InitUpgrades();
+        }
+
         private void InitUpgrades()
         {
             foreach (var upgradeUI in _upgradesUI) Destroy(upgradeUI.gameObject);
@@ -67,6 +76,11 @@ namespace UI
                 upgradeUI.SetUpgradeData(upgrade);
                 _upgradesUI.Add(upgradeUI);
             }
+        }
+
+        private void InitRepairs(BaseRepair repair)
+        {
+            InitRepairs();
         }
 
         private void InitRepairs()

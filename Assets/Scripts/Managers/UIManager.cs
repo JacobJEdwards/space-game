@@ -1,10 +1,12 @@
 #nullable enable
 
 using System.Collections.Generic;
+using DG.Tweening;
 using Interfaces;
 using Player;
 using Spaceship;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace Managers
@@ -37,24 +39,23 @@ namespace Managers
         [Header("Warning Settings")] [SerializeField]
         private Text warning = null!;
 
+        [Header("Quest Settings")] [SerializeField]
+        private Text quest = null!;
+
+        public UnityEvent<UIState> onStateChanged = new();
+
         private readonly Dictionary<UIState, IUIPanel> _uiPanels = new();
         private UIState _currentState = UIState.None;
 
         private UIState _previousState = UIState.None;
         public static UiManager Instance { get; private set; } = null!;
 
-
         private void Awake()
         {
             if (!Instance)
-            {
                 Instance = this;
-                DontDestroyOnLoad(gameObject);
-            }
             else
-            {
                 Destroy(gameObject);
-            }
         }
 
         public void RegisterPanel(IUIPanel panel)
@@ -73,6 +74,8 @@ namespace Managers
 
             _previousState = _currentState;
             _currentState = state;
+
+            onStateChanged.Invoke(state);
         }
 
         public void SetHint(string text)
@@ -88,6 +91,17 @@ namespace Managers
         public void SetWarning(string text)
         {
             warning.text = text;
+        }
+
+        public void SetQuest(string text)
+        {
+            quest.text = text;
+            quest.DOFade(1, 0.5f).SetEase(Ease.OutBounce);
+        }
+
+        public void ClearQuest()
+        {
+            quest.DOFade(0, 0.5f).SetEase(Ease.OutBounce);
         }
 
         public void SetInfo(string text, float duration)

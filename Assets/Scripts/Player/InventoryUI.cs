@@ -3,8 +3,6 @@
 using System;
 using System.Linq;
 using CollectableResources;
-using Interfaces;
-using Managers;
 using UI;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -19,12 +17,12 @@ namespace Player
         [SerializeField] private Image selectedResourceIcon = null!;
         [SerializeField] private Text selectedResourceInfo = null!;
 
-        private InventorySlot[] _inventorySlots = null!;
-
         private InventorySlot? _draggedSlot;
+
+        private InventorySlot[] _inventorySlots = null!;
         private ResourceObject? _selectedResource;
 
-        private void Awake()
+        private void Start()
         {
             Assert.IsNotNull(inventory, "Inventory is not assigned");
             inventory.onInventoryChanged.AddListener(UpdateInventory);
@@ -39,7 +37,7 @@ namespace Player
 
         private void UpdateInventory()
         {
-            foreach (var slot in _inventorySlots) {slot.ClearSlot();}
+            foreach (var slot in _inventorySlots) slot.ClearSlot();
 
             foreach (var resource in inventory.resources)
             {
@@ -93,22 +91,14 @@ namespace Player
             toSlot.ClearSlot();
 
             if (fromResource)
-            {
                 toSlot.SetResource(fromResource);
-            }
             else
-            {
                 toSlot.ClearSlot();
-            }
 
             if (toResource)
-            {
                 fromSlot.SetResource(toResource);
-            }
             else
-            {
                 fromSlot.ClearSlot();
-            }
         }
 
 

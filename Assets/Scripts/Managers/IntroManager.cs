@@ -161,5 +161,9 @@ public class IntroManager : MonoBehaviour
 
         while (!operation.isDone)
             yield return null;
+
+        _tweener?.Kill();
+        spinTween?.Kill();
+        fadeTween?.Kill();
     }
 }

@@ -11,25 +11,24 @@ namespace Managers
 {
     [RequireComponent(typeof(Planet))]
     public abstract class PlanetObjectManager<T> : MonoBehaviour
-    where T : MonoBehaviour, IPoolable<T>
+        where T : MonoBehaviour, IPoolable<T>
     {
-        protected Planet Planet = null!;
-        protected ObjectSpawner<T> ObjectSpawner = null!;
-
-        private readonly List<T> _activeObjects = new ();
-        protected readonly Dictionary<T, IObjectPool<T>> Pools = new ();
-        protected readonly Dictionary<T, Vector3> Positions = new ();
-        protected readonly Dictionary<T, Vector3> Rotations = new ();
-
-        protected Transform PlayerTransform = null!;
-        private Vector3 _lastUpdatePosition;
-
         [SerializeField] private float spawnRadius = 1000f;
         [SerializeField] private float despawnRadius = 1200f;
         [SerializeField] private float checkInterval = 1f;
         [SerializeField] private float distanceCheck = 50f;
 
+        private readonly List<T> _activeObjects = new();
+        protected readonly Dictionary<T, IObjectPool<T>> Pools = new();
+        protected readonly Dictionary<T, Vector3> Positions = new();
+        protected readonly Dictionary<T, Vector3> Rotations = new();
+        private Vector3 _lastUpdatePosition;
+
         private float _nextCheckTime;
+        protected ObjectSpawner<T> ObjectSpawner = null!;
+        protected Planet Planet = null!;
+
+        protected Transform PlayerTransform = null!;
 
         private void Awake()
         {
@@ -63,6 +62,21 @@ namespace Managers
             DespawnAll();
         }
 
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, spawnRadius);
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position, despawnRadius);
+
+            foreach (var (_, pos) in Positions)
+            {
+                Gizmos.color = Color.gray;
+                Gizmos.DrawWireSphere(pos, 10f);
+            }
+        }
+
         public abstract void GenerateObjectPositions();
 
         private void UpdateVisibility()
@@ -86,13 +100,8 @@ namespace Managers
                 var distance = Vector3.Distance(PlayerTransform.position, rockWorldPos);
 
                 if (distance < spawnRadius && !obj.gameObject.activeSelf)
-                {
                     SpawnObj(obj, pos);
-                }
-                else if (distance > despawnRadius && obj.gameObject.activeSelf)
-                {
-                    DespawnObj(obj);
-                }
+                else if (distance > despawnRadius && obj.gameObject.activeSelf) DespawnObj(obj);
             }
         }
 
@@ -115,10 +124,7 @@ namespace Managers
             obj.transform.parent = Planet.transform;
             obj.gameObject.SetActive(true);
             obj.transform.localPosition = pos;
-            if (Rotations.TryGetValue(obj, out var rot))
-            {
-                obj.transform.localRotation = Quaternion.Euler(rot);
-            }
+            if (Rotations.TryGetValue(obj, out var rot)) obj.transform.localRotation = Quaternion.Euler(rot);
             _activeObjects.Add(obj);
             Spawn(obj);
         }
@@ -129,21 +135,6 @@ namespace Managers
         {
             Pools[obj].Release(obj);
             _activeObjects.Remove(obj);
-        }
-
-
-        private void OnDrawGizmos()
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, spawnRadius);
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(transform.position, despawnRadius);
-
-            foreach (var (_, pos) in Positions)
-            {
-                Gizmos.color = Color.gray;
-                Gizmos.DrawWireSphere(pos, 10f);
-            }
         }
     }
 }

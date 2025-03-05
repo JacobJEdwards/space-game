@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Managers;
 using Player;
+using Player.Upgrades;
 using UnityEngine;
 
 namespace UI
@@ -18,6 +19,8 @@ namespace UI
         {
             _upgradeManager = UpgradeManager.Instance;
 
+            _upgradeManager.onUpgradeApplied.AddListener(InitUpgrades);
+
             InitUpgrades();
         }
 
@@ -25,6 +28,11 @@ namespace UI
         {
             _upgradeManager.TryApplyUpgrade(upgradeData, target);
 
+            InitUpgrades();
+        }
+
+        private void InitUpgrades(BaseUpgrade upgrade)
+        {
             InitUpgrades();
         }
 

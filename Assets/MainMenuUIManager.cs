@@ -1,8 +1,11 @@
 using System;
 using System.Collections;
+using Managers;
 using Movement;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenuUIManager : MonoBehaviour
 {
@@ -12,23 +15,23 @@ public class MainMenuUIManager : MonoBehaviour
     private GameObject mainCanvas;
 
     [SerializeField] private GameObject loadingMenu;
-    [SerializeField] private UnityEngine.UI.Slider loadingBar;
-    [SerializeField] private UnityEngine.UI.Text loadPromptText;
+    [SerializeField] private Slider loadingBar;
+    [SerializeField] private Text loadPromptText;
     [SerializeField] private GameObject exitMenu;
     [SerializeField] private GameObject extrasMenu;
     [SerializeField] private GameObject playMenu;
     [SerializeField] private GameObject mainMenu;
     [SerializeField] private GameObject firstMenu;
 
-    [Header("Others")]
-    [SerializeField] private InputManager inputManager;
+    [Header("Others")] [SerializeField] private InputManager inputManager;
+
     [SerializeField] private Animator cameraObject;
 
 
     [Header("Settings")] [SerializeField] private bool waitForInput = true;
 
-    [Header("SFX")]
-    public AudioSource hoverSound;
+    [Header("SFX")] public AudioSource hoverSound;
+
     public AudioSource sliderSound;
     public AudioSource swooshSound;
 
@@ -39,50 +42,57 @@ public class MainMenuUIManager : MonoBehaviour
     {
         inputManager.SetOnInteractPressed(() =>
         {
-            if (waitForInput)
-            {
-                _allowSceneActivation = true;
-            }
+            if (waitForInput) _allowSceneActivation = true;
         });
 
         cameraObject = transform.GetComponent<Animator>();
 
         playMenu.SetActive(false);
         exitMenu.SetActive(false);
-        if(extrasMenu) extrasMenu.SetActive(false);
+        if (extrasMenu) extrasMenu.SetActive(false);
         firstMenu.SetActive(true);
         mainMenu.SetActive(true);
     }
 
-    public void Position2(){
+    public void Position2()
+    {
         DisablePlayCampaign();
-        cameraObject.SetFloat(Animate,1);
+        cameraObject.SetFloat(Animate, 1);
     }
 
-    public void Position1(){
-        cameraObject.SetFloat(Animate,0);
+    public void Position1()
+    {
+        cameraObject.SetFloat(Animate, 0);
     }
 
-    public void PlayCampaign(){
+    public void PlayCampaign()
+    {
         exitMenu.SetActive(false);
-        if(extrasMenu) extrasMenu.SetActive(false);
+        if (extrasMenu) extrasMenu.SetActive(false);
         playMenu.SetActive(true);
     }
 
-    public void ReturnMenu(){
+    public void ReturnMenu()
+    {
         playMenu.SetActive(false);
-        if(extrasMenu) extrasMenu.SetActive(false);
+        if (extrasMenu) extrasMenu.SetActive(false);
         exitMenu.SetActive(false);
         mainMenu.SetActive(true);
     }
 
-    public void LoadScene(string scene){
-        if(scene != ""){
-            StartCoroutine(LoadAsynchronously(scene));
-        }
+    public void LoadSaved()
+    {
+        SharedData.Instance.savePath = "save.json";
+        LoadScene("SpaceScene");
     }
 
-    private void  DisablePlayCampaign(){
+    public void LoadScene(string scene)
+    {
+        if (scene != "") StartCoroutine(LoadAsynchronously(scene));
+    }
+
+    private void DisablePlayCampaign()
+    {
         playMenu.SetActive(false);
     }
 
@@ -96,7 +106,7 @@ public class MainMenuUIManager : MonoBehaviour
     public void QuitGame()
     {
 #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
+        EditorApplication.isPlaying = false;
 #else
             Application.Quit();
 #endif
@@ -106,10 +116,7 @@ public class MainMenuUIManager : MonoBehaviour
     {
         // scene name is just the name of the current scene being loaded
         var operation = SceneManager.LoadSceneAsync(sceneName);
-        if (operation == null)
-        {
-            throw new Exception("Scene not found");
-        }
+        if (operation == null) throw new Exception("Scene not found");
 
         operation.allowSceneActivation = false;
         mainCanvas.SetActive(false);
@@ -125,10 +132,7 @@ public class MainMenuUIManager : MonoBehaviour
                 loadPromptText.text = "Press F to continue";
                 loadingBar.value = 1;
 
-                if (_allowSceneActivation)
-                {
-                    operation.allowSceneActivation = true;
-                }
+                if (_allowSceneActivation) operation.allowSceneActivation = true;
             }
             else if (operation.progress >= 0.9f && !waitForInput)
             {

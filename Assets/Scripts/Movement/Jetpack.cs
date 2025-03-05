@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Interfaces;
 using Managers;
 using Player;
+using Player.Upgrades;
 using Unity.Assertions;
 using UnityEngine;
 
@@ -11,10 +13,10 @@ namespace Movement
     [RequireComponent(typeof(Rigidbody))]
     public class Jetpack : MonoBehaviour, IUpgradeable, IRepairable
     {
-        [SerializeField] private JetpackSettings settings = null!;
         [SerializeField] private AudioSource jetpackAudioSource = null!;
         [SerializeField] private AudioClip jetpackClip = null!;
         [SerializeField] private AudioClip jetpackEmptyClip = null!;
+        [SerializeField] private JetpackSettings settings = null!;
 
         public bool isJetpacking;
 
@@ -28,7 +30,6 @@ namespace Movement
         {
             _rb = GetComponent<Rigidbody>();
 
-            Assert.IsNotNull(settings, "JetpackSettings is missing");
             Assert.IsNotNull(jetpackAudioSource, "JetpackAudioSource is missing");
             Assert.IsNotNull(jetpackClip, "JetpackClip is missing");
             Assert.IsNotNull(jetpackEmptyClip, "JetpackEmptyClip is missing");
@@ -128,8 +129,8 @@ namespace Movement
             return _isRepaired && _jetpackFuel > 0;
         }
 
-        [CreateAssetMenu(fileName = "JetpackSettings", menuName = "JetpackSettings")]
-        public class JetpackSettings : ScriptableObject
+        [Serializable]
+        public class JetpackSettings
         {
             public float jetpackForce = 2.0f;
             public float jetpackFuel = 100.0f;

@@ -7,22 +7,16 @@ namespace Managers
 {
     public class ModelPreviewManager : MonoBehaviour
     {
-        public static ModelPreviewManager Instance { get; private set; } = null!;
-
         [SerializeField] private Camera previewCamera = null!;
         private readonly Dictionary<GameObject, (GameObject, RenderTexture)> _renderTextures = new();
+        public static ModelPreviewManager Instance { get; private set; } = null!;
 
         private void Awake()
         {
             if (!Instance)
-            {
                 Instance = this;
-                DontDestroyOnLoad(gameObject);
-            }
             else
-            {
                 Destroy(gameObject);
-            }
         }
 
         private void SetModel(GameObject model)
@@ -60,7 +54,6 @@ namespace Managers
             if (renderers.Length == 0) return;
 
             foreach (var renderer in renderers)
-            {
                 if (!boundsInitialized)
                 {
                     bounds = renderer.bounds;
@@ -70,14 +63,13 @@ namespace Managers
                 {
                     bounds.Encapsulate(renderer.bounds);
                 }
-            }
 
             if (!boundsInitialized) return;
 
             var modelCenter = bounds.center;
 
             var maxSize = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
-            var distance = (maxSize / 2.0f) / Mathf.Tan(previewCamera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+            var distance = maxSize / 2.0f / Mathf.Tan(previewCamera.fieldOfView * 0.5f * Mathf.Deg2Rad);
 
             model.transform.position = previewCamera.transform.position + previewCamera.transform.forward * distance;
 
@@ -136,19 +128,13 @@ namespace Managers
             }
 
             // Recursively clone all children
-            foreach (Transform child in source.transform)
-            {
-                CloneVisualHierarchy(child.gameObject, newObj.transform);
-            }
+            foreach (Transform child in source.transform) CloneVisualHierarchy(child.gameObject, newObj.transform);
         }
 
         private static void SetLayerRecursively(GameObject obj, int layer)
         {
             obj.layer = layer;
-            foreach (Transform child in obj.transform)
-            {
-                SetLayerRecursively(child.gameObject, layer);
-            }
+            foreach (Transform child in obj.transform) SetLayerRecursively(child.gameObject, layer);
         }
 
         public Texture2D ToTexture2D(GameObject model)

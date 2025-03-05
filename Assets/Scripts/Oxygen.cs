@@ -3,8 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Player;
-using Unity.Cinemachine;
+using Player.Upgrades;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -14,8 +13,6 @@ public class Oxygen : MonoBehaviour
     [Header("Config")] [SerializeField] public OxygenConfig config = null!;
 
     public UnityEvent<float> onOxygenChanged = new();
-
-    [SerializeField] private CinemachineCamera playerCamera = null!;
 
     private readonly List<PlayerOxygenUpgrade> _appliedUpgrades = new();
 

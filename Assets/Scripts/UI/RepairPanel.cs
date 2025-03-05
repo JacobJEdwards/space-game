@@ -8,7 +8,7 @@ namespace UI
     public class RepairPanel : MonoBehaviour, IRepairPanel
     {
         [SerializeField] private GameObject target = null!;
-        [SerializeField] public RepairType repairType;
+        [SerializeField] public RepairType[] repairType;
 
         [SerializeField] private GameObject upgradeBlock = null!;
         private readonly List<RepairUI> _upgradesUI = new();
@@ -17,6 +17,8 @@ namespace UI
         private void Start()
         {
             _upgradeManager = UpgradeManager.Instance;
+
+            _upgradeManager.onRepairApplied.AddListener(InitUpgrades);
 
             InitUpgrades();
         }
@@ -33,18 +35,26 @@ namespace UI
             InitUpgrades();
         }
 
+        private void InitUpgrades(BaseRepair upgradeData)
+        {
+            InitUpgrades();
+        }
+
         private void InitUpgrades()
         {
             foreach (var upgradeUI in _upgradesUI) Destroy(upgradeUI.gameObject);
 
-            var upgrades = _upgradeManager.GetAvailableRepairsForType(repairType);
-
-            foreach (var upgrade in upgrades)
+            foreach (var repair in repairType)
             {
-                var upgradeUI = Instantiate(upgradeBlock, transform).GetComponent<RepairUI>();
-                upgradeUI.SetPanel(this);
-                upgradeUI.SetUpgradeData(upgrade);
-                _upgradesUI.Add(upgradeUI);
+                var upgrades = _upgradeManager.GetAvailableRepairsForType(repair);
+
+                foreach (var upgrade in upgrades)
+                {
+                    var upgradeUI = Instantiate(upgradeBlock, transform).GetComponent<RepairUI>();
+                    upgradeUI.SetPanel(this);
+                    upgradeUI.SetUpgradeData(upgrade);
+                    _upgradesUI.Add(upgradeUI);
+                }
             }
         }
     }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Interfaces;
 using Managers;
 using Movement;
+using Player.Upgrades;
 using Spaceship;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -39,6 +40,8 @@ namespace Player
         public UnityEvent onEnterShip = new();
         public UnityEvent onExitShip = new();
 
+        public PlayerState playerState = PlayerState.InZeroG;
+
         private readonly List<PlayerUpgrade> _playerUpgrades = new();
 
         private CameraController _cameraController = null!;
@@ -47,8 +50,6 @@ namespace Player
         private PlanetaryMovement _planetaryMovement = null!;
         private Health _playerHealth = null!;
         private Oxygen _playerOxygen = null!;
-
-        private PlayerState _playerState = PlayerState.InZeroG;
         private Rigidbody _rb = null!;
 
         private SpaceMovement _spaceMovement = null!;
@@ -84,7 +85,7 @@ namespace Player
 
         private void OnDisable()
         {
-            if (playerCamera) _cameraController.Unregister(playerCamera);
+            if (playerCamera) _cameraController?.Unregister(playerCamera);
         }
 
         public bool CanApplyUpgrade(BaseUpgrade upgrade)
@@ -201,6 +202,12 @@ namespace Player
 
         private void OnInteractionInput()
         {
+            if (playerState == PlayerState.OnShip)
+            {
+                ExitShip();
+                return;
+            }
+
             _interactionManager.OnInteractInput();
         }
 
@@ -211,14 +218,20 @@ namespace Player
 
         private void UpdateOxygenAndHealth()
         {
-            if (_playerState == PlayerState.InZeroG) _playerOxygen.TakeDamage(1f * Time.fixedDeltaTime);
+            if (playerState == PlayerState.InZeroG) _playerOxygen.TakeDamage(1f * Time.fixedDeltaTime);
         }
 
         private void UpdateMovementState()
         {
-            switch (_playerState)
+            switch (playerState)
             {
                 case PlayerState.OnShip:
+                    if (shipToEnter)
+                    {
+                        EnterShip(shipToEnter);
+                        shipToEnter.PlayerEnteredShip(this);
+                    }
+
                     return;
                 case PlayerState.InZeroG:
                     UpdateZeroGMovement();
@@ -238,7 +251,7 @@ namespace Player
             if (Physics.OverlapSphereNonAlloc(transform.position, 50, colliders, movementSettings.groundLayer) !=
                 0) return;
 
-            _playerState = PlayerState.InZeroG;
+            playerState = PlayerState.InZeroG;
             UpdateMovementComponents();
         }
 
@@ -249,17 +262,18 @@ namespace Player
             if (Physics.OverlapSphereNonAlloc(transform.position, 50, colliders, movementSettings.groundLayer) ==
                 0) return;
 
-            _playerState = PlayerState.InGravity;
+            playerState = PlayerState.InGravity;
             UpdateMovementComponents();
         }
 
         public void EnterShip(ShipController ship)
         {
             shipToEnter = ship;
+            ship.PlayerEnteredShip(this);
             transform.parent = ship.transform;
             gameObject.SetActive(false);
 
-            _playerState = PlayerState.OnShip;
+            playerState = PlayerState.OnShip;
 
             onEnterShip.Invoke();
             _playerOxygen.Reset();
@@ -272,18 +286,21 @@ namespace Player
         {
             if (!shipToEnter) return;
 
+            shipToEnter.PlayerExitShip();
+
             transform.parent = null;
             gameObject.SetActive(true);
-            var position = shipToEnter.transform.position + shipToEnter.transform.forward * 2;
+            var position = shipToEnter.transform.position + shipToEnter.transform.forward * 2 +
+                           shipToEnter.transform.up * 2 + shipToEnter.transform.right * 2;
 
             transform.position = position;
 
             _cameraController.SetActiveCamera(playerCamera);
 
-            if (shipToEnter && shipToEnter.CurrentState == ShipState.Landed)
-                _playerState = PlayerState.InGravity;
+            if (shipToEnter && shipToEnter.currentState == ShipState.Landed)
+                playerState = PlayerState.InGravity;
             else
-                _playerState = PlayerState.InZeroG;
+                playerState = PlayerState.InZeroG;
 
             onExitShip.Invoke();
             shipToEnter = null;
@@ -294,7 +311,7 @@ namespace Player
 
         private void UpdateMovementComponents()
         {
-            switch (_playerState)
+            switch (playerState)
             {
                 case PlayerState.InZeroG:
                     EnableZeroGMovement();

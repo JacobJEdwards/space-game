@@ -1,4 +1,5 @@
 using Player;
+using Player.Upgrades;
 
 namespace Interfaces
 {

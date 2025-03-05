@@ -9,20 +9,21 @@ This subsection will cover the first two states, with the third being covered in
 \subsubsection{Zero G Player Movement and Spaceship Entry}\label{subsubsec:zerog}
 The player, when not in their ship, is able to move in 3D world space, with the ability to move in any direction and
 rotate in any direction.
-This is done using Unity's InputSystem\citep{unity:inputsystem} to get the player's input and apply it to the player's
-Rigidbody component\citep{unity:rigidbody} using thrust and torque force, as well as gliding to simulate the lack of
-friction in space.
+This is achieved using Unity's InputSystem\citep{unity:inputsystem} to get the player's input, and then calculating the
+torque and thrust force, which are applied to the player's Rigidbody\citep{unity:rigidbody} component.
+The player also glides smoothly through space to simulate the lack of friction.
 The player also carries a gun, which can be shot using the left mouse button.
 
-From this state, the player can enter their ship by looking at it (when in range) and pressing \textit{F}, which is the
-interact key in the game.
-A ray is shot repeatedly from the player's camera to forwards, and if its hits an interactable object (such as the
-player's ship)the player is able to interact.
+From this state, the player can enter their ship by looking at it (when in range) and pressing \textit{F} (the
+interact key in the game).
+This interaction is performed by repeatedly shooting a ray from the player's camera forwards, and if said ray hits an
+interactable object (such as the player's ship) the player is able to interact.
+On interaction, an event is triggered.
 The interaction event for the ship causes the player to enter the ship and
-switch to the spaceship state (the player controls the ship).
+switch to the spaceship state (wherein the player controls the ship).
 
 The player also has oxygen and health, which are shown in the UI\@.
-Oxygen is consumed over time, and regenerates when the player is in the ship or within a planets atmosphere.
+Oxygen is consumed over time, and regenerates when the player is in the ship or within a planet's atmosphere.
 
 \begin{figure}[h]
     \centering
@@ -37,10 +38,10 @@ The ship movement is very similar to the player movement, with the player able t
 direction, but with a few key differences:
 The thrust is much greater in the forwards direction, simulating the fact that the boosters are at the back, and
 the pitch and yaw movement is much slower, simulating the fact that the ship is much larger and heavier than the
-player, as well as requiring more force to rotate.
+player, thus requiring more force to rotate.
 The player is also able to fire the ship's weapons, which are much more powerful than the player's gun, and have
 a cooldown time.
-The cooldown is shown in the UI\@.
+The cooldown timer is shown in the UI\@.
 
 \begin{figure}[h]
     \centering
@@ -49,14 +50,15 @@ The cooldown is shown in the UI\@.
     \label{fig:ship}
 \end{figure}
 
-The player is able to exit the ship by pressing \textit{F} again, which will cause the player to exit the ship and
-switch back to the Zero G movement state.
+The player is able to exit the ship by pressing \textit{F} again, allowing the player to return to the Zero G movement
+state.
 
 \subsection{Weapon Firing}\label{subsec:weapons}
 
 The player is able to fire their gun and the ship's weapons from their respective states.
 These weapons are raycast based, with the player's gun firing a ray from the camera, and the ship's weapons firing
 from the front of the ship, with line renderers\citep{unity:linerenderer} being used to simulate the laser beams.
+To give a more immersive feel, the player's weapon has a muzzle flash and a sound effect when fired.
 If a ray hits an object of a particular layer, the object is damaged, with the damage being calculated based on the
 weapon's damage value.
 If the objects health reaches 0, the object is destroyed, and can drop resources or other items.
@@ -92,22 +94,24 @@ Opening the inventory pauses the game.
 \subsubsection{Planetary Exploration}\label{subsubsec:planetary}
 
 From the ship, the player is able to land on planets or large asteroids, where they can exit the ship and explore
-the surface with gravity.
+the surface with the effects of gravity.
 This requires a change to the player's movement to simulate the gravity, with the addition of
 a jump mechanic and more fluid pitch and yaw movement.
 A jetpack is also available allowing the player to fly within this gravity affected environment.
 
 As well as being able to land the ship on the planet, if the player is in Zero G movement and gets close enough
-to a planet, they will collide with a trigger from the planet's atmosphere, which will cause
-the player to be affected by the planet's gravity (and fall to the surface).
+to a planet, they will collide with a trigger from the planet's atmosphere.
+This will cause the player to be affected by the planet's gravity (and fall to the surface).
 
 In order to simulate the gravity, a custom movement system was implemented to allow for more control over the player's
-movement
+movement.
 This involves applying a force to the player's Rigidbody component based on the player's input, as well
 as a rotation force based on the surface normal of the planet.
 This ensures the player is always upright with respect to the planet's surface.
 Initially, this was only performed when the player is grounded, but was changed to be applied whenever the
 player is within the planet's atmosphere, to allow for more fluid movement.
+Sounds are played on the player's movement, with footstep sounds being played when the player is walking on the
+planet's surface, and jetpack sounds being played when the player is flying.
 
 \begin{figure}[h]
     \centering
@@ -131,9 +135,12 @@ Aliens wander around the planet's surface, and will follow and stare at the play
 This was done to give an eerie feeling to the planets, as well as to give the player something to interact with.
 This is implemented with a state machine approach, with the life AI having a wandering state and a following state,
 and various transitions between the states.
-An example of one such transition is if  the player being close enough to an alien, the alien will switch to the following state.
+An example of one such transition is if the player being close enough to an alien, the alien will switch to the following state.
 The alien is also damaged by the player's weapons, and can drop resources when killed.
 Again, animations are provided for walking and idle states, similar to the player's character.
+Additionally, the alien has a simple pathfinding system to avoid obstacles and follow the player, which involves checking
+for obstacles in the direction of the player and moving around them.
+Occasionally the alien will emit a sound on interaction, and will also emit footstep sounds when walking.
 
 \begin{figure}[h]
     \centering

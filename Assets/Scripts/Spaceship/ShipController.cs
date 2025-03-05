@@ -7,6 +7,7 @@ using Interfaces;
 using Managers;
 using Movement;
 using Player;
+using Player.Upgrades;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -33,6 +34,7 @@ namespace Spaceship
         [SerializeField] private ParticleSystem damageParticles = null!;
 
         [SerializeField] private Transform[] damagePoints = null!;
+        public ShipState currentState = ShipState.SpaceIdle;
 
         private readonly List<ShipUpgrade> _upgrades = new();
 
@@ -52,7 +54,6 @@ namespace Spaceship
         private UiManager _uiManager = null!;
 
         public bool IsOccupied => _currentPlayer;
-        public ShipState CurrentState { get; private set; } = ShipState.SpaceIdle;
 
         private void Awake()
         {
@@ -68,11 +69,13 @@ namespace Spaceship
 
             var inputManager = InputManager.Instance;
             inputManager.SetOnLandingPressed(HandleLandingOrTakeoff);
+            inputManager.SetOnInteractPressed(OnInteract);
 
             _health.onHealthChanged.AddListener(OnHealthChanged);
 
             SetCurrentState(ShipState.SpaceIdle, true);
         }
+
 
         private void FixedUpdate()
         {
@@ -155,7 +158,7 @@ namespace Spaceship
 
         private void UpdateShipState()
         {
-            switch (CurrentState)
+            switch (currentState)
             {
                 case ShipState.Landed:
                     HandleLandedState();
@@ -370,7 +373,7 @@ namespace Spaceship
 
             foreach (var indicator in indicators) indicator.enabled = false;
 
-            if (CurrentState == ShipState.SpaceIdle) SetCurrentState(ShipState.Flying);
+            if (currentState == ShipState.SpaceIdle) SetCurrentState(ShipState.Flying);
         }
 
         public void PlayerExitShip()
@@ -379,17 +382,15 @@ namespace Spaceship
 
             foreach (var indicator in indicators) indicator.enabled = true;
 
-            _currentPlayer.ExitShip();
             _currentPlayer = null;
             _uiManager.ClearHint();
-            _uiManager.TransitionToState(UIState.ZeroG);
 
-            if (CurrentState == ShipState.Flying) SetCurrentState(ShipState.SpaceIdle);
+            if (currentState == ShipState.Flying) SetCurrentState(ShipState.SpaceIdle);
         }
 
-        private void SetCurrentState(ShipState state, bool force = false)
+        public void SetCurrentState(ShipState state, bool force = false)
         {
-            if (state == CurrentState && !force) return;
+            if (state == currentState && !force) return;
 
             switch (state)
             {
@@ -415,7 +416,7 @@ namespace Spaceship
                     throw new ArgumentOutOfRangeException(nameof(state), state, null);
             }
 
-            CurrentState = state;
+            currentState = state;
         }
 
         public void OnInteract()
@@ -436,7 +437,7 @@ namespace Spaceship
 
         private void HandleLandingOrTakeoff()
         {
-            switch (CurrentState)
+            switch (currentState)
             {
                 case ShipState.Landed:
                     InitiateTakeoff();
@@ -472,7 +473,7 @@ namespace Spaceship
 
         private void MaybeFailLanding()
         {
-            if (CurrentState != ShipState.Landing) return;
+            if (currentState != ShipState.Landing) return;
 
             _hasValidLandingPoint = false;
             _uiManager.SetInfo("Landing Failed", 5);
@@ -499,7 +500,7 @@ namespace Spaceship
 
         private void DrawShipStateGizmos()
         {
-            switch (CurrentState)
+            switch (currentState)
             {
                 case ShipState.Landed:
                     DrawLandedGizmos();

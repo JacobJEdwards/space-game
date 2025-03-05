@@ -6,6 +6,7 @@ using System.Linq;
 using Interfaces;
 using Managers;
 using Player;
+using Player.Upgrades;
 using Unity.Assertions;
 using Unity.Cinemachine;
 using UnityEngine;

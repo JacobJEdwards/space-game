@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 4110372195919071009}
   - component: {fileID: 2221597234033060044}
   - component: {fileID: -8072175513796385072}
+  - component: {fileID: 5670130242815920402}
+  - component: {fileID: 6718617692558755968}
   m_Layer: 9
   m_Name: Planet
   m_TagString: Untagged
@@ -64,8 +66,8 @@ MonoBehaviour:
   treePrefabs:
   - {fileID: -5267562290140661747, guid: 78c29697749a6d44e964f9a0cf83d77a, type: 3}
   rockManager: {fileID: -8072175513796385072}
-  treeManager: {fileID: 0}
-  lifeManager: {fileID: 0}
+  treeManager: {fileID: 5670130242815920402}
+  lifeManager: {fileID: 6718617692558755968}
 --- !u!114 &-8072175513796385072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76,6 +78,38 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2bdb72ef54b34f56b9493bb0336f55a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnRadius: 1000
+  despawnRadius: 1200
+  checkInterval: 1
+  distanceCheck: 50
+--- !u!114 &5670130242815920402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225937356025052187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b5da31a30c34bbab07e455a64d3555b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnRadius: 1000
+  despawnRadius: 1200
+  checkInterval: 1
+  distanceCheck: 50
+--- !u!114 &6718617692558755968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225937356025052187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1910067a876c4a4a9e36df4b261db87a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   spawnRadius: 1000

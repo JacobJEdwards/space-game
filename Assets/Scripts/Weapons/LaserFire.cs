@@ -27,7 +27,7 @@ namespace Weapons
             _mainCam = Camera.main!;
             _laser = GetComponent<LineRenderer>();
             _laser.gameObject.SetActive(false);
-            settings.mask = LayerMask.GetMask("Shootable", "PlanetSurface", "Water", "Rock", "NPC");
+            settings.mask = LayerMask.GetMask("Shootable", "PlanetSurface", "Water", "Rock", "NPC", "Ship");
             settings.audioSource.transform.parent = transform;
             settings.hitAudioSource.transform.parent = transform;
             ValidateComponents();

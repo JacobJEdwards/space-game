@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Interfaces;
 using Movement;
+using Player.Upgrades;
 using Unity.Assertions;
 using UnityEngine;
 using Weapons;
