@@ -44,15 +44,27 @@ namespace UI
 
         public void TryApplyUpgrade(BaseRepair upgradeData, RepairUI upgradeUI)
         {
-            _upgradeManager.TryApplyRepair(upgradeData, target);
+            if (_upgradeManager.TryApplyRepair(upgradeData, target))
+            {
+                _repairsUI.Remove(upgradeUI);
+                upgradeUI.gameObject.SetActive(false);
+                Destroy(upgradeUI.gameObject);
+            }
 
             InitRepairs();
+            InitUpgrades();
         }
 
         public void TryApplyUpgrade(BaseUpgrade upgradeData, UpgradeUI upgradeUI)
         {
-            _upgradeManager.TryApplyUpgrade(upgradeData, target);
+            if (_upgradeManager.TryApplyUpgrade(upgradeData, target))
+            {
+                _upgradesUI.Remove(upgradeUI);
+                upgradeUI.gameObject.SetActive(false);
+                Destroy(upgradeUI.gameObject);
+            }
 
+            InitRepairs();
             InitUpgrades();
         }
 

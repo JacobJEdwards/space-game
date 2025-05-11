@@ -55,19 +55,24 @@ namespace Player
         private SpaceMovement _spaceMovement = null!;
         private UiManager _uiManager = null!;
 
-        private void Start()
+        private void Awake()
         {
             _cameraController = CameraController.Instance;
             _uiManager = UiManager.Instance;
             _interactionManager = GetComponent<InteractionManager>();
 
-            movementSettings.groundLayer = LayerMask.GetMask("PlanetSurface");
             InitialiseComponents();
+
+            movementSettings.groundLayer = LayerMask.GetMask("PlanetSurface");
             ValidateComponents();
             UpdateMovementComponents();
-
-            HideLockMouse(true);
         }
+
+        private void Start()
+        {
+            Utils.HideLockMouse(true);
+        }
+
 
         private void FixedUpdate()
         {
@@ -148,26 +153,13 @@ namespace Player
             _planetaryMovement.ApplyUpgrade(jetpackUpgrade);
         }
 
-        private static void HideLockMouse(bool on)
-        {
-            if (on)
-            {
-                if (Cursor.visible) Cursor.visible = false;
-                if (Cursor.lockState != CursorLockMode.Locked) Cursor.lockState = CursorLockMode.Locked;
-            }
-            else
-            {
-                if (Cursor.visible == false) Cursor.visible = true;
-                if (Cursor.lockState != CursorLockMode.None) Cursor.lockState = CursorLockMode.None;
-            }
-        }
-
 
         private void InitialiseComponents()
         {
             var inputManager = InputManager.Instance;
             inputManager.SetOnInteractPressed(OnInteractionInput);
             inputManager.SetOnInventoryPress(OnToggleInventory);
+            inputManager.SetOnPausePressed(OnTogglePauseMenu);
 
             _playerHealth = GetComponent<Health>();
             _playerOxygen = GetComponent<Oxygen>();
@@ -188,7 +180,8 @@ namespace Player
             _playerOxygen.Reset();
 
             _uiManager.TransitionToState(UIState.Death);
-            HideLockMouse(false);
+
+            Utils.HideLockMouse(false);
             gameObject.SetActive(false);
         }
 
@@ -216,6 +209,11 @@ namespace Player
             _uiManager.ToggleInventory();
         }
 
+        private void OnTogglePauseMenu()
+        {
+            _uiManager.TogglePause();
+        }
+
         private void UpdateOxygenAndHealth()
         {
             if (playerState == PlayerState.InZeroG) _playerOxygen.TakeDamage(1f * Time.fixedDeltaTime);
@@ -226,12 +224,8 @@ namespace Player
             switch (playerState)
             {
                 case PlayerState.OnShip:
-                    if (shipToEnter)
-                    {
-                        EnterShip(shipToEnter);
-                        shipToEnter.PlayerEnteredShip(this);
-                    }
-
+                    if (!shipToEnter) return;
+                    EnterShip(shipToEnter);
                     return;
                 case PlayerState.InZeroG:
                     UpdateZeroGMovement();

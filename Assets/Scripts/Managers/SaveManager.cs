@@ -48,7 +48,7 @@ namespace Managers
             }
         }
 
-        private void SaveGame()
+        public void SaveGame()
         {
             var upgrades = upgradeManager.AppliedUpgrades.Select(t => t.Value).Select(t => t.Select(u => u.upgradeName))
                 .SelectMany(t => t).ToArray();
@@ -91,14 +91,19 @@ namespace Managers
 
             var success = FileManager.LoadFromFile(filename, out var json);
 
-            if (!success) return;
+            if (!success) Debug.LogError("Failed to load save file");
+            ;
 
             var saveState = JsonUtility.FromJson<SaveState>(json);
 
+            Debug.Log($"Loaded save file: {filename}");
+
             gameManager.introStep = saveState.introStep;
 
-            foreach (var upgrade in saveState.appliedRepairs) upgradeManager.ApplyRepair(upgrade);
-            foreach (var repair in saveState.appliedUpgrades) upgradeManager.ApplyUpgrade(repair);
+            Debug.Log($"Intro step: {gameManager.introStep}");
+
+            foreach (var upgrade in saveState.appliedRepairs) upgradeManager.ForceApplyRepair(upgrade);
+            foreach (var repair in saveState.appliedUpgrades) upgradeManager.ForceApplyUpgrade(repair);
 
             foreach (var resource in saveState.resources)
             {

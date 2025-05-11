@@ -22,7 +22,7 @@ namespace PlanetarySystem
         [SerializeField] public List<Planet.Planet> planets = new();
 
         [Header("Planet Generation")] [SerializeField]
-        public bool randomisePosition = true;
+        public bool randomisePosition;
 
         [SerializeField] public int planetAmount = 5;
         [SerializeField] public int seed = 12345;
@@ -43,12 +43,13 @@ namespace PlanetarySystem
             skyMaterial.SetColor(ColorA, Color.HSVToRGB(0.39f, 0.24f, 0.29f));
             skyMaterial.SetColor(ColorB, Color.HSVToRGB(0.5f, 0.27f, 0.3f));
             RenderSettings.fogColor = Color.HSVToRGB(0.5f, 0.35f, 0.47f);
-
-            _planetGenerator = new PlanetGenerator(planetGenerationSettings, seed);
         }
 
         private void Start()
         {
+            seed = PlayerPrefs.GetInt("Seed", seed);
+
+            _planetGenerator = new PlanetGenerator(planetGenerationSettings, seed);
             GeneratePlanetSystem();
         }
 

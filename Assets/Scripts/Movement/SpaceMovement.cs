@@ -6,6 +6,7 @@ using System.Linq;
 using Managers;
 using Movement.Config;
 using Player;
+using Spaceship;
 using Unity.Assertions;
 using UnityEngine;
 
@@ -16,6 +17,7 @@ namespace Movement
     {
         [SerializeField] private SpaceMovementConfig config = null!;
         [SerializeField] private Thrusters? thrusters;
+        [SerializeField] private Hyperdrive? hyperdrive;
 
         private readonly List<ISpaceMovementUpgrade> _upgrades = new();
 
@@ -40,6 +42,9 @@ namespace Movement
             _rb = GetComponent<Rigidbody>();
             _animator = GetComponentInChildren<Animator>();
             thrusters ??= GetComponentInChildren<Thrusters>();
+            hyperdrive ??= GetComponentInChildren<Hyperdrive>();
+
+            _inputManager.SetOnHyperdrivePressed(OnHyperdrivePressed);
 
             CurrentBoostAmount = config.MaxBoostAmount;
 
@@ -56,6 +61,16 @@ namespace Movement
             HandleBoosting();
             HandleMovement();
             // HandleFOV();
+        }
+
+        private void OnHyperdrivePressed()
+        {
+            if (!hyperdrive) return;
+
+            if (hyperdrive.IsRepaired())
+                hyperdrive.ActivateHyperdrive();
+            else
+                UiManager.Instance.SetWarning("Hyperdrive is damaged!", 2f);
         }
 
         public void ApplyUpgrade(ISpaceMovementUpgrade upgrade)

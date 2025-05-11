@@ -123,6 +123,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 0}
   animancer: {fileID: 7816778624554801017}
+  moveAudioSource: {fileID: 172455857748733182}
+  interactAudioSource: {fileID: -7923813039593000572}
   idleAnimation:
     _FadeDuration: 0.25
     _Speed: 1
@@ -177,16 +179,30 @@ MonoBehaviour:
       _Names: []
     _Clip: {fileID: 1395189703230314720, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
     _NormalizedStartTime: NaN
+  attackAnimation:
+    _FadeDuration: 0.25
+    _Speed: 1
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -4592842328519117816, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
+    _NormalizedStartTime: NaN
   speed: 5
   rotationSpeed: 10
+  stateCooldown: 1
+  currentState: 0
   followDistance: 10
   stopDistance: 2
+  wanderRadius: 10
+  minIdleTime: 5
+  maxIdleTime: 15
   observationDistance: 8
   minObservationTime: 3
   maxObservationTime: 8
   minLookDistance: 4
   headTrackingSpeed: 3
-  headBone: {fileID: 0}
+  headBone: {fileID: 5058493858359762837}
   groupRadius: 5
   separationDistance: 2
   cohesionWeight: 0.5
@@ -194,10 +210,6 @@ MonoBehaviour:
   npcLayer:
     serializedVersion: 2
     m_Bits: 2048
-  wanderRadius: 10
-  minIdleTime: 5
-  maxIdleTime: 15
-  interactionRadius: 3
   gravityMultiplier: 2
   groundCheckDistance: 20
   uprightSpeed: 5
@@ -210,20 +222,33 @@ MonoBehaviour:
   fleeDistance: 15
   healthFleeThreshold: 0.3
   fleeDuration: 10
-  moveAudioSource: {fileID: 172455857748733182}
+  isEnemy: 1
+  aggroRange: 12
+  attackRange: 3.5
+  attackCooldown: 2
+  attackDamage: 10
+  targetLayerMask:
+    serializedVersion: 2
+    m_Bits: 2048
   moveClips:
   - {fileID: 8300000, guid: e3edc2a270af5c04886ab9c5fa4fced6, type: 3}
   - {fileID: 8300000, guid: 59dcb693bbd385e49aa6fa7ffd2f0f9f, type: 3}
   - {fileID: 8300000, guid: 64a3500e0328dba43a0bc91e55dcef3f, type: 3}
   - {fileID: 8300000, guid: e702c6b7953d72f42a62778c969b44ce, type: 3}
   - {fileID: 8300000, guid: c3a0d384acb5b9a4d8af0bee5d2820a6, type: 3}
-  interactAudioSource: {fileID: -7923813039593000572}
   interactClips:
   - {fileID: 8300000, guid: a931da70ee74947d5a047de583170ade, type: 3}
   - {fileID: 8300000, guid: 1deb201b8bf8f89479323a74e421150b, type: 3}
-  fleeClips: []
-  stateCooldown: 1
-  currentState: 0
+  fleeClips:
+  - {fileID: 8300000, guid: 6c8508d96905ea749ae50b49916fde55, type: 3}
+  - {fileID: 8300000, guid: 35bda0c39b1fbe64196a669bfb99757d, type: 3}
+  - {fileID: 8300000, guid: 6259119f201fafa4ca80646eff6b4b1f, type: 3}
+  - {fileID: 8300000, guid: 7a5ff4a806216b14ab9dba35a4fb258c, type: 3}
+  - {fileID: 8300000, guid: 6c8508d96905ea749ae50b49916fde55, type: 3}
+  attackClips:
+  - {fileID: 8300000, guid: a37f44cbf8c2a7443a3c361efa2f233a, type: 3}
+  - {fileID: 8300000, guid: 75adfe9a619833445a701305b983e548, type: 3}
+  - {fileID: 8300000, guid: e11a5a019377fbd4c81caa0adcb4c236, type: 3}
   references:
     version: 2
     RefIds: []
@@ -577,6 +602,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
+--- !u!4 &5058493858359762837 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -6632547305067513996, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}
+  m_PrefabInstance: {fileID: 7333852513050732769}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &7083508538852757258 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 265e16637d07d4745b4af1c43aa78988, type: 3}

@@ -1,4 +1,6 @@
+using DG.Tweening;
 using Interfaces;
+using Managers;
 using Player;
 using Player.Upgrades;
 using UnityEngine;
@@ -29,6 +31,18 @@ namespace Spaceship
         public bool IsRepaired()
         {
             return _isRepaired;
+        }
+
+        public void ActivateHyperdrive()
+        {
+            if (!_isRepaired) return;
+
+            UiManager.Instance.ClearQuest();
+            UiManager.Instance.ClearHint();
+
+            transform.DOShakePosition(0.5f, 0.5f);
+
+            UiManager.Instance.TransitionToState(UIState.Final);
         }
     }
 }

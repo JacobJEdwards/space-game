@@ -18,73 +18,70 @@ namespace SlimUI.ModernMenu
             Custom3
         }
 
-        // campaign button sub menu
-        [Header("MENUS")] [Tooltip("The Menu for when the MAIN menu buttons")]
-        public GameObject mainMenu;
+        private static readonly int Animate = Animator.StringToHash("Animate");
 
-        [Tooltip("THe first list of buttons")] public GameObject firstMenu;
+        [Header("MENUS")] public GameObject mainMenu;
 
-        [Tooltip("The Menu for when the PLAY button is clicked")]
+        public GameObject firstMenu;
+
+
         public GameObject playMenu;
 
-        [Tooltip("The Menu for when the EXIT button is clicked")]
+
         public GameObject exitMenu;
 
         [Header("THEME SETTINGS")] public Theme theme;
 
         public ThemedUIData themeController;
 
-        [Header("PANELS")] [Tooltip("The UI Panel parenting all sub menus")]
-        public GameObject mainCanvas;
+        [Header("PANELS")] public GameObject mainCanvas;
 
-        [Tooltip("The UI Panel that holds the CONTROLS window tab")]
+
         public GameObject PanelControls;
 
-        [Tooltip("The UI Panel that holds the VIDEO window tab")]
+
         public GameObject PanelVideo;
 
-        [Tooltip("The UI Panel that holds the GAME window tab")]
+
         public GameObject PanelGame;
+
+        public Texture2D cursorTexture;
+        public CursorMode cursorMode = CursorMode.Auto;
+        public Vector2 hotSpot = Vector2.zero;
+        public float scale = 0.3f;
 
 
         // highlights in settings screen
-        [Header("SETTINGS SCREEN")] [Tooltip("Highlight Image for when GAME Tab is selected in Settings")]
-        public GameObject lineGame;
+        [Header("SETTINGS SCREEN")] public GameObject lineGame;
 
-        [Tooltip("Highlight Image for when VIDEO Tab is selected in Settings")]
+
         public GameObject lineVideo;
 
-        [Tooltip("Highlight Image for when CONTROLS Tab is selected in Settings")]
+
         public GameObject lineControls;
 
-        [Header("LOADING SCREEN")] [Tooltip("If this is true, the loaded scene won't load until receiving user input")]
-        public bool waitForInput = true;
+        [Header("LOADING SCREEN")] public bool waitForInput = true;
 
         public GameObject loadingMenu;
 
-        [Tooltip("The loading bar Slider UI element in the Loading Screen")]
         public Slider loadingBar;
 
         public TMP_Text loadPromptText;
 
-        [Header("SFX")] [Tooltip("The GameObject holding the Audio Source component for the HOVER SOUND")]
-        public AudioSource hoverSound;
+        [Header("SFX")] public AudioSource hoverSound;
 
-        [Tooltip("The GameObject holding the Audio Source component for the AUDIO SLIDER")]
         public AudioSource sliderSound;
 
-        [Tooltip(
-            "The GameObject holding the Audio Source component for the SWOOSH SOUND when switching to the Settings Screen")]
         public AudioSource swooshSound;
 
         private bool _allowSceneActivation;
         private Animator _cameraObject;
         private InputManager _inputManager;
-        private int _themeIndex;
 
         private void Start()
         {
             _inputManager = InputManager.Instance;
+
             _inputManager.SetOnInteractPressed(
                 () =>
                 {
@@ -99,7 +96,13 @@ namespace SlimUI.ModernMenu
             firstMenu.SetActive(true);
             mainMenu.SetActive(true);
 
+            Cursor.SetCursor(cursorTexture, hotSpot, cursorMode);
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+
             SetThemeColors();
+
+            Time.timeScale = 1;
         }
 
         public void LoadSavedScene()
@@ -115,17 +118,14 @@ namespace SlimUI.ModernMenu
                 case Theme.Custom1:
                     themeController.currentColor = themeController.custom1.graphic1;
                     themeController.textColor = themeController.custom1.text1;
-                    _themeIndex = 0;
                     break;
                 case Theme.Custom2:
                     themeController.currentColor = themeController.custom2.graphic2;
                     themeController.textColor = themeController.custom2.text2;
-                    _themeIndex = 1;
                     break;
                 case Theme.Custom3:
                     themeController.currentColor = themeController.custom3.graphic3;
                     themeController.textColor = themeController.custom3.text3;
-                    _themeIndex = 2;
                     break;
                 default:
                     Debug.Log("Invalid theme selected.");
@@ -166,12 +166,12 @@ namespace SlimUI.ModernMenu
         public void Position2()
         {
             DisablePlayCampaign();
-            _cameraObject.SetFloat("Animate", 1);
+            _cameraObject.SetFloat(Animate, 1);
         }
 
         public void Position1()
         {
-            _cameraObject.SetFloat("Animate", 0);
+            _cameraObject.SetFloat(Animate, 0);
         }
 
         private void DisablePanels()

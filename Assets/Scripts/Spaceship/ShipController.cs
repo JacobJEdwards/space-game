@@ -69,7 +69,6 @@ namespace Spaceship
 
             var inputManager = InputManager.Instance;
             inputManager.SetOnLandingPressed(HandleLandingOrTakeoff);
-            inputManager.SetOnInteractPressed(OnInteract);
 
             _health.onHealthChanged.AddListener(OnHealthChanged);
 
@@ -152,7 +151,6 @@ namespace Spaceship
             Assert.IsNotNull(_rb, "Rigidbody is not set!");
             Assert.IsNotNull(_spaceMovement, "Space movement is not set!");
             Assert.IsNotNull(cameraSettings.thirdPersonCamera, "Third person camera is not set!");
-            Assert.IsNotNull(cameraSettings.firstPersonCamera, "First person camera is not set!");
             Assert.IsNotNull(landingSettings, "Landing settings are not set!");
         }
 
@@ -354,16 +352,12 @@ namespace Spaceship
         {
             if (cameraSettings.thirdPersonCamera)
                 _cameraController?.Register(cameraSettings.thirdPersonCamera);
-            if (cameraSettings.firstPersonCamera)
-                _cameraController?.Register(cameraSettings.firstPersonCamera);
         }
 
         private void UnregisterCameras()
         {
             if (cameraSettings.thirdPersonCamera)
                 _cameraController?.Unregister(cameraSettings.thirdPersonCamera);
-            if (cameraSettings.firstPersonCamera)
-                _cameraController?.Unregister(cameraSettings.firstPersonCamera);
         }
 
         public void PlayerEnteredShip(PlayerController player)
@@ -419,21 +413,6 @@ namespace Spaceship
             currentState = state;
         }
 
-        public void OnInteract()
-        {
-            if (IsOccupied) PlayerExitShip();
-        }
-
-        public void OnSwitchCamera()
-        {
-            if (!IsOccupied) return;
-
-            var newCamera = _cameraController.IsActive(cameraSettings.thirdPersonCamera)
-                ? cameraSettings.firstPersonCamera
-                : cameraSettings.thirdPersonCamera;
-
-            _cameraController.SetActiveCamera(newCamera);
-        }
 
         private void HandleLandingOrTakeoff()
         {
@@ -543,7 +522,6 @@ namespace Spaceship
         private class CameraSettings
         {
             public CinemachineCamera thirdPersonCamera = null!;
-            public CinemachineCamera firstPersonCamera = null!;
         }
 
         [Serializable]

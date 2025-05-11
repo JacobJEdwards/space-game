@@ -147,7 +147,7 @@ namespace Movement
             _playerUpgrades.Add(playerUpgrade);
         }
 
-        public void ApplyJetpackUpgrade(JetpackUpgrade jetpackUpgrade)
+        private void ApplyJetpackUpgrade(JetpackUpgrade jetpackUpgrade)
         {
             jetpack.ApplyUpgrade(jetpackUpgrade);
         }
@@ -297,11 +297,9 @@ namespace Movement
 
         private void OnJetpackPressed()
         {
-            if (!jetpack.IsRepaired())
-            {
-                UiManager.Instance.SetWarning("Jetpack is not repaired!", 2f);
+            if (!jetpack.IsRepaired() && !jetpack.CanJetpack())
+                // UiManager.Instance.SetWarning("Jetpack is not repaired!", 2f);
                 return;
-            }
 
             if (!jetpack.CanJetpack()) return;
 

@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 namespace SlimUI.ModernMenu
 {
@@ -32,11 +32,12 @@ namespace SlimUI.ModernMenu
         public GameObject sensitivityXSlider;
         public GameObject sensitivityYSlider;
         public GameObject mouseSmoothSlider;
+        public TMP_InputField seedInput;
 
         private float sliderValue = 0.0f;
-        private float sliderValueXSensitivity = 0.0f;
-        private float sliderValueYSensitivity = 0.0f;
-        private float sliderValueSmoothing = 0.0f;
+        private float sliderValueSmoothing;
+        private float sliderValueXSensitivity;
+        private float sliderValueYSensitivity;
 
 
         public void Start()
@@ -47,12 +48,13 @@ namespace SlimUI.ModernMenu
             sensitivityXSlider.GetComponent<Slider>().value = PlayerPrefs.GetFloat("XSensitivity");
             sensitivityYSlider.GetComponent<Slider>().value = PlayerPrefs.GetFloat("YSensitivity");
             mouseSmoothSlider.GetComponent<Slider>().value = PlayerPrefs.GetFloat("MouseSmoothing");
+            seedInput.text = PlayerPrefs.GetInt("Seed").ToString();
 
             fullscreentext.GetComponent<TMP_Text>().text = Screen.fullScreen switch
             {
                 // check full screen
                 true => "on",
-                false => "off",
+                false => "off"
             };
 
             // check hud value
@@ -94,33 +96,19 @@ namespace SlimUI.ModernMenu
 
             // check mouse inverse
             if (PlayerPrefs.GetInt("Inverted") == 0)
-            {
                 invertmousetext.GetComponent<TMP_Text>().text = "off";
-            }
-            else if (PlayerPrefs.GetInt("Inverted") == 1)
-            {
-                invertmousetext.GetComponent<TMP_Text>().text = "on";
-            }
+            else if (PlayerPrefs.GetInt("Inverted") == 1) invertmousetext.GetComponent<TMP_Text>().text = "on";
 
             // check motion blur
             if (PlayerPrefs.GetInt("MotionBlur") == 0)
-            {
                 motionblurtext.GetComponent<TMP_Text>().text = "off";
-            }
-            else if (PlayerPrefs.GetInt("MotionBlur") == 1)
-            {
-                motionblurtext.GetComponent<TMP_Text>().text = "on";
-            }
+            else if (PlayerPrefs.GetInt("MotionBlur") == 1) motionblurtext.GetComponent<TMP_Text>().text = "on";
 
             // check ambient occlusion
             if (PlayerPrefs.GetInt("AmbientOcclusion") == 0)
-            {
                 ambientocclusiontext.GetComponent<TMP_Text>().text = "off";
-            }
             else if (PlayerPrefs.GetInt("AmbientOcclusion") == 1)
-            {
                 ambientocclusiontext.GetComponent<TMP_Text>().text = "on";
-            }
 
             // check texture quality
             if (PlayerPrefs.GetInt("Textures") == 0)
@@ -161,8 +149,23 @@ namespace SlimUI.ModernMenu
             fullscreentext.GetComponent<TMP_Text>().text = Screen.fullScreen switch
             {
                 true => "on",
-                false => "off",
+                false => "off"
             };
+        }
+
+        public void SetSeed()
+        {
+            var text = seedInput.text;
+
+            for (var i = 0; i < text.Length; i++)
+                if (!char.IsDigit(text[i]))
+                {
+                    seedInput.text = text.Remove(i, 1);
+                    break;
+                }
+
+            var parsed = int.TryParse(seedInput.text, out var result) ? result : 0;
+            PlayerPrefs.SetInt("Seed", parsed);
         }
 
         public void MusicSlider()

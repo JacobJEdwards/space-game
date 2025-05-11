@@ -3,6 +3,7 @@
 using System;
 using PlanetarySystem.Planet;
 using UnityEngine;
+using Random = System.Random;
 
 namespace PlanetarySystem
 {
@@ -28,13 +29,13 @@ namespace PlanetarySystem
 
     public class PlanetGenerator
     {
+        private readonly Random _random;
         private readonly PlanetGenerationSettings _settings;
-        private readonly System.Random _random;
 
         public PlanetGenerator(PlanetGenerationSettings settings, int seed)
         {
             _settings = settings;
-            _random = new System.Random(seed);
+            _random = new Random(seed);
         }
 
         public void GeneratePlanet(Planet.Planet planet)
@@ -76,7 +77,7 @@ namespace PlanetarySystem
             planet.numRocks = _random.Next(0, 40);
             planet.hasLife = _random.NextDouble() < 0.5f;
 
-            // make dependant on biome
+            // make dependant on biome?
             planet.numTrees = _random.Next(0, 40);
 
             planet.GeneratePlanet();

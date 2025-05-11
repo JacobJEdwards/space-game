@@ -64,9 +64,19 @@ namespace Movement
             _playerControls.SpaceControls.Interact.performed += _ => action.Invoke();
         }
 
+        public void SetOnHyperdrivePressed(UnityAction action)
+        {
+            _playerControls.SpaceControls.Hyperdrive.performed += _ => action.Invoke();
+        }
+
         public void SetOnInventoryPress(UnityAction action)
         {
             _playerControls.SpaceControls.ToggleInventory.performed += _ => action.Invoke();
+        }
+
+        public void SetOnPausePressed(UnityAction action)
+        {
+            _playerControls.SpaceControls.TogglePause.performed += _ => action.Invoke();
         }
 
         public void SetOnShootPressed(UnityAction action)

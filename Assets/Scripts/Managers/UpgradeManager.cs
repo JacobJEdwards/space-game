@@ -75,24 +75,70 @@ namespace Managers
         {
             var upgrade = _availableUpgrades.Values.SelectMany(u => u).FirstOrDefault(u => u.upgradeName == n);
 
-            print(n);
-            print(upgrade);
+            Debug.Log($"Applying upgrade: {n}");
+
             if (!upgrade) return;
 
-            print("Applying upgrade: " + upgrade.upgradeName);
+            Debug.Log($"Upgrade found: {upgrade.upgradeName}");
 
             ApplyUpgrade(upgrade, GetTarget(upgrade));
+        }
+
+        public void ForceApplyRepair(BaseRepair repair, GameObject target)
+        {
+            var repairable = GetRepairable(target, repair.target);
+
+            repairable.ApplyRepair(repair);
+            CompletedRepairs[repair.target].Add(repair);
+            _availableRepairs[repair.target].Remove(repair);
+
+            if (repair.nextRepair) _availableRepairs[repair.nextRepair.target].Add(repair.nextRepair);
+
+            if (repair.nextUpgrade) _availableUpgrades[repair.nextUpgrade.target].Add(repair.nextUpgrade);
+
+            onRepairApplied.Invoke(repair);
+
+            UpdateAvailableUpgrades();
+        }
+
+        public void ForceApplyRepair(string n)
+        {
+            var repair = _availableRepairs.Values.SelectMany(u => u).FirstOrDefault(u => u.upgradeName == n);
+
+            if (!repair) return;
+
+            ForceApplyRepair(repair, GetTarget(repair));
+        }
+
+        public void ForceApplyUpgrade(BaseUpgrade upgrade, GameObject target)
+        {
+            var upgradeable = GetUpgradeable(target, upgrade.target);
+
+            upgradeable.ApplyUpgrade(upgrade);
+            AppliedUpgrades[upgrade.target].Add(upgrade);
+            _availableUpgrades[upgrade.target].Remove(upgrade);
+
+            if (upgrade.nextUpgrade) _availableUpgrades[upgrade.nextUpgrade.target].Add(upgrade.nextUpgrade);
+
+            onUpgradeApplied.Invoke(upgrade);
+
+            UpdateAvailableUpgrades();
+        }
+
+        public void ForceApplyUpgrade(string n)
+        {
+            var upgrade = _availableUpgrades.Values.SelectMany(u => u).FirstOrDefault(u => u.upgradeName == n);
+
+            if (!upgrade) return;
+
+            ForceApplyUpgrade(upgrade, GetTarget(upgrade));
         }
 
         public void ApplyRepair(string n)
         {
             var repair = _availableRepairs.Values.SelectMany(u => u).FirstOrDefault(u => u.upgradeName == n);
 
-            print(n);
-            print(repair);
             if (!repair) return;
-
-            print("Applying repair: " + repair.upgradeName);
 
             ApplyRepair(repair, GetTarget(repair));
         }
@@ -289,7 +335,6 @@ namespace Managers
 
         public List<BaseUpgrade> GetAvailableUpgradesForType(UpgradeType type)
         {
-            print(type);
             return _availableUpgrades[type];
         }
 

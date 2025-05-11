@@ -65,6 +65,7 @@ MonoBehaviour:
   - {fileID: 7866805020946256775, guid: 0c45c204bda6b4c98bd14bf60b142b7d, type: 3}
   treePrefabs:
   - {fileID: -5267562290140661747, guid: 78c29697749a6d44e964f9a0cf83d77a, type: 3}
+  - {fileID: 8693551026779616760, guid: 62724a8cd2495b14f930b7129c3bc47b, type: 3}
   rockManager: {fileID: -8072175513796385072}
   treeManager: {fileID: 5670130242815920402}
   lifeManager: {fileID: 6718617692558755968}

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5692a748f6c84ff79ef96c6b1fe37827, type: 3}
+  m_Name: WeaponUpgrade
+  m_EditorClassIdentifier: 
+  upgradeName: Weapon
+  upgradeDescription: Increased cool rate
+  upgradeIcon: {fileID: 0}
+  target: 0
+  nextUpgrade: {fileID: 11400000, guid: b5676aa74f011438b9cc590d6354efb2, type: 2}
+  requirements:
+  - type: 1
+    requiredObject: {fileID: 11400000, guid: f03f3b594023f40d890719aa8d05e276, type: 2}
+    requiredAmount: 2
+  coolRateBonus: 1.5
+  damageBonus: 1
+  heatRateBonus: 1
+  maxChargeBonus: 1
+  rangeBonus: 1

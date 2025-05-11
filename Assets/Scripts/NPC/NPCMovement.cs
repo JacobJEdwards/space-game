@@ -15,33 +15,48 @@ namespace NPC
         Wander,
         Follow,
         Interact,
+        Attacking,
         ObservePlayer,
         Flee,
         Death,
         Falling
     }
 
-    [RequireComponent(typeof(Rigidbody), typeof(Life))]
+    [RequireComponent(typeof(Rigidbody), typeof(Life), typeof(Health))]
     public class NpcMovement : MonoBehaviour
     {
         [Header("References")] [SerializeField]
         public Transform player = null!;
 
         [SerializeField] private AnimancerComponent animancer = null!;
+        [SerializeField] private AudioSource moveAudioSource = null!;
 
-        [SerializeField] private ClipTransition idleAnimation = null!;
+        [SerializeField] private AudioSource interactAudioSource = null!;
+
+        [Header("Animations")] [SerializeField]
+        private ClipTransition idleAnimation = null!;
+
         [SerializeField] private ClipTransition walkAnimation = null!;
         [SerializeField] private ClipTransition interactAnimation = null!;
         [SerializeField] private ClipTransition deathAnimation = null!;
         [SerializeField] private ClipTransition floatingAnimation = null!;
         [SerializeField] private ClipTransition fleeAnimation = null!;
+        [SerializeField] private ClipTransition attackAnimation = null!;
 
-        [Header("Movement Settings")] [SerializeField]
+        [Header("General Settings")] [SerializeField]
         private float speed = 5f;
 
         [SerializeField] private float rotationSpeed = 10f;
-        [SerializeField] private float followDistance = 10f;
+        [SerializeField] private float stateCooldown = 0.5f;
+        [SerializeField] private NpcState currentState = NpcState.Idle;
+
+        [Header("Movement Behavior")] [SerializeField]
+        private float followDistance = 10f;
+
         [SerializeField] private float stopDistance = 2f;
+        [SerializeField] private float wanderRadius = 10f;
+        [SerializeField] private float minIdleTime = 5f;
+        [SerializeField] private float maxIdleTime = 15f;
 
         [Header("Player Observation")] [SerializeField]
         private float observationDistance = 8f;
@@ -59,13 +74,6 @@ namespace NPC
         [SerializeField] private float cohesionWeight = 0.5f;
         [SerializeField] private float separationWeight = 1f;
         [SerializeField] private LayerMask npcLayer;
-
-        [Header("Idle Behavior")] [SerializeField]
-        private float wanderRadius = 10f;
-
-        [SerializeField] private float minIdleTime = 5f;
-        [SerializeField] private float maxIdleTime = 15f;
-        [SerializeField] private float interactionRadius = 3f;
 
         [Header("Physics Settings")] [SerializeField]
         private float gravityMultiplier = 2f;
@@ -86,16 +94,24 @@ namespace NPC
         [SerializeField] private float healthFleeThreshold = 0.3f;
         [SerializeField] private float fleeDuration = 10f;
 
-        [Header("Audio")] [SerializeField] private AudioSource moveAudioSource = null!;
+        [Header("Enemy Settings")] [SerializeField]
+        private bool isEnemy;
 
-        [SerializeField] private AudioClip[] moveClips = null!;
-        [SerializeField] private AudioSource interactAudioSource = null!;
+        [SerializeField] private float aggroRange = 12f;
+        [SerializeField] private float attackRange = 2.5f;
+        [SerializeField] private float attackCooldown = 2f;
+        [SerializeField] private float attackDamage = 10f;
+
+        [SerializeField] private LayerMask targetLayerMask;
+
+        [Header("Audio Clips")] [SerializeField]
+        private AudioClip[] moveClips = null!;
+
         [SerializeField] private AudioClip[] interactClips = null!;
         [SerializeField] private AudioClip[] fleeClips = null!;
-
-        [SerializeField] private float stateCooldown = 1f;
-
-        [SerializeField] private NpcState currentState = NpcState.Idle;
+        [SerializeField] private AudioClip[] attackClips = null!;
+        private float _attackTimer;
+        private Transform? _currentTarget;
         private Vector3 _fleeTarget;
         private Health _health = null!;
         private bool _isGrounded;
@@ -113,10 +129,10 @@ namespace NPC
         {
             _rb = GetComponent<Rigidbody>();
             _health = GetComponent<Health>();
-            _originalSpeed = speed;
             _life = GetComponent<Life>();
-            ConfigureRigidbody();
+            _originalSpeed = speed;
 
+            ConfigureRigidbody();
             if (headBone) _originalHeadRotation = headBone.localRotation;
         }
 
@@ -125,98 +141,161 @@ namespace NPC
             waterLayer = LayerMask.GetMask("Water", "Rock", "Ship");
             npcLayer = LayerMask.GetMask("NPC", "Ship");
 
-            _health.onHealthChanged.AddListener(OnHealthChanged);
-            _health.onDeath.AddListener(OnDeath);
+            if (_health)
+            {
+                _health.onHealthChanged.AddListener(OnHealthChanged);
+                _health.onDeath.AddListener(OnDeath);
+            }
+            else
+            {
+                Debug.LogError("Health component not found!", this);
+            }
+
+            if (!_life) Debug.LogError("Life component not found!", this);
+
+            if (!player && isEnemy)
+            {
+                var playerObject = GameObject.FindGameObjectWithTag("Player");
+                if (playerObject) player = playerObject.transform;
+                else
+                    Debug.LogWarning(
+                        "Player transform not assigned and could not be found by tag 'Player'. Enemy AI might not function correctly.",
+                        this);
+            }
+
+
             ChangeState(NpcState.Idle, true);
+        }
+
+        private void Update()
+        {
+            _stateTimer += Time.deltaTime;
+            _attackTimer += Time.deltaTime;
         }
 
         private void FixedUpdate()
         {
+            if (currentState == NpcState.Death) return;
+
             UpdateGroundedState();
+            if (!_isGrounded) return;
 
             var moveDirection = Vector3.zero;
+            var applyGroupBehavior = true;
 
             switch (currentState)
             {
                 case NpcState.Idle:
+                case NpcState.Interact:
+                case NpcState.ObservePlayer:
+                    if (isEnemy && !_currentTarget && FindTarget())
+                    {
+                        ChangeState(NpcState.Attacking);
+                        return;
+                    }
+
+                    if (currentState is NpcState.ObservePlayer or NpcState.Interact)
+                        if (player && Vector3.Distance(transform.position, player.position) <= minLookDistance)
+                            moveDirection = CalculateAvoidanceDirection(player.position);
+
                     break;
 
                 case NpcState.Wander:
                     moveDirection = CalculateMovementDirection(_wanderTarget);
+                    if (isEnemy && !_currentTarget && FindTarget()) ChangeState(NpcState.Attacking);
                     break;
 
                 case NpcState.Follow:
-                {
-                    var distanceToTarget = Vector3.Distance(transform.position, player.position);
-                    if (distanceToTarget <= stopDistance)
-                        moveDirection =
-                            CalculateMovementDirection(transform.position + (transform.position - player.position));
-                    else if (distanceToTarget <= minLookDistance)
-                        ChangeState(NpcState.ObservePlayer);
-                    else if (distanceToTarget > followDistance)
+                    if (!player)
+                    {
                         ChangeState(NpcState.Idle);
-                    else
-                        moveDirection = CalculateMovementDirection(player.position);
-                }
+                        return;
+                    }
+
+                    var distanceToPlayer = Vector3.Distance(transform.position, player.position);
+                    if (distanceToPlayer <= stopDistance) moveDirection = Vector3.zero;
+                    else if (distanceToPlayer > followDistance) ChangeState(NpcState.Idle);
+                    else moveDirection = CalculateMovementDirection(player.position);
+
+                    if (isEnemy && !_currentTarget && FindTarget()) ChangeState(NpcState.Attacking);
+                    break;
+
+                case NpcState.Attacking:
+                    applyGroupBehavior = false;
+                    if (!_currentTarget || !_currentTarget.gameObject.activeInHierarchy)
+                    {
+                        ChangeState(NpcState.Idle);
+                        return;
+                    }
+
+                    var distanceToTarget = Vector3.Distance(transform.position, _currentTarget.position);
+                    moveDirection = distanceToTarget > attackRange
+                        ? CalculateMovementDirection(_currentTarget.position)
+                        : Vector3.zero;
+
                     break;
 
                 case NpcState.Flee:
                     moveDirection = CalculateMovementDirection(_fleeTarget);
+                    applyGroupBehavior = false;
                     break;
 
-                case NpcState.Interact:
-                case NpcState.ObservePlayer:
-                {
-                    var distanceToTarget = Vector3.Distance(transform.position, player.position);
-
-                    if (distanceToTarget <= minLookDistance)
-                        moveDirection =
-                            CalculateMovementDirection(transform.position + (transform.position - player.position));
-                    else if (distanceToTarget > followDistance) ChangeState(NpcState.Idle);
-                }
-
-                    break;
-                case NpcState.Death:
-                    return;
                 case NpcState.Falling:
+                case NpcState.Death:
+                    applyGroupBehavior = false;
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            if (currentState != NpcState.Flee && currentState != NpcState.Death && currentState != NpcState.Falling)
+            if (applyGroupBehavior)
             {
                 var groupInfluence = CalculateGroupBehavior();
-                moveDirection += groupInfluence;
-                if (moveDirection.magnitude > 0) moveDirection.Normalize();
+                if (moveDirection.magnitude > 0.01f || groupInfluence.magnitude > 0.01f)
+                    moveDirection = (moveDirection + groupInfluence).normalized;
             }
 
             HandleMovement(moveDirection);
+            UpdateAnimator(moveDirection.magnitude > 0.1f);
         }
+
 
         private void OnDrawGizmosSelected()
         {
+            // Existing Gizmos...
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, followDistance);
 
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, stopDistance);
 
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(transform.position, observationDistance);
+
+            if (isEnemy)
+            {
+                Gizmos.color = Color.magenta;
+                Gizmos.DrawWireSphere(transform.position, aggroRange);
+                Gizmos.color = Color.white;
+                Gizmos.DrawWireSphere(transform.position, attackRange);
+            }
+
             if (!Application.isPlaying) return;
 
             Gizmos.color = Color.blue;
-            Gizmos.DrawRay(transform.position, transform.forward * waterCheckDistance);
+            Gizmos.DrawRay(transform.position + Vector3.up * 0.1f,
+                transform.forward * waterCheckDistance); // Offset slightly up
 
             var leftDirection = Quaternion.Euler(0, -30, 0) * transform.forward;
             var rightDirection = Quaternion.Euler(0, 30, 0) * transform.forward;
-            Gizmos.DrawRay(transform.position, leftDirection * waterCheckDistance);
-            Gizmos.DrawRay(transform.position, rightDirection * waterCheckDistance);
+            Gizmos.DrawRay(transform.position + Vector3.up * 0.1f, leftDirection * waterCheckDistance);
+            Gizmos.DrawRay(transform.position + Vector3.up * 0.1f, rightDirection * waterCheckDistance);
 
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(transform.position, groupRadius);
 
             Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(transform.position, wanderRadius);
 
             switch (currentState)
             {
@@ -228,6 +307,14 @@ namespace NPC
                     Gizmos.color = Color.red;
                     Gizmos.DrawLine(transform.position, _fleeTarget);
                     Gizmos.DrawWireSphere(transform.position, fleeDistance);
+                    break;
+                case NpcState.Attacking:
+                    if (_currentTarget)
+                    {
+                        Gizmos.color = Color.yellow;
+                        Gizmos.DrawLine(transform.position, _currentTarget.position);
+                    }
+
                     break;
                 case NpcState.Idle:
                 case NpcState.Follow:
@@ -248,53 +335,69 @@ namespace NPC
             _rb.freezeRotation = true;
         }
 
-        private void OnHealthChanged(float healthValue)
+        private void OnHealthChanged(float currentHealth)
         {
-            if (healthValue / _health.MaxHealth < healthFleeThreshold && currentState != NpcState.Flee)
-                ChangeState(NpcState.Flee);
+            if (currentHealth / _health.MaxHealth < healthFleeThreshold && currentState != NpcState.Flee &&
+                currentState != NpcState.Death) ChangeState(NpcState.Flee);
         }
 
         private void OnDeath()
         {
+            if (currentState == NpcState.Death) return;
+            ChangeState(NpcState.Death, true);
             _rb.isKinematic = true;
-            currentState = NpcState.Death;
-            animancer.Play(deathAnimation);
+            _rb.linearVelocity = Vector3.zero;
+            StopAllCoroutines();
 
-            Invoke(nameof(DestroyAfterAnimation), 1.5f);
+            var col = GetComponent<Collider>();
+            if (col != null) col.enabled = false;
+
+            animancer.Play(deathAnimation);
+            var destroyDelay = deathAnimation.Clip
+                ? deathAnimation.Clip.length
+                : 1.5f;
+            Invoke(nameof(CleanupAfterDeath), destroyDelay);
         }
 
-        private void DestroyAfterAnimation()
+        private void CleanupAfterDeath()
         {
-            ChangeState(NpcState.Idle, true);
-            _rb.isKinematic = false;
             gameObject.SetActive(false);
         }
 
         private void ChangeState(NpcState newState, bool force = false)
         {
-            if (currentState == NpcState.Death && !force) return;
-            if (currentState == newState && !force) return;
-
-            if (Time.time - _stateTimer < stateCooldown) return;
-
-            _stateTimer = Time.time;
-
-            StopAllCoroutines();
+            if (!force && currentState == newState) return;
+            if (currentState == NpcState.Death && !force)
+                return;
+            if (!force && _stateTimer < stateCooldown) return;
 
             switch (currentState)
             {
                 case NpcState.ObservePlayer:
                     if (headBone) headBone.localRotation = _originalHeadRotation;
+                    StopCoroutine(nameof(ObservePlayerState));
+                    StopCoroutine(nameof(RotateToFace));
                     break;
                 case NpcState.Flee:
                     speed = _originalSpeed;
+                    StopCoroutine(nameof(FleeState));
+                    break;
+                case NpcState.Attacking:
+                    _currentTarget = null;
+                    StopCoroutine(nameof(AttackState));
+                    break;
+                case NpcState.Wander:
+                    StopCoroutine(nameof(WanderState));
                     break;
                 case NpcState.Idle:
-                case NpcState.Wander:
+                    StopCoroutine(nameof(IdleState));
+                    break;
+                case NpcState.Interact:
+                    StopCoroutine(nameof(InteractState));
+                    break;
                 case NpcState.Follow:
                 case NpcState.Death:
                 case NpcState.Falling:
-                case NpcState.Interact:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -316,6 +419,10 @@ namespace NPC
                 case NpcState.Interact:
                     StartCoroutine(InteractState());
                     break;
+                case NpcState.Attacking:
+                    if (_currentTarget) StartCoroutine(AttackState());
+                    else ChangeState(NpcState.Idle);
+                    break;
                 case NpcState.ObservePlayer:
                     StartCoroutine(ObservePlayerState());
                     break;
@@ -329,14 +436,69 @@ namespace NPC
                     throw new ArgumentOutOfRangeException();
             }
 
-            UpdateAnimator();
+            UpdateAnimator(false);
         }
 
-        private bool ShouldObservePlayer()
+
+        private bool FindTarget()
         {
+            if (!isEnemy || !player) return false;
+
             var distanceToPlayer = Vector3.Distance(transform.position, player.position);
-            return distanceToPlayer <= observationDistance;
+            if (distanceToPlayer <= aggroRange)
+            {
+                _currentTarget = player;
+                return true;
+            }
+
+            Transform? closestNpcTarget = null;
+            var minDistanceSqr = aggroRange * aggroRange;
+
+            Collider[] hits = Physics.OverlapSphere(transform.position, aggroRange, targetLayerMask);
+
+            foreach (var hit in hits)
+            {
+                if (hit.transform == transform) continue;
+
+                if (hit.TryGetComponent<NpcMovement>(out var otherNpc) && !otherNpc.isEnemy &&
+                    hit.TryGetComponent<Health>(out _))
+                {
+                    var distSqr = (hit.transform.position - transform.position).sqrMagnitude;
+                    if (!(distSqr < minDistanceSqr)) continue;
+
+                    minDistanceSqr = distSqr;
+                    closestNpcTarget = hit.transform;
+                }
+                else if (hit.transform == player)
+                {
+                    var distSqr = (hit.transform.position - transform.position).sqrMagnitude;
+                    if (!(distSqr < minDistanceSqr)) continue;
+
+                    minDistanceSqr = distSqr;
+                    closestNpcTarget = hit.transform;
+                }
+            }
+
+            _currentTarget = closestNpcTarget;
+            return _currentTarget != null;
         }
+
+        private bool HasLineOfSight(Vector3 targetPosition)
+        {
+            var direction =
+                (targetPosition - (transform.position + Vector3.up * 0.5f))
+                .normalized; // Start ray slightly above ground
+            var distance = Vector3.Distance(transform.position, targetPosition);
+
+            LayerMask sightBlockingLayers =
+                LayerMask.GetMask("Default", "PlanetSurface", "Water", "Rock", "Ship");
+
+            if (!Physics.Raycast(transform.position + Vector3.up * 0.5f, direction, out var hit, distance,
+                    sightBlockingLayers)) return true;
+
+            return !(Vector3.Distance(hit.point, targetPosition) > 1.0f);
+        }
+
 
         private Vector3 CalculateGroupBehavior()
         {
@@ -350,7 +512,6 @@ namespace NPC
             for (var i = 0; i < size; i++)
             {
                 var neighbor = results[i];
-
                 if (neighbor.gameObject == gameObject) continue;
 
                 var directionToNeighbor = neighbor.transform.position - transform.position;
@@ -358,15 +519,17 @@ namespace NPC
 
                 cohesion += neighbor.transform.position;
 
-                if (distance < separationDistance) separation += -directionToNeighbor.normalized / distance;
+                if (distance > 0 && distance < separationDistance)
+                    separation -= directionToNeighbor.normalized / distance;
 
                 neighborCount++;
             }
 
-            if (neighborCount <= 0) return Vector3.zero;
+            if (neighborCount == 0) return Vector3.zero;
 
-            cohesion = (cohesion / neighborCount - transform.position) * cohesionWeight;
-            separation *= separationWeight;
+            cohesion = cohesion / neighborCount - transform.position;
+            cohesion = Vector3.ProjectOnPlane(cohesion, _surfaceNormal).normalized * cohesionWeight;
+            separation = Vector3.ProjectOnPlane(separation, _surfaceNormal).normalized * separationWeight;
 
             return cohesion + separation;
         }
@@ -374,85 +537,139 @@ namespace NPC
         private Vector3 CalculateMovementDirection(Vector3 destination)
         {
             var direction = destination - transform.position;
+            direction.y = 0;
             return Vector3.ProjectOnPlane(direction, _surfaceNormal).normalized;
         }
 
+        private Vector3 CalculateAvoidanceDirection(Vector3 positionToAvoid)
+        {
+            var direction = transform.position - positionToAvoid;
+            direction.y = 0;
+            return Vector3.ProjectOnPlane(direction, _surfaceNormal).normalized;
+        }
+
+
         private void UpdateGroundedState()
         {
-            _surfaceNormal = _life.surfaceNormal;
-
-            switch (_isGrounded)
+            if (_life == null)
             {
-                case false when _life.isGrounded:
-                    _isGrounded = true;
-                    ChangeState(NpcState.Idle);
-                    break;
-                case true when !_life.isGrounded:
-                    _isGrounded = false;
-                    ChangeState(NpcState.Falling);
-                    break;
+                Debug.LogError("Life component is null in UpdateGroundedState.", this);
+                _isGrounded = false; // Assume not grounded if Life component is missing
+                if (currentState != NpcState.Falling) ChangeState(NpcState.Falling);
+                return;
+            }
+
+            var currentlyGrounded = _life.isGrounded;
+            _surfaceNormal = _life.surfaceNormal; // Get surface normal from Life component
+
+            if (!_isGrounded && currentlyGrounded) // Landed
+            {
+                _isGrounded = true;
+                if (currentState == NpcState.Falling) ChangeState(NpcState.Idle); // Recover to Idle after falling
+            }
+            else if (_isGrounded && !currentlyGrounded) // Started falling
+            {
+                _isGrounded = false;
+                if (currentState != NpcState.Death) ChangeState(NpcState.Falling); // Don't change if already dead
             }
         }
 
+
         private bool IsWaterAhead(Vector3 moveDirection)
         {
-            if (Physics.Raycast(transform.position, moveDirection, waterCheckDistance, waterLayer)) return true;
+            // Check slightly ahead and downwards from the base of the NPC
+            var origin = transform.position + Vector3.up * 0.1f; // Start ray slightly above feet
+            var checkDist = waterCheckDistance;
 
-            var left = Quaternion.Euler(0, -30, 0) * moveDirection;
-            var right = Quaternion.Euler(0, 30, 0) * moveDirection;
+            // Check main direction
+            if (Physics.Raycast(origin, moveDirection, checkDist, waterLayer)) return true;
 
-            return Physics.Raycast(transform.position, left, waterCheckDistance, waterLayer) ||
-                   Physics.Raycast(transform.position, right, waterCheckDistance, waterLayer);
+            // Check angled directions
+            var leftRot = Quaternion.Euler(0, -waterAvoidanceAngle * 0.5f, 0);
+            var rightRot = Quaternion.Euler(0, waterAvoidanceAngle * 0.5f, 0);
+
+            if (Physics.Raycast(origin, leftRot * moveDirection, checkDist, waterLayer)) return true;
+            if (Physics.Raycast(origin, rightRot * moveDirection, checkDist, waterLayer)) return true;
+
+            return false;
         }
 
         private Vector3 FindSafeDirection(Vector3 originalDirection)
         {
-            for (float angle = 0; angle <= waterAvoidanceAngle; angle += 5)
-            {
-                var left = Quaternion.Euler(0, -angle, 0) * originalDirection;
-                if (!IsWaterAhead(left)) return left;
+            var checkAngle = 5f; // Angle step for checking alternative directions
+            var maxCheck = 180f; // Don't check more than 180 degrees
 
-                var right = Quaternion.Euler(0, angle, 0) * originalDirection;
-                if (!IsWaterAhead(right)) return right;
+            for (var angle = checkAngle; angle <= maxCheck; angle += checkAngle)
+            {
+                // Check left
+                var leftRot = Quaternion.Euler(0, -angle, 0);
+                var leftDir = leftRot * originalDirection;
+                if (!IsWaterAhead(leftDir)) return leftDir.normalized;
+
+                // Check right
+                var rightRot = Quaternion.Euler(0, angle, 0);
+                var rightDir = rightRot * originalDirection;
+                if (!IsWaterAhead(rightDir)) return rightDir.normalized;
             }
 
-            return Vector3.zero;
+            return -originalDirection.normalized; // Turn around as last resort
         }
 
         private void HandleMovement(Vector3 moveDirection)
         {
-            if (moveDirection == Vector3.zero)
+            if (moveDirection.magnitude < 0.01f)
             {
-                _rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, Vector3.zero, Time.deltaTime * 5f);
+                _rb.linearVelocity =
+                    Vector3.Lerp(_rb.linearVelocity, Vector3.zero,
+                        Time.deltaTime * 10f);
                 return;
             }
 
-            if (IsWaterAhead(moveDirection))
-            {
-                moveDirection = FindSafeDirection(moveDirection);
+            var effectiveDirection = moveDirection.normalized;
 
-                if (moveDirection == Vector3.zero)
+            if (IsWaterAhead(effectiveDirection))
+            {
+                effectiveDirection = FindSafeDirection(effectiveDirection);
+                if (effectiveDirection.magnitude < 0.01f)
                 {
-                    _rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, Vector3.zero, Time.deltaTime * 5f);
+                    _rb.linearVelocity = Vector3.Lerp(_rb.linearVelocity, Vector3.zero, Time.deltaTime * 10f);
                     return;
                 }
             }
 
-            var targetRotation = Quaternion.LookRotation(moveDirection, _surfaceNormal);
+            var targetRotation = Quaternion.LookRotation(effectiveDirection, _surfaceNormal);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
 
-            _rb.MovePosition(_rb.position + moveDirection * (speed * Time.deltaTime));
+            var targetVelocity = effectiveDirection * speed;
+            var currentVelocity = _rb.linearVelocity;
+            var velocityChange = targetVelocity - currentVelocity;
+            velocityChange.y = 0;
 
-            if (!moveAudioSource.isPlaying)
-                AudioManager.Instance.PlaySound(moveAudioSource, Utils.RandomElement(moveClips));
+            _rb.AddForce(velocityChange, ForceMode.VelocityChange);
+
+            if (moveAudioSource.isPlaying || moveClips.Length <= 0) return;
+
+            moveAudioSource.pitch = Random.Range(0.9f, 1.1f);
+            AudioManager.Instance?.PlaySound(moveAudioSource, Utils.RandomElement(moveClips));
         }
 
-        private void UpdateAnimator()
+        private void UpdateAnimator(bool isMoving)
         {
-            var isMoving = _rb.linearVelocity.magnitude > 0.1f;
-
             switch (currentState)
             {
+                case NpcState.Idle:
+                case NpcState.ObservePlayer:
+                    animancer.Play(idleAnimation);
+                    break;
+                case NpcState.Wander:
+                case NpcState.Follow:
+                    animancer.Play(isMoving
+                        ? walkAnimation
+                        : idleAnimation);
+                    break;
+                case NpcState.Attacking:
+                    animancer.Play(attackAnimation);
+                    break;
                 case NpcState.Interact:
                     animancer.Play(interactAnimation);
                     break;
@@ -463,76 +680,113 @@ namespace NPC
                     animancer.Play(floatingAnimation);
                     break;
                 case NpcState.Death:
-                    animancer.Play(deathAnimation);
-                    break;
-                case NpcState.Follow:
-                    animancer.Play(walkAnimation);
-                    break;
-                case NpcState.Idle:
-                case NpcState.ObservePlayer:
-                    animancer.Play(idleAnimation);
-                    break;
-                case NpcState.Wander:
-                    animancer.Play(walkAnimation);
                     break;
                 default:
-                    var s = animancer.Play(isMoving ? walkAnimation : idleAnimation);
+                    animancer.Play(idleAnimation);
                     break;
             }
         }
 
-        #region State Implementations
 
         private IEnumerator IdleState()
         {
-            while (true)
+            while (currentState == NpcState.Idle)
             {
-                if (player && Vector3.Distance(transform.position, player.position) < followDistance)
+                if (isEnemy && FindTarget())
                 {
-                    ChangeState(NpcState.Follow);
+                    ChangeState(NpcState.Attacking);
                     yield break;
                 }
 
-                if (ShouldObservePlayer())
+                switch (isEnemy)
                 {
-                    ChangeState(NpcState.ObservePlayer);
-                    yield break;
+                    case false when player &&
+                                    Vector3.Distance(transform.position, player.position) < followDistance:
+                        ChangeState(NpcState.Follow);
+                        yield break;
+                    case false when ShouldObservePlayer():
+                        ChangeState(NpcState.ObservePlayer);
+                        yield break;
                 }
 
-                if (Random.value < 0.1f)
-                    AudioManager.Instance.PlaySound(interactAudioSource, Utils.RandomElement(interactClips));
-
-                if (Random.value < 0.7f)
+                var waitTime = Random.Range(minIdleTime, maxIdleTime);
+                var timer = 0f;
+                while (timer < waitTime)
                 {
-                    ChangeState(NpcState.Wander);
-                    yield break;
+                    if (isEnemy && FindTarget())
+                    {
+                        ChangeState(NpcState.Attacking);
+                        yield break;
+                    }
+
+                    switch (isEnemy)
+                    {
+                        case false when player &&
+                                        Vector3.Distance(transform.position, player.position) < followDistance:
+                            ChangeState(NpcState.Follow);
+                            yield break;
+                        case false when ShouldObservePlayer():
+                            ChangeState(NpcState.ObservePlayer);
+                            yield break;
+                        default:
+                            timer += Time.deltaTime;
+                            yield return null;
+                            break;
+                    }
                 }
 
-                var results = new Collider[10];
-                var size = Physics.OverlapSphereNonAlloc(transform.position, interactionRadius, results, npcLayer);
 
-                for (var i = 0; i < size; i++)
+                var actionRoll = Random.value;
+                switch (actionRoll)
                 {
-                    var npc = results[i];
-                    if (npc.transform == transform) continue;
+                    case < 0.6f:
+                        ChangeState(NpcState.Wander);
+                        yield break;
+                    case < 0.8f:
+                    {
+                        var results = new Collider[5];
+                        var size = Physics.OverlapSphereNonAlloc(transform.position, 20f, results, npcLayer);
+                        for (var i = 0; i < size; i++)
+                            if (results[i].transform != transform &&
+                                results[i].TryGetComponent<NpcMovement>(out _))
+                            {
+                                ChangeState(NpcState.Interact);
+                                yield break;
+                            }
 
-                    ChangeState(NpcState.Interact);
-                    yield break;
+                        break;
+                    }
                 }
 
-                yield return new WaitForSeconds(Random.Range(minIdleTime, maxIdleTime));
+                if (Random.value < 0.1f && interactClips.Length > 0)
+                    AudioManager.Instance?.PlaySound(interactAudioSource, Utils.RandomElement(interactClips));
+
+                yield return null;
             }
         }
 
         private void StartWandering()
         {
             var randomDirection = Random.insideUnitSphere;
-            _wanderTarget = transform.position +
-                            Vector3.ProjectOnPlane(randomDirection, _surfaceNormal).normalized * wanderRadius;
+            randomDirection.y = 0;
+            var targetPos = transform.position +
+                            randomDirection.normalized * Random.Range(wanderRadius * 0.5f, wanderRadius);
 
-            if (IsWaterAhead((_wanderTarget - transform.position).normalized))
-                _wanderTarget = transform.position +
-                                FindSafeDirection((_wanderTarget - transform.position).normalized) * wanderRadius;
+            targetPos = transform.position +
+                        Vector3.ProjectOnPlane(targetPos - transform.position, _surfaceNormal).normalized *
+                        Random.Range(wanderRadius * 0.5f, wanderRadius);
+
+
+            var directionToTarget = (targetPos - transform.position).normalized;
+            if (IsWaterAhead(directionToTarget))
+            {
+                var safeDirection = FindSafeDirection(directionToTarget);
+                _wanderTarget = transform.position + safeDirection * Random.Range(wanderRadius * 0.5f, wanderRadius);
+            }
+            else
+            {
+                _wanderTarget = targetPos;
+            }
 
             _wanderTimer = 0f;
             StartCoroutine(WanderState());
@@ -540,48 +794,57 @@ namespace NPC
 
         private IEnumerator WanderState()
         {
-            while (Vector3.Distance(transform.position, _wanderTarget) > stopDistance)
+            const float maxWanderDuration = 15f;
+
+            while (currentState == NpcState.Wander)
             {
-                if (_wanderTimer > 8f)
+                if (Vector3.Distance(transform.position, _wanderTarget) <= stopDistance)
                 {
-                    _wanderTimer = 0f;
                     ChangeState(NpcState.Idle);
                     yield break;
                 }
 
-                if (player && Vector3.Distance(transform.position, player.position) < followDistance)
-                {
-                    ChangeState(NpcState.Follow);
-                    yield break;
-                }
-
-                if (ShouldObservePlayer())
-                {
-                    ChangeState(NpcState.ObservePlayer);
-                    yield break;
-                }
-
                 _wanderTimer += Time.deltaTime;
+                if (_wanderTimer > maxWanderDuration)
+                {
+                    ChangeState(NpcState.Idle);
+                    yield break;
+                }
 
-                yield return null;
+                if (isEnemy && FindTarget())
+                {
+                    ChangeState(NpcState.Attacking);
+                    yield break;
+                }
+
+                switch (isEnemy)
+                {
+                    case false when player &&
+                                    Vector3.Distance(transform.position, player.position) < followDistance:
+                        ChangeState(NpcState.Follow);
+                        yield break;
+                    case false when ShouldObservePlayer():
+                        ChangeState(NpcState.ObservePlayer);
+                        yield break;
+                    default:
+                        yield return null;
+                        break;
+                }
             }
-
-            ChangeState(NpcState.Idle);
         }
 
         private IEnumerator InteractState()
         {
-            var results = new Collider[10];
-            var size = Physics.OverlapSphereNonAlloc(transform.position, interactionRadius, results, npcLayer);
             Transform? interactionTarget = null;
-
+            var results = new Collider[10];
+            var size = Physics.OverlapSphereNonAlloc(transform.position, 20f, results, npcLayer);
             for (var i = 0; i < size; i++)
-            {
-                var npc = results[i];
-                if (npc.transform == transform) continue;
-                interactionTarget = npc.transform;
-                break;
-            }
+                if (results[i].transform != transform &&
+                    results[i].TryGetComponent<NpcMovement>(out _))
+                {
+                    interactionTarget = results[i].transform;
+                    break;
+                }
 
             if (!interactionTarget)
             {
@@ -589,74 +852,147 @@ namespace NPC
                 yield break;
             }
 
-            AudioManager.Instance.PlaySound(interactAudioSource, Utils.RandomElement(interactClips));
+            animancer.Play(interactAnimation);
+            if (interactClips.Length > 0)
+                AudioManager.Instance?.PlaySound(interactAudioSource, Utils.RandomElement(interactClips));
+
 
             var interactTime = Random.Range(3f, 8f);
             var timer = 0f;
 
-            while (timer < interactTime)
+            while (timer < interactTime && currentState == NpcState.Interact)
             {
-                if (!interactionTarget) break;
+                if (!interactionTarget || !interactionTarget.gameObject.activeInHierarchy) break;
 
-                var direction = (interactionTarget.position - transform.position).normalized;
-                direction = Vector3.ProjectOnPlane(direction, _surfaceNormal).normalized;
+                var direction = interactionTarget.position - transform.position;
+                RotateTowards(direction);
 
-                var targetRotation = Quaternion.LookRotation(direction, _surfaceNormal);
-                transform.rotation =
-                    Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+                if (isEnemy && FindTarget() &&
+                    _currentTarget != interactionTarget)
+                {
+                    ChangeState(NpcState.Attacking);
+                    yield break;
+                }
 
                 timer += Time.deltaTime;
                 yield return null;
             }
 
-            ChangeState(NpcState.Idle);
+            if (currentState == NpcState.Interact) ChangeState(NpcState.Idle);
         }
 
         private IEnumerator ObservePlayerState()
         {
-            while (true)
+            if (!player)
             {
-                var direction = (player.position - transform.position).normalized;
-                direction = Vector3.ProjectOnPlane(direction, _surfaceNormal).normalized;
+                ChangeState(NpcState.Idle);
+                yield break;
+            }
 
-                var targetRotation = Quaternion.LookRotation(direction, _surfaceNormal);
+            var observationTimer = 0f;
+            var maxObserveDuration = Random.Range(minObservationTime, maxObservationTime);
 
-                // if target rotation too much, start coroutine to rotate head
-                if (Quaternion.Angle(transform.rotation, targetRotation) > 5f)
-                    StartCoroutine(RotateToFace(targetRotation));
-                else
-                    transform.rotation =
-                        Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+            while (currentState == NpcState.ObservePlayer)
+            {
+                var distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-                if (!ShouldObservePlayer())
+                if (distanceToPlayer > observationDistance * 1.2f ||
+                    observationTimer > maxObserveDuration)
                 {
-                    ChangeState(Vector3.Distance(player.transform.position, transform.position) < followDistance
-                        ? NpcState.Follow
-                        : NpcState.Idle);
-
+                    ChangeState(NpcState.Idle);
                     yield break;
                 }
 
+                if (distanceToPlayer > observationDistance && distanceToPlayer < followDistance)
+                {
+                    ChangeState(NpcState.Follow);
+                    yield break;
+                }
+
+
+                var directionToPlayer = player.position - transform.position;
+                RotateTowards(directionToPlayer);
+
+
                 if (headBone)
                 {
-                    var lookDir = player.position - headBone.position;
-                    var lookRot = Quaternion.LookRotation(lookDir, transform.up);
+                    var lookRot =
+                        Quaternion.LookRotation(player.position - headBone.position,
+                            transform.up);
+
                     headBone.rotation =
                         Quaternion.Slerp(headBone.rotation, lookRot, Time.deltaTime * headTrackingSpeed);
                 }
 
-                yield return new WaitForSeconds(0.1f);
+                observationTimer += Time.deltaTime;
+                yield return null;
             }
         }
 
-        private IEnumerator RotateToFace(Quaternion targetRotation)
+        private IEnumerator AttackState()
         {
-            while (Quaternion.Angle(transform.rotation, targetRotation) > 5f)
+            if (!_currentTarget)
             {
-                transform.rotation =
-                    Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+                ChangeState(NpcState.Idle);
+                yield break;
+            }
+
+            var targetHealth = _currentTarget.GetComponent<Health>();
+            if (!targetHealth)
+            {
+                Debug.LogWarning($"Target {_currentTarget.name} does not have a Health component. Cannot attack.",
+                    this);
+                ChangeState(NpcState.Idle);
+                yield break;
+            }
+
+            _attackTimer = attackCooldown;
+
+            while (currentState == NpcState.Attacking)
+            {
+                if (!_currentTarget ||
+                    !_currentTarget.gameObject.activeInHierarchy)
+                {
+                    _currentTarget = null;
+                    if (!FindTarget()) ChangeState(NpcState.Idle);
+                    yield break;
+                }
+
+                var distanceToTarget = Vector3.Distance(transform.position, _currentTarget.position);
+
+                RotateTowards(_currentTarget.position - transform.position);
+
+                if (distanceToTarget <= attackRange)
+                    if (_attackTimer >= attackCooldown)
+                    {
+                        _attackTimer = 0f;
+
+                        if (attackClips.Length > 0)
+                            AudioManager.Instance?.PlaySound(interactAudioSource, Utils.RandomElement(attackClips));
+
+
+                        var damageDelay =
+                            attackAnimation.Clip
+                                ? attackAnimation.Clip.length * 0.5f
+                                : 0.3f;
+                        StartCoroutine(ApplyDamageAfterDelay(targetHealth, attackDamage, damageDelay));
+                    }
+
+                if (distanceToTarget > aggroRange * 1.2f)
+                {
+                    _currentTarget = null;
+                    ChangeState(NpcState.Idle);
+                    yield break;
+                }
+
                 yield return null;
             }
+        }
+
+        private static IEnumerator ApplyDamageAfterDelay(Health targetHealth, float damage, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            if (targetHealth && targetHealth.gameObject.activeInHierarchy) targetHealth.TakeDamage(damage);
         }
 
         private IEnumerator FleeState()
@@ -665,31 +1001,13 @@ namespace NPC
                 AudioManager.Instance.PlaySound(interactAudioSource, Utils.RandomElement(fleeClips));
 
             speed = fleeSpeed;
+            _currentTarget = null;
 
-            if (player)
-            {
-                var fleeDirection = (transform.position - player.position).normalized;
-                _fleeTarget = transform.position + fleeDirection * fleeDistance;
+            FindNewFleeTarget();
 
-                if (IsWaterAhead(fleeDirection))
-                {
-                    var safeDirection = FindSafeDirection(fleeDirection);
-                    if (safeDirection != Vector3.zero) _fleeTarget = transform.position + safeDirection * fleeDistance;
-                }
-            }
-            else
-            {
-                var randomDirection = Random.insideUnitSphere;
-                randomDirection = Vector3.ProjectOnPlane(randomDirection, _surfaceNormal).normalized;
+            var fleeTimer = 0f;
 
-                if (IsWaterAhead(randomDirection)) randomDirection = FindSafeDirection(randomDirection);
-
-                _fleeTarget = transform.position + randomDirection * fleeDistance;
-            }
-
-            float fleeTimer = 0;
-
-            while (fleeTimer < fleeDuration)
+            while (currentState == NpcState.Flee && fleeTimer < fleeDuration)
             {
                 if (_health.CurrentHealth / _health.MaxHealth > healthFleeThreshold * 1.5f)
                 {
@@ -697,32 +1015,80 @@ namespace NPC
                     yield break;
                 }
 
-                if (player && Vector3.Distance(transform.position, player.position) < fleeDistance * 0.5f)
-                {
-                    var fleeDirection = (transform.position - player.position).normalized;
-                    if (IsWaterAhead(fleeDirection)) fleeDirection = FindSafeDirection(fleeDirection);
+                if (player && Vector3.Distance(transform.position, player.position) < fleeDistance * 0.7f)
+                    FindNewFleeTarget();
 
-                    _fleeTarget = transform.position + fleeDirection * fleeDistance;
-                }
-
-                if (Vector3.Distance(transform.position, _fleeTarget) < stopDistance)
-                {
-                    var randomDirection = Random.insideUnitSphere;
-                    randomDirection = Vector3.ProjectOnPlane(randomDirection, _surfaceNormal).normalized;
-
-                    if (IsWaterAhead(randomDirection)) randomDirection = FindSafeDirection(randomDirection);
-
-                    _fleeTarget = transform.position + randomDirection * fleeDistance;
-                }
+                if (Vector3.Distance(transform.position, _fleeTarget) <
+                    stopDistance * 1.5f)
+                    FindNewFleeTarget(true);
 
                 fleeTimer += Time.deltaTime;
                 yield return null;
             }
 
+            if (currentState != NpcState.Flee) yield break;
+
             speed = _originalSpeed;
             ChangeState(NpcState.Idle);
         }
 
-        #endregion
+        private void FindNewFleeTarget(bool forceRandom = false)
+        {
+            Vector3 fleeDirection;
+
+            if (!forceRandom && player)
+            {
+                fleeDirection = (transform.position - player.position).normalized;
+            }
+            else
+            {
+                fleeDirection = Random.insideUnitSphere;
+                fleeDirection.y = 0;
+                fleeDirection = Vector3.ProjectOnPlane(fleeDirection, _surfaceNormal).normalized;
+            }
+
+
+            if (IsWaterAhead(fleeDirection))
+            {
+                var safeDirection = FindSafeDirection(fleeDirection);
+                if (safeDirection.magnitude > 0.1f) fleeDirection = safeDirection;
+                else fleeDirection = -fleeDirection;
+            }
+
+            _fleeTarget = transform.position + fleeDirection * fleeDistance;
+        }
+
+
+        private IEnumerator RotateToFace(Quaternion targetRotation)
+        {
+            while (Quaternion.Angle(transform.rotation, targetRotation) > 1.0f)
+            {
+                transform.rotation =
+                    Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+                yield return null;
+            }
+
+            transform.rotation = targetRotation;
+        }
+
+        private void RotateTowards(Vector3 direction)
+        {
+            if (direction.sqrMagnitude < 0.01f) return;
+
+            var projectedDirection = Vector3.ProjectOnPlane(direction, _surfaceNormal).normalized;
+            if (projectedDirection.sqrMagnitude < 0.01f) return;
+
+            var targetRotation = Quaternion.LookRotation(projectedDirection, _surfaceNormal);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+        }
+
+
+        private bool ShouldObservePlayer()
+        {
+            if (!player) return false;
+            var distanceToPlayer = Vector3.Distance(transform.position, player.position);
+            return distanceToPlayer <= observationDistance &&
+                   distanceToPlayer > minLookDistance;
+        }
     }
 }

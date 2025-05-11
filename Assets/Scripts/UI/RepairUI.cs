@@ -16,11 +16,7 @@ namespace UI
         [SerializeField] private Text upgradeCost = null!;
         public BaseRepair upgradeData = null!;
 
-        [SerializeField] public IRepairPanel UpgradePanel = null!;
-
-        public void Start()
-        {
-        }
+        public IRepairPanel UpgradePanel = null!;
 
         public void SetPanel(IRepairPanel panel)
         {
@@ -40,11 +36,11 @@ namespace UI
 
             upgradeName.text = upgradeData.upgradeName;
             upgradeDescription.text = upgradeData.upgradeDescription;
-            // cast to resource
+
             var cost = upgradeData.requirements.Where(r => r.type == UpgradeRequirement.RequirementType.Resource)
                 .ToList();
             var resources = cost.Select(r => ((ResourceObject)r.requiredObject, r.requiredAmount)).ToList();
-            upgradeCost.text = string.Join("\n", resources.Select(r => $"{r.Item1.resourceName}: {r.Item2}"));
+            upgradeCost.text = string.Join("\n", resources.Select(r => $"{r.Item1.resourceName}: {r.requiredAmount}"));
         }
     }
 }

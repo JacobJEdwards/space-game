@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cdba14c140741a898ec8a1ef7cb8dae, type: 3}
+  m_Name: PlayerWalkingMovementUpgrade
+  m_EditorClassIdentifier: 
+  upgradeName: Planetary Movement
+  upgradeDescription: Increase your speed.
+  upgradeIcon: {fileID: 0}
+  target: 2
+  nextUpgrade: {fileID: 11400000, guid: 0f70db50cf56e490d9e87da4bc0c7553, type: 2}
+  requirements:
+  - type: 1
+    requiredObject: {fileID: 11400000, guid: f03f3b594023f40d890719aa8d05e276, type: 2}
+    requiredAmount: 2
+  jumpHeightBonus: 1
+  speedBonus: 1.5
+  sprintSpeedBonus: 1

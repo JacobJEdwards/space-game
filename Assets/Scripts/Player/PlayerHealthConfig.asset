@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: PlayerHealthConfig
   m_EditorClassIdentifier: 
   maxHealth: 100
-  healRate: 0
-  timeToHeal: 10
+  healRate: 5
+  timeToHeal: 5

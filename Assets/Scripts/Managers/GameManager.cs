@@ -4,6 +4,7 @@ using HUDIndicator;
 using Movement;
 using Player;
 using Player.Upgrades;
+using Spaceship;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
@@ -19,6 +20,7 @@ namespace Managers
         [SerializeField] private IndicatorOffScreen questIndicatorOffScreen = null!;
 
         [SerializeField] private Thrusters thrusters = null!;
+        [SerializeField] private Hyperdrive hyperdrive = null!;
 
         [SerializeField] private DepthOfField dof = null!;
         [SerializeField] private CinemachinePostProcessing postProcessing = null!;
@@ -43,6 +45,8 @@ namespace Managers
         {
             Init();
             IntroStep(introStep);
+
+            StartCoroutine(SlowUpdate());
         }
 
         private void Init()
@@ -53,6 +57,15 @@ namespace Managers
             postProcessing.Profile.TryGetSettings(out dof);
 
             IntroStep(introStep);
+        }
+
+        private IEnumerator SlowUpdate()
+        {
+            while (Application.isPlaying)
+            {
+                yield return new WaitForSeconds(1f);
+                IntroStep(introStep);
+            }
         }
 
         private IEnumerator ClearDof()
@@ -70,27 +83,55 @@ namespace Managers
 
         private void OnRepairApplied(BaseRepair repair)
         {
-            if (repair is not ThrusterRepair) return;
-
-            IntroStep(2);
+            switch (repair)
+            {
+                case ThrusterRepair:
+                    introStep = 2;
+                    IntroStep(2);
+                    break;
+                case HyperdriveRepair:
+                    introStep = 3;
+                    IntroStep(3);
+                    break;
+            }
         }
 
-        public void IntroStep(int step)
+        private void IntroStep(int step)
         {
-            if (thrusters.IsRepaired() && step != 2)
+            if (hyperdrive.IsRepaired() && step != 3)
+            {
+                introStep = 3;
+                IntroStep(introStep);
+                return;
+            }
+
+            if (thrusters.IsRepaired() && step != 2 && !hyperdrive.IsRepaired())
             {
                 introStep = 2;
                 IntroStep(introStep);
                 return;
             }
 
+            // if (hyperdrive.IsRepaired() && step != 3)
+            // {
+            //     introStep = 3;
+            //     IntroStep(introStep);
+            //     return;
+            // }
+
             switch (step)
             {
                 case 0:
                 {
-                    if (thrusters.IsRepaired())
+                    if (thrusters.IsRepaired() && !hyperdrive.IsRepaired())
                     {
                         introStep = 2;
+                        IntroStep(introStep);
+                    }
+
+                    if (hyperdrive.IsRepaired())
+                    {
+                        introStep = 3;
                         IntroStep(introStep);
                     }
 
@@ -125,8 +166,11 @@ namespace Managers
 
                     _uiManager.SetQuest("Repair the thrusters");
 
-                    questIndicatorOffScreen.enabled = true;
-                    questIndicatorOnScreen.enabled = true;
+                    if (questIndicatorOffScreen)
+                        questIndicatorOffScreen.enabled = true;
+
+                    if (questIndicatorOnScreen)
+                        questIndicatorOnScreen.enabled = true;
 
                     _upgradeManager.onRepairApplied.AddListener(OnRepairApplied);
                 }
@@ -135,14 +179,41 @@ namespace Managers
                 {
                     StopAllCoroutines();
 
+                    if (hyperdrive.IsRepaired())
+                    {
+                        introStep = 3;
+                        IntroStep(introStep);
+                        return;
+                    }
+
                     dof.enabled.value = false;
                     damageEffects.enabled = true;
                     blackScreen.enabled = false;
 
-                    questIndicatorOffScreen.enabled = false;
-                    questIndicatorOnScreen.enabled = false;
+                    if (questIndicatorOffScreen)
+                        questIndicatorOffScreen.enabled = false;
+
+                    if (questIndicatorOnScreen)
+                        questIndicatorOnScreen.enabled = false;
 
                     _uiManager.SetQuest("Repair the hyperdrive");
+                }
+                    break;
+                case 3:
+                {
+                    StopAllCoroutines();
+
+                    dof.enabled.value = false;
+                    damageEffects.enabled = true;
+                    blackScreen.enabled = false;
+
+                    if (questIndicatorOffScreen)
+                        questIndicatorOffScreen.enabled = false;
+
+                    if (questIndicatorOnScreen)
+                        questIndicatorOnScreen.enabled = false;
+
+                    _uiManager.SetQuest("Hyperdrive repaired - Escape (hold H while flying)!");
                 }
                     break;
             }

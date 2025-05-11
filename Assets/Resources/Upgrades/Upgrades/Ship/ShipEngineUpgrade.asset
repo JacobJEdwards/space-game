@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1846ab12825d4462a637de91ac120479, type: 3}
+  m_Name: ShipEngineUpgrade
+  m_EditorClassIdentifier: 
+  upgradeName: Ship Engine
+  upgradeDescription: Ship can fly faster.
+  upgradeIcon: {fileID: 0}
+  target: 1
+  nextUpgrade: {fileID: 11400000, guid: a5cdb6d467e1a4e6eb2f0b665c6d66dd, type: 2}
+  requirements:
+  - type: 1
+    requiredObject: {fileID: 11400000, guid: 9ef2e1d3c131f47509a935d7486466e3, type: 2}
+    requiredAmount: 3
+  accelerationBonus: 1.5
+  boostBonus: 1
+  boostDeprecationRateBonus: 1
+  boostRechargeRateBonus: 1
+  handlingBonus: 1.2
+  maxChargeBonus: 1
+  speedBonus: 1.5

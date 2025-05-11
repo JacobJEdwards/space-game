@@ -74,15 +74,16 @@ namespace Player
 
         private void UpdateDepthOfField()
         {
-            if (health.CurrentHealth > health.MaxHealth * 0.7)
+            if (health.CurrentHealth > health.MaxHealth * 0.5)
             {
+                dof.focusDistance.value = 0.5f;
                 dof.enabled.value = false;
                 return;
             }
 
             dof.enabled.value = true;
 
-            var healthThreshold = health.MaxHealth * 0.7f;
+            var healthThreshold = health.MaxHealth * 0.5f;
             var focusDistance = Mathf.Lerp(0.5f, 0.1f, 1 - health.CurrentHealth / healthThreshold);
 
             dof.focusDistance.value = focusDistance;

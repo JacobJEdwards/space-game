@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13dfc8a5463c4407b4f06539272fc551, type: 3}
+  m_Name: JetpackUpgrade
+  m_EditorClassIdentifier: 
+  upgradeName: Jetpack power
+  upgradeDescription: More powerful jetpack.
+  upgradeIcon: {fileID: 0}
+  target: 2
+  nextUpgrade: {fileID: 11400000, guid: 05a609892ed404641b1b811550cb24cb, type: 2}
+  requirements:
+  - type: 1
+    requiredObject: {fileID: 11400000, guid: f03f3b594023f40d890719aa8d05e276, type: 2}
+    requiredAmount: 2
+  jetpackForceBonus: 1.5
+  jetpackFuelCapacityBonus: 1
+  jetpackFuelConsumptionBonus: 1
+  jetpackFuelRegenerationBonus: 1

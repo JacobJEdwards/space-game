@@ -25,8 +25,11 @@ namespace UI
 
         public void TryApplyUpgrade(BaseRepair upgradeData, RepairUI upgradeUI)
         {
+            print("attemping to apply repair");
+
             if (_upgradeManager.TryApplyRepair(upgradeData, target))
             {
+                print("repair applied");
                 _upgradesUI.Remove(upgradeUI);
                 upgradeUI.gameObject.SetActive(false);
                 Destroy(upgradeUI.gameObject);
@@ -43,6 +46,8 @@ namespace UI
         private void InitUpgrades()
         {
             foreach (var upgradeUI in _upgradesUI) Destroy(upgradeUI.gameObject);
+
+            _upgradesUI.Clear();
 
             foreach (var repair in repairType)
             {

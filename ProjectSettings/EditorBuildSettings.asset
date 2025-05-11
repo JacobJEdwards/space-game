@@ -14,6 +14,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/IntroScene.unity
     guid: 3ea8c53395a944363bc0ed39df6cad2e
+  - enabled: 1
+    path: Assets/Scenes/Hyperdrive.unity
+    guid: 39fede7a14e2345d2aa648e36f944e17
   m_configObjects:
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 8f69d76b6a6944213b8b62a7bbb84593, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 73033609d88a34615865e96cdd5d32fd, type: 2}

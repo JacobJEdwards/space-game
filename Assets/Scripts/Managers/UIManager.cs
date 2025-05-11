@@ -18,6 +18,7 @@ namespace Managers
         Pause,
         Inventory,
         Death,
+        Final,
         None
     }
 
@@ -44,6 +45,8 @@ namespace Managers
 
         public UnityEvent<UIState> onStateChanged = new();
 
+        private readonly Image _blackScreen = null!;
+
         private readonly Dictionary<UIState, IUIPanel> _uiPanels = new();
         private UIState _currentState = UIState.None;
 
@@ -58,15 +61,23 @@ namespace Managers
                 Destroy(gameObject);
         }
 
+        public void FadeToBlack(float duration)
+        {
+            _blackScreen.gameObject.SetActive(true);
+            _blackScreen.DOFade(1, duration).SetEase(Ease.OutQuad);
+        }
+
         public void RegisterPanel(IUIPanel panel)
         {
-            _uiPanels.Add(panel.AssociatedState, panel);
+            _uiPanels.TryAdd(panel.AssociatedState, panel);
+
             _uiPanels[panel.AssociatedState].Hide();
         }
 
         public void TransitionToState(UIState state)
         {
             if (_currentState == state) return;
+            if (_currentState is UIState.Death or UIState.Final) return;
 
             if (_uiPanels.TryGetValue(_currentState, out var panel)) panel.Hide();
 
@@ -139,6 +150,33 @@ namespace Managers
         public void ClearWarning()
         {
             warning.text = string.Empty;
+        }
+
+        public void TogglePause()
+        {
+            TransitionToState(_currentState == UIState.Pause ? _previousState : UIState.Pause);
+
+            if (_currentState == UIState.Pause)
+            {
+                Time.timeScale = 0;
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                if (_previousState == UIState.Ship)
+                    shipController.gameObject.SetActive(false);
+                else
+                    playerController.gameObject.SetActive(false);
+            }
+            else
+            {
+                Time.timeScale = 1;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+
+                if (_currentState == UIState.Ship)
+                    shipController.gameObject.SetActive(true);
+                else
+                    playerController.gameObject.SetActive(true);
+            }
         }
 
         public void ToggleInventory()

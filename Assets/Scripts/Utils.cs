@@ -16,4 +16,18 @@ public static class Utils
     {
         return !animator.GetCurrentAnimatorStateInfo(0).IsName(name);
     }
+
+    public static void HideLockMouse(bool on)
+    {
+        if (on)
+        {
+            if (Cursor.visible) Cursor.visible = false;
+            if (Cursor.lockState != CursorLockMode.Locked) Cursor.lockState = CursorLockMode.Locked;
+        }
+        else
+        {
+            if (Cursor.visible == false) Cursor.visible = true;
+            if (Cursor.lockState != CursorLockMode.None) Cursor.lockState = CursorLockMode.None;
+        }
+    }
 }

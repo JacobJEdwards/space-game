@@ -6,12 +6,11 @@ namespace Managers
 {
     public class AudioManager : MonoBehaviour
     {
-        public static AudioManager Instance { get; private set; } = null!;
+        [SerializeField] [Range(0, 100)] private float musicVolume = 100;
+        [SerializeField] [Range(0, 100)] private float soundVolume = 100;
 
         private AudioSource? _musicSource;
-
-        [SerializeField][Range(0, 100)] private float musicVolume = 100;
-        [SerializeField][Range(0, 100)] private float soundVolume = 100;
+        public static AudioManager Instance { get; private set; } = null!;
 
         private void Awake()
         {
