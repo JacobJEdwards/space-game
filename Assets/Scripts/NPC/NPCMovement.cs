@@ -285,7 +285,7 @@ namespace NPC
 
             Gizmos.color = Color.blue;
             Gizmos.DrawRay(transform.position + Vector3.up * 0.1f,
-                transform.forward * waterCheckDistance); // Offset slightly up
+                transform.forward * waterCheckDistance);
 
             var leftDirection = Quaternion.Euler(0, -30, 0) * transform.forward;
             var rightDirection = Quaternion.Euler(0, 30, 0) * transform.forward;
@@ -480,14 +480,14 @@ namespace NPC
             }
 
             _currentTarget = closestNpcTarget;
-            return _currentTarget != null;
+            return _currentTarget;
         }
 
         private bool HasLineOfSight(Vector3 targetPosition)
         {
             var direction =
                 (targetPosition - (transform.position + Vector3.up * 0.5f))
-                .normalized; // Start ray slightly above ground
+                .normalized;
             var distance = Vector3.Distance(transform.position, targetPosition);
 
             LayerMask sightBlockingLayers =
@@ -551,68 +551,65 @@ namespace NPC
 
         private void UpdateGroundedState()
         {
-            if (_life == null)
+            if (!_life)
             {
                 Debug.LogError("Life component is null in UpdateGroundedState.", this);
-                _isGrounded = false; // Assume not grounded if Life component is missing
+                _isGrounded = false;
                 if (currentState != NpcState.Falling) ChangeState(NpcState.Falling);
                 return;
             }
 
             var currentlyGrounded = _life.isGrounded;
-            _surfaceNormal = _life.surfaceNormal; // Get surface normal from Life component
+            _surfaceNormal = _life.surfaceNormal;
 
-            if (!_isGrounded && currentlyGrounded) // Landed
+            switch (_isGrounded)
             {
-                _isGrounded = true;
-                if (currentState == NpcState.Falling) ChangeState(NpcState.Idle); // Recover to Idle after falling
-            }
-            else if (_isGrounded && !currentlyGrounded) // Started falling
-            {
-                _isGrounded = false;
-                if (currentState != NpcState.Death) ChangeState(NpcState.Falling); // Don't change if already dead
+                case false when currentlyGrounded:
+                {
+                    _isGrounded = true;
+                    if (currentState == NpcState.Falling) ChangeState(NpcState.Idle);
+                    break;
+                }
+                case true when !currentlyGrounded:
+                {
+                    _isGrounded = false;
+                    if (currentState != NpcState.Death) ChangeState(NpcState.Falling);
+                    break;
+                }
             }
         }
 
 
         private bool IsWaterAhead(Vector3 moveDirection)
         {
-            // Check slightly ahead and downwards from the base of the NPC
-            var origin = transform.position + Vector3.up * 0.1f; // Start ray slightly above feet
+            var origin = transform.position + Vector3.up * 0.1f;
             var checkDist = waterCheckDistance;
 
-            // Check main direction
             if (Physics.Raycast(origin, moveDirection, checkDist, waterLayer)) return true;
 
-            // Check angled directions
             var leftRot = Quaternion.Euler(0, -waterAvoidanceAngle * 0.5f, 0);
             var rightRot = Quaternion.Euler(0, waterAvoidanceAngle * 0.5f, 0);
 
-            if (Physics.Raycast(origin, leftRot * moveDirection, checkDist, waterLayer)) return true;
-            if (Physics.Raycast(origin, rightRot * moveDirection, checkDist, waterLayer)) return true;
-
-            return false;
+            return Physics.Raycast(origin, leftRot * moveDirection, checkDist, waterLayer) || Physics.Raycast(origin, rightRot * moveDirection, checkDist, waterLayer);
         }
 
         private Vector3 FindSafeDirection(Vector3 originalDirection)
         {
-            var checkAngle = 5f; // Angle step for checking alternative directions
-            var maxCheck = 180f; // Don't check more than 180 degrees
+            const float checkAngle = 5f;
+            const float maxCheck = 180f;
 
             for (var angle = checkAngle; angle <= maxCheck; angle += checkAngle)
             {
-                // Check left
                 var leftRot = Quaternion.Euler(0, -angle, 0);
                 var leftDir = leftRot * originalDirection;
                 if (!IsWaterAhead(leftDir)) return leftDir.normalized;
 
-                // Check right
                 var rightRot = Quaternion.Euler(0, angle, 0);
                 var rightDir = rightRot * originalDirection;
                 if (!IsWaterAhead(rightDir)) return rightDir.normalized;
             }
 
-            return -originalDirection.normalized; // Turn around as last resort
+            return -originalDirection.normalized;
         }
 
         private void HandleMovement(Vector3 moveDirection)
